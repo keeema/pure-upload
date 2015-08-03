@@ -1,0 +1,9 @@
+{
+  "name": "inspire_upload",
+  "version": "0.0.1",
+  "dependencies": {},
+  "devDependencies": {
+    "express": "~4.10.2",
+    "multer": "~0.1.6"
+  }
+}
