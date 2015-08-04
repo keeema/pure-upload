@@ -1,77 +1,102 @@
 class XhrUploader {
-
     constructor(private options: IXhrUploadOptions) {
         this.options = this.getFullOptions(options);
     }
 
     upload(fileList: File[]| Object): void {
+        var files = this.castFiles(fileList);
+        files.forEach((file: XhrFile) => this.processFile(file));
+    }
+
+    private processFile(file: XhrFile): void {
+        var xhr = this.createRequest();
+        this.setCallbacks(xhr, file);
+        this.send(xhr, file);
+    }
+
+    private castFiles(fileList: File[]| Object): File[] {
         let files: XhrFile[];
+
         if (typeof fileList === 'object') {
             files = Object.keys(fileList).map((key) => fileList[key]);
-
         } else {
             files = <XhrFile[]>fileList;
         }
 
+        files.forEach((file: XhrFile) => {
+            file.uploadStatus = XhrUploadStatus.Uploading
+            file.responseCode = 0;
+            file.responseText = '';
+            file.progress = 0;
+            file.sentBytes = 0;
+            file.cancel = () => { };
+        });
 
-        files.forEach((file: XhrFile) => this.sendFile(file));
-
+        return files;
     }
 
-    private sendFile(file: XhrFile): void {
+    private createRequest(): XMLHttpRequest {
         var xhr = new XMLHttpRequest();
-        file.xhr = xhr
-        file.uploadStatus = XhrUploadStatus.Queued
-        file.cancel = () => file.xhr.abort();
-
-        xhr.onload = (e) => this.onload(file, xhr, e)
-        xhr.onerror = () => this.onerror(file);
-        //xhr.onprogress = (e: ProgressEvent) => this.updateProgress(file, e);
         xhr.open(this.options.method, this.options.url, true);
         xhr.withCredentials = !!this.options.withCredentials;
-
-        let headers = {
-            "Accept": "application/json",
-            "Cache-Control": "no-cache",
-            "X-Requested-With": "XMLHttpRequest"
-        };
-        /*if (this.options.headers) {
-          extend(headers, this.options.headers);
-        }*/
-        for (var headerName in headers) {
-            var headerValue = headers[headerName];
-            xhr.setRequestHeader(headerName, headerValue);
-        }
-
-        xhr.upload.addEventListener('progress', (e: ProgressEvent) => this.updateProgress(file, e));
-
-        var formData = new FormData();
-        /*if (this.options.params) {
-            _ref1 = this.options.params;
-            for (key in _ref1) {
-                value = _ref1[key];
-                formData.append(key, value);
-            }
-        }*/
-
-        formData.append('file', file, file.name);
-        xhr.send(formData);
-
-        // setTimeout(()=>{
-        //   var c = xhr;
-        // },100);
+        this.setHeaders(xhr);
+        return xhr;
     }
 
-    private handleError(file: XhrFile): void {
+    private setHeaders(xhr: XMLHttpRequest) {
+        this.options.headers['Accept'] = this.options.headers['Accept'] || 'application/json';
+        this.options.headers['Cache-Control'] = this.options.headers['Cache-Control'] || 'no-cache';
+        this.options.headers['X-Requested-With'] = this.options.headers['X-Requested-With'] || 'XMLHttpRequest';
+
+        Object.keys(this.options.headers).forEach((headerName: string) => {
+            var headerValue = this.options.headers[headerName];
+            if (headerValue != undefined)
+                xhr.setRequestHeader(headerName, headerValue);
+        })
+    }
+
+    private setCallbacks(xhr: XMLHttpRequest, file: XhrFile) {
+        file.cancel = () => {
+            xhr.abort();
+            file.uploadStatus = XhrUploadStatus.Canceled;
+            this.options.onCancelledCallback(file);
+        }
+
+        xhr.onload = (e) => this.onload(file, xhr)
+        xhr.onerror = () => this.handleError(file, xhr);
+        xhr.upload.onprogress = (e: ProgressEvent) => this.updateProgress(file, e);
+    }
+
+    private send(xhr: XMLHttpRequest, file: XhrFile) {
+        var formData = this.createFormData(file)
+        this.options.onUploadStartedCallback(file);
+        xhr.send(formData);
+    }
+
+    private createFormData(file: XhrFile): FormData {
+        var formData = new FormData();
+        Object.keys(this.options.params).forEach((paramName: string) => {
+            var paramValue = this.options.params[paramName];
+            if (paramValue != undefined)
+                formData.append(paramName, paramValue);
+        })
+
+        formData.append('file', file, file.name);
+        return formData;
+    }
+
+    private handleError(file: XhrFile, xhr: XMLHttpRequest): void {
         file.uploadStatus = XhrUploadStatus.Failed
-        file.responseStatus = file.xhr.status
+        file.responseText = xhr.statusText;
+        file.responseCode = xhr.status
+
+        this.options.onErrorCallback(file);
+        this.options.onFinishedCallback(file);
     }
 
     private updateProgress(file: XhrFile, e?: ProgressEvent) {
-
         if (e != null) {
-            var ratio = e.loaded / e.total;
-            file.progress = 100 * (ratio);
+            file.progress = 100 * (e.loaded / e.total);
             file.sentBytes = e.loaded;
 
         } else {
@@ -83,37 +108,26 @@ class XhrUploader {
         this.options.onProgressCallback(file);
     }
 
-    private onload(file: XhrFile, xhr: XMLHttpRequest, e: Event) {
-        if (xhr.readyState !== 4) {
+    private onload(file: XhrFile, xhr: XMLHttpRequest) {
+        if (xhr.readyState !== 4)
             return;
-        }
 
-        /*let response = xhr.responseText;
-        if (xhr.getResponseHeader("content-type") && xhr.getResponseHeader("content-type").indexOf("application/json")) {
-            try {
-                response = JSON.parse(response);
-            } catch (_error) {
-                e = _error;
-                response = "Invalid JSON response from server.";
-            }
-        }*/
-        this.updateProgress(file);
+        if (file.progress != 100)
+            this.updateProgress(file);
+
         if (xhr.status === 200)
-            this.finished(file, e);
+            this.finished(file, xhr);
         else
-            this.handleError(file);
+            this.handleError(file, xhr);
     }
 
-    private finished(file: XhrFile, e: Event) {
-        file.uploadStatus = XhrUploadStatus.Uploaded
-        file.responseStatus = file.xhr.status
-    };
+    private finished(file: XhrFile, xhr: XMLHttpRequest) {
+        file.uploadStatus = XhrUploadStatus.Uploaded;
+        file.responseText = xhr.statusText;
+        file.responseCode = xhr.status
 
-    onerror(file: XhrFile) {
-        /*if (files[0].status === Dropzone.CANCELED) {
-          return;
-        }*/
-        this.handleError(file);
+        this.options.onUploadedCallback(file);
+        this.options.onFinishedCallback(file);
     };
 
 
@@ -121,6 +135,8 @@ class XhrUploader {
         return <IXhrUploadOptions>{
             url: options.url,
             method: options.method,
+            headers: options.headers || {},
+            params: options.params || {},
             withCredentials: options.withCredentials || false,
             parallelUploads: options.parallelUploads || 2,
             uploadMultiple: options.uploadMultiple || false,

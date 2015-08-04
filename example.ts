@@ -6,17 +6,13 @@ var done = false;
 
 app.use('/api/test', multer({
     dest: './uploads/',
-    rename: function(fieldname, filename) {
-        return filename + Date.now();
-    },
+    rename: (fieldname, filename) => filename + Date.now(),
 
-    onFileUploadStart: function(file: Express.Multer.File) {
+    onFileUploadStart: (file: Express.Multer.File) => {
         console.log(file.originalname + ' is starting ...')
     },
 
-    
-
-    onFileUploadComplete: function(file) {
+    onFileUploadComplete: (file) => {
         console.log(file.fieldname + ' uploaded to  ' + file.path)
         done = true;
     }
@@ -25,14 +21,13 @@ app.use('/api/test', multer({
 app.use(express.static('example'));
 app.use(express.static('src'));
 
-app.post('/api/test', function(req, res: express.Response) {
+app.post('/api/test', (req, res: express.Response) => {
     if (done == true) {
         res.send("File uploaded.");
         done = false;
     }
 });
 
-/*Run the server.*/
-app.listen(3000, function() {
-    console.log("Working on port 3000");
+app.listen(3000, () => {
+    console.log("Listening on port 3000");
 });

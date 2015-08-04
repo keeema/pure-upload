@@ -2,6 +2,9 @@ interface IXhrUploadOptions {
     url: string;
     method: string;
     withCredentials?: boolean;
+    headers?: {[key:string]:any}
+    params?: {[key:string]:any}
+        
     parallelUploads?: number;
     uploadMultiple?: boolean,
     maxFileSize?: number;

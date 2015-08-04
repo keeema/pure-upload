@@ -1,14 +1,14 @@
 enum XhrUploadStatus {
-    Queued,
     Uploading,
     Uploaded,
-    Failed
+    Failed,
+    Canceled
 }
 
 class XhrFile extends File {
-    xhr: XMLHttpRequest;
     uploadStatus: XhrUploadStatus;
-    responseStatus: number;
+    responseCode: number;
+    responseText: string;
     progress: number;
     sentBytes: number;
     cancel: () => void;
