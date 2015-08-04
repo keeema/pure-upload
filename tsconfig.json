@@ -15,8 +15,8 @@
         "./decl/serve-static/serve-static.d.ts",
         "./example.ts",
         "./example/index.ts",
-        "./src/iXhrUploadOptions.ts",
-        "./src/xhrFile.ts",
-        "./src/xhruploader.ts"
+        "./src/core/iXhrUploadOptions.ts",
+        "./src/core/xhrFile.ts",
+        "./src/core/xhrUploader.ts"
     ]
 }

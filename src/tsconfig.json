@@ -8,8 +8,8 @@
         "./**/*.ts"
     ],
     "files": [
-        "./iXhrUploadOptions.ts",
-        "./xhrFile.ts",
-        "./xhruploader.ts"
+        "./core/iXhrUploadOptions.ts",
+        "./core/xhrFile.ts",
+        "./core/xhrUploader.ts"
     ]
 }

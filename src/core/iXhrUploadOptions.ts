@@ -4,17 +4,8 @@ interface IXhrUploadOptions {
     withCredentials?: boolean;
     headers?: {[key:string]:any}
     params?: {[key:string]:any}
-        
-    parallelUploads?: number;
-    uploadMultiple?: boolean,
-    maxFileSize?: number;
-    progressDelay?: number;
-    maxFiles?: number;
-    acceptedFiles?: string;
-    acceptedMimeTypes?: string;
-    autoProcessQueue?: boolean;
 
-    onProgressCallback?: (file: XhrFile) => void;
+      onProgressCallback?: (file: XhrFile) => void;
     onCancelledCallback?: (file: XhrFile) => void;
     onFinishedCallback?: (file: XhrFile) => void;
     onUploadedCallback?: (file: XhrFile) => void;

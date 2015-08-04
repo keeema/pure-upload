@@ -86,17 +86,15 @@ class XhrUploader {
     }
 
     private handleError(file: XhrFile, xhr: XMLHttpRequest): void {
-        file.uploadStatus = XhrUploadStatus.Failed
-        file.responseText = xhr.statusText;
-        file.responseCode = xhr.status
-
+        file.uploadStatus = XhrUploadStatus.Failed;
+        this.setResponse(file, xhr);
         this.options.onErrorCallback(file);
         this.options.onFinishedCallback(file);
     }
 
     private updateProgress(file: XhrFile, e?: ProgressEvent) {
         if (e != null) {
-            file.progress = 100 * (e.loaded / e.total);
+            file.progress = Math.round(100 * (e.loaded / e.total));
             file.sentBytes = e.loaded;
 
         } else {
@@ -123,13 +121,15 @@ class XhrUploader {
 
     private finished(file: XhrFile, xhr: XMLHttpRequest) {
         file.uploadStatus = XhrUploadStatus.Uploaded;
-        file.responseText = xhr.statusText;
-        file.responseCode = xhr.status
-
+        this.setResponse(file, xhr);
         this.options.onUploadedCallback(file);
         this.options.onFinishedCallback(file);
     };
 
+    private setResponse(file: XhrFile, xhr: XMLHttpRequest) {
+        file.responseCode = xhr.status;
+        file.responseText = (xhr.statusText || xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
+    }
 
     private getFullOptions(options: IXhrUploadOptions) {
         return <IXhrUploadOptions>{
@@ -138,14 +138,6 @@ class XhrUploader {
             headers: options.headers || {},
             params: options.params || {},
             withCredentials: options.withCredentials || false,
-            parallelUploads: options.parallelUploads || 2,
-            uploadMultiple: options.uploadMultiple || false,
-            maxFileSize: options.maxFileSize || 104857600, // 100 MB
-            maxFiles: options.maxFiles || 10,
-            acceptedFiles: options.acceptedFiles || '',
-            acceptedMimeTypes: options.acceptedMimeTypes || '',
-            autoProcessQueue: options.autoProcessQueue || false,
-
             onProgressCallback: options.onProgressCallback || (() => { }),
             onCancelledCallback: options.onCancelledCallback || (() => { }),
             onFinishedCallback: options.onFinishedCallback || (() => { }),
