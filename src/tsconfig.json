@@ -10,6 +10,6 @@
     "files": [
         "./iXhrUploadOptions.ts",
         "./xhrFile.ts",
-        "./xhrupload.ts"
+        "./xhruploader.ts"
     ]
 }
