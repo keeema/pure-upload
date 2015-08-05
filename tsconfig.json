@@ -15,6 +15,7 @@
         "./decl/serve-static/serve-static.d.ts",
         "./example.ts",
         "./example/index.ts",
+        "./src/UploadQueue.ts",
         "./src/core/iUploadCore.d.ts",
         "./src/core/iUploadFile.d.ts",
         "./src/core/iUploadOptions.d.ts",

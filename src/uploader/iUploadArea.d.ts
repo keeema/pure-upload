@@ -1,4 +1,4 @@
-interface iUploadArea {
+interface IUploadArea {
   targetElement: Element;
   uploadCore: any;
   uploadAreaOptions: any;

@@ -14,8 +14,10 @@
         "./core/iUploadOptions.d.ts",
         "./core/uploadCore.ts",
         "./iPureUploader.d.ts",
-        "./iUploadArea.d.ts",
-        "./iUploadQueue.d.ts",
-        "./iUploaderOptions.d.ts"
+        "./uploader/IUploadAreaOptions.d.ts",
+        "./uploader/iPureUploader.d.ts",
+        "./uploader/iUploadArea.d.ts",
+        "./uploader/iUploadQueue.d.ts",
+        "./uploader/iUploaderOptions.d.ts"
     ]
 }
