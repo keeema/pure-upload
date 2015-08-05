@@ -12,9 +12,8 @@
         "./core/xhrFile.ts",
         "./core/xhrUploader.ts",
         "./iPureUploader.d.ts",
-        "./iUploadArea.ts",
-        "./iUploadQueue.ts",
-        "./iUploaderOptions.ts",
-        "./pureupload.ts"
+        "./iUploadArea.d.ts",
+        "./iUploadQueue.d.ts",
+        "./iUploaderOptions.d.ts"
     ]
 }
