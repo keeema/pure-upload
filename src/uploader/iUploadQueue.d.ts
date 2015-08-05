@@ -1,4 +1,4 @@
-interface iUploadQueue {
+interface IUploadQueue {
   queuedFiles: any[];
 
   addFiles(files: any[]);
