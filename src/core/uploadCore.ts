@@ -1,30 +1,44 @@
-class XhrUploader {
-    constructor(private options: IXhrUploadOptions) {
+class UploadStatusStatic   {
+    static uploading:string = 'uploading';
+    static uploaded:string = 'uploaded';
+    static failed:string = 'failed';
+    static canceled:string = 'canceled';
+
+}
+
+var uploadStatus:IUploadStatus = <any>UploadStatusStatic;
+
+var getUploadCore = function (options: IUploadOptions): IUploadCore {
+    return new UploaderCore(options);
+}
+
+class UploaderCore implements IUploadCore {
+    constructor(private options: IUploadOptions) {
         this.options = this.getFullOptions(options);
     }
 
     upload(fileList: File[]| Object): void {
         var files = this.castFiles(fileList);
-        files.forEach((file: XhrFile) => this.processFile(file));
+        files.forEach((file: IUploadFile) => this.processFile(file));
     }
 
-    private processFile(file: XhrFile): void {
+    private processFile(file: IUploadFile): void {
         var xhr = this.createRequest();
         this.setCallbacks(xhr, file);
         this.send(xhr, file);
     }
 
     private castFiles(fileList: File[]| Object): File[] {
-        let files: XhrFile[];
+        let files: IUploadFile[];
 
         if (typeof fileList === 'object') {
             files = Object.keys(fileList).map((key) => fileList[key]);
         } else {
-            files = <XhrFile[]>fileList;
+            files = <IUploadFile[]>fileList;
         }
 
-        files.forEach((file: XhrFile) => {
-            file.uploadStatus = XhrUploadStatus.Uploading
+        files.forEach((file: IUploadFile) => {
+            file.uploadStatus = uploadStatus.uploading
             file.responseCode = 0;
             file.responseText = '';
             file.progress = 0;
@@ -55,10 +69,10 @@ class XhrUploader {
         })
     }
 
-    private setCallbacks(xhr: XMLHttpRequest, file: XhrFile) {
+    private setCallbacks(xhr: XMLHttpRequest, file: IUploadFile) {
         file.cancel = () => {
             xhr.abort();
-            file.uploadStatus = XhrUploadStatus.Canceled;
+            file.uploadStatus = uploadStatus.canceled;
             this.options.onCancelledCallback(file);
         }
 
@@ -67,13 +81,13 @@ class XhrUploader {
         xhr.upload.onprogress = (e: ProgressEvent) => this.updateProgress(file, e);
     }
 
-    private send(xhr: XMLHttpRequest, file: XhrFile) {
+    private send(xhr: XMLHttpRequest, file: IUploadFile) {
         var formData = this.createFormData(file)
         this.options.onUploadStartedCallback(file);
         xhr.send(formData);
     }
 
-    private createFormData(file: XhrFile): FormData {
+    private createFormData(file: IUploadFile): FormData {
         var formData = new FormData();
         Object.keys(this.options.params).forEach((paramName: string) => {
             var paramValue = this.options.params[paramName];
@@ -85,14 +99,14 @@ class XhrUploader {
         return formData;
     }
 
-    private handleError(file: XhrFile, xhr: XMLHttpRequest): void {
-        file.uploadStatus = XhrUploadStatus.Failed;
+    private handleError(file: IUploadFile, xhr: XMLHttpRequest): void {
+        file.uploadStatus = uploadStatus.failed;
         this.setResponse(file, xhr);
         this.options.onErrorCallback(file);
         this.options.onFinishedCallback(file);
     }
 
-    private updateProgress(file: XhrFile, e?: ProgressEvent) {
+    private updateProgress(file: IUploadFile, e?: ProgressEvent) {
         if (e != null) {
             file.progress = Math.round(100 * (e.loaded / e.total));
             file.sentBytes = e.loaded;
@@ -102,11 +116,11 @@ class XhrUploader {
             file.sentBytes = file.size;
         }
 
-        file.uploadStatus = file.progress === 100 ? XhrUploadStatus.Uploaded : XhrUploadStatus.Uploading;
+        file.uploadStatus = file.progress === 100 ? uploadStatus.uploaded : uploadStatus.uploading;
         this.options.onProgressCallback(file);
     }
 
-    private onload(file: XhrFile, xhr: XMLHttpRequest) {
+    private onload(file: IUploadFile, xhr: XMLHttpRequest) {
         if (xhr.readyState !== 4)
             return;
 
@@ -119,20 +133,20 @@ class XhrUploader {
             this.handleError(file, xhr);
     }
 
-    private finished(file: XhrFile, xhr: XMLHttpRequest) {
-        file.uploadStatus = XhrUploadStatus.Uploaded;
+    private finished(file: IUploadFile, xhr: XMLHttpRequest) {
+        file.uploadStatus = uploadStatus.uploaded;
         this.setResponse(file, xhr);
         this.options.onUploadedCallback(file);
         this.options.onFinishedCallback(file);
     };
 
-    private setResponse(file: XhrFile, xhr: XMLHttpRequest) {
+    private setResponse(file: IUploadFile, xhr: XMLHttpRequest) {
         file.responseCode = xhr.status;
         file.responseText = (xhr.statusText || xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
     }
 
-    private getFullOptions(options: IXhrUploadOptions) {
-        return <IXhrUploadOptions>{
+    private getFullOptions(options: IUploadOptions) {
+        return <IUploadOptions>{
             url: options.url,
             method: options.method,
             headers: options.headers || {},

@@ -15,9 +15,13 @@
         "./decl/serve-static/serve-static.d.ts",
         "./example.ts",
         "./example/index.ts",
-        "./src/core/iXhrUploadOptions.ts",
-        "./src/core/xhrFile.ts",
-        "./src/core/xhrUploader.ts",
-        "./src/pureupload.ts"
+        "./src/core/iUploadCore.d.ts",
+        "./src/core/iUploadFile.d.ts",
+        "./src/core/iUploadOptions.d.ts",
+        "./src/core/uploadCore.ts",
+        "./src/iPureUploader.d.ts",
+        "./src/iUploadArea.d.ts",
+        "./src/iUploadQueue.d.ts",
+        "./src/iUploaderOptions.d.ts"
     ]
 }

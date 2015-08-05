@@ -8,9 +8,10 @@
         "./**/*.ts"
     ],
     "files": [
-        "./core/iXhrUploadOptions.ts",
-        "./core/xhrFile.ts",
-        "./core/xhrUploader.ts",
+        "./core/iUploadCore.d.ts",
+        "./core/iUploadFile.d.ts",
+        "./core/iUploadOptions.d.ts",
+        "./core/uploadCore.ts",
         "./iPureUploader.d.ts",
         "./iUploadArea.d.ts",
         "./iUploadQueue.d.ts",

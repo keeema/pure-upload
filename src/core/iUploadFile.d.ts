@@ -1,12 +1,12 @@
-enum XhrUploadStatus {
+declare enum UploadStatus {
     Uploading,
     Uploaded,
     Failed,
     Canceled
 }
 
-class XhrFile extends File {
-    uploadStatus: XhrUploadStatus;
+interface IUploadFile extends File {
+    uploadStatus: IUploadStatus;
     responseCode: number;
     responseText: string;
     progress: number;
