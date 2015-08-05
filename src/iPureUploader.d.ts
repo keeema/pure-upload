@@ -1,6 +1,6 @@
 interface iPureUploader {
   uploadAreas: iUploadArea[];
-  queue: iUploadQueue;
+  queue: IUploadQueue;
   uploaderOptions: iUploaderOptions;
 
   register(element: Element, options: any);

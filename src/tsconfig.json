@@ -8,6 +8,7 @@
         "./**/*.ts"
     ],
     "files": [
+        "./UploadQueue.ts",
         "./core/iUploadCore.d.ts",
         "./core/iUploadFile.d.ts",
         "./core/iUploadOptions.d.ts",
