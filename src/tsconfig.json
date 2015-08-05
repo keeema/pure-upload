@@ -10,6 +10,11 @@
     "files": [
         "./core/iXhrUploadOptions.ts",
         "./core/xhrFile.ts",
-        "./core/xhrUploader.ts"
+        "./core/xhrUploader.ts",
+        "./iPureUploader.d.ts",
+        "./iUploadArea.ts",
+        "./iUploadQueue.ts",
+        "./iUploaderOptions.ts",
+        "./pureupload.ts"
     ]
 }

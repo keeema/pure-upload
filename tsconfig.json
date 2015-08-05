@@ -17,6 +17,7 @@
         "./example/index.ts",
         "./src/core/iXhrUploadOptions.ts",
         "./src/core/xhrFile.ts",
-        "./src/core/xhrUploader.ts"
+        "./src/core/xhrUploader.ts",
+        "./src/pureupload.ts"
     ]
 }
