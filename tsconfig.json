@@ -5,18 +5,20 @@
         "module": "commonjs"
     },
     "filesGlob": [
-        "./**/*.ts"
+        "./*.ts",
+        "./example/**/*.ts",
+        "./**/*.d.ts"
     ],
     "files": [
+        "./example.ts",
+        "./example/index.ts",
         "./decl/express/express.d.ts",
         "./decl/mime/mime.d.ts",
         "./decl/multer/multer.d.ts",
         "./decl/node/node.d.ts",
         "./decl/serve-static/serve-static.d.ts",
-        "./example.ts",
-        "./example/index.ts",
-        "./src/core/iXhrUploadOptions.ts",
-        "./src/core/xhrFile.ts",
-        "./src/core/xhrUploader.ts"
+        "./src/core/iUploadCore.d.ts",
+        "./src/core/iUploadFile.d.ts",
+        "./src/core/iUploadOption.d.ts"
     ]
 }

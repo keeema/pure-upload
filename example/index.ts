@@ -5,10 +5,10 @@ window.onload = () => {
         var options = {
             url: '/api/test',
             method: 'POST',
-            onProgressCallback: (file: XhrFile) => progressElement.innerText = file.progress + '%',
-            onErrorCallback: (file: XhrFile) => alert(file.responseText + ' (' + file.responseCode + ')')
+            onProgressCallback: (file: IUploadFile) => progressElement.innerText = file.progress + '%',
+            onErrorCallback: (file: IUploadFile) => alert(file.responseText + ' (' + file.responseCode + ')')
         }
-        var uploader = new XhrUploader(options);
+        var uploader = getUploadCore(options);
         uploader.upload(fileInput.files);
         event.preventDefault();
     });
