@@ -13,6 +13,7 @@
     "files": [
         "./dist/pureupload.d.ts",
         "./decl/express/express.d.ts",
+        "./decl/jasmine/jasmine.d.ts",
         "./decl/mime/mime.d.ts",
         "./decl/multer/multer.d.ts",
         "./decl/node/node.d.ts",

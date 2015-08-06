@@ -226,29 +226,87 @@ var UploadQueue = (function () {
 })();
 
 var UploadArea = (function () {
-    function UploadArea(element, options, queue) {
+    function UploadArea(element, options, uploader) {
         this.targetElement = element;
         this.uploadAreaOptions = options;
-        this.queue = queue;
+        this.uploader = uploader;
     }
     UploadArea.prototype.init = function () {
         this.uploadCore = getUploadCore(this.uploadAreaOptions);
+        this.setupHiddenInput();
     };
-    UploadArea.prototype.setupListeners = function () {
+    UploadArea.prototype.putFilesToQueue = function (files) {
+        var file;
+        file = files[0];
+        var filesToGo;
+        filesToGo = [];
+        filesToGo.push(file);
+        var _class = this;
+        file.start = function () {
+            _class.uploadCore.upload(filesToGo);
+            file.start = function () { };
+        };
+        this.uploader.queue.addFiles(filesToGo);
     };
     UploadArea.prototype.setupHiddenInput = function () {
+        var _this = this;
+        var fileInput = document.createElement("input");
+        fileInput.setAttribute("type", "file");
+        fileInput.style.display = "none";
+        fileInput.accept = this.uploadAreaOptions.accept;
+        if (this.uploadAreaOptions.multiple) {
+            fileInput.setAttribute("multiple", "");
+        }
+        if (this.uploader.uploaderOptions.autoStart) {
+            fileInput.addEventListener("change", function (e) {
+                console.log("changed");
+                console.log(e);
+                _this.putFilesToQueue(e.target.files);
+            });
+        }
+        if (this.uploadAreaOptions.clickable) {
+            this.targetElement.addEventListener("click", function (e) {
+                fileInput.click();
+            });
+        }
+        if (this.uploadAreaOptions.allowDragDrop) {
+            this.targetElement.addEventListener("dragenter", function (e) {
+                console.log("dragenter");
+                console.log(e);
+            });
+            this.targetElement.addEventListener("drop", function (e) {
+                console.log(e);
+                console.log("dragdrop");
+            });
+            this.targetElement.addEventListener("dragstart", function (e) {
+                console.log("dragstart");
+                console.log(e);
+            });
+            this.targetElement.addEventListener("dragend", function (e) {
+                console.log("dragend");
+                console.log(e);
+            });
+        }
+        // attach to body
+        document.body.appendChild(fileInput);
     };
     return UploadArea;
 })();
 
+var getUploader = function (options) {
+    return new Uploader(options);
+};
 var Uploader = (function () {
-    function Uploader() {
+    function Uploader(options) {
+        this.setOptions(options);
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options);
     }
     Uploader.prototype.setOptions = function (options) {
         this.uploaderOptions = options;
     };
     Uploader.prototype.registerArea = function (element, options) {
-        var uploadArea = new UploadArea(element, options, this.queue);
+        var uploadArea = new UploadArea(element, options, this);
         uploadArea.init();
         this.uploadAreas.push(uploadArea);
     };

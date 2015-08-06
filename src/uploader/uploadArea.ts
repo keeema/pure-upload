@@ -2,23 +2,74 @@ class UploadArea implements IUploadArea {
     targetElement: Element;
     uploadCore: IUploadCore;
     uploadAreaOptions: IUploadAreaOptions;
-    queue: IUploadQueue;
+    uploader: IUploader;
 
-    constructor(element: Element, options: IUploadAreaOptions, queue: IUploadQueue) {
+    constructor(element: Element, options: IUploadAreaOptions, uploader: IUploader) {
         this.targetElement = element;
         this.uploadAreaOptions = options;
-        this.queue = queue;
+        this.uploader = uploader;
     }
 
-    init() : void {
+    init(): void {
         this.uploadCore = getUploadCore(this.uploadAreaOptions);
+        this.setupHiddenInput();
     }
 
-    private setupListeners(): void {
+    private putFilesToQueue(files: FileList): void {
+        let file: IUploadFile;
+        file = <IUploadFile>files[0];
 
+        let filesToGo: IUploadFile[];
+        filesToGo = [];
+        filesToGo.push(file);
+
+        var _class = this;
+        file.start = () => {
+            _class.uploadCore.upload(filesToGo);
+            file.start = () => { };
+        };
+        this.uploader.queue.addFiles(filesToGo);
     }
 
     private setupHiddenInput(): void {
-      
+        var fileInput = document.createElement("input");
+        fileInput.setAttribute("type", "file");
+        fileInput.style.display = "none";
+        fileInput.accept = this.uploadAreaOptions.accept;
+        if (this.uploadAreaOptions.multiple) {
+            fileInput.setAttribute("multiple", "");
+        }
+        if (this.uploader.uploaderOptions.autoStart) {
+            fileInput.addEventListener("change", (e: any) => {
+                console.log("changed");
+                console.log(e);
+                this.putFilesToQueue(e.target.files);
+            });
+        }
+        if (this.uploadAreaOptions.clickable) {
+            this.targetElement.addEventListener("click", (e) => {
+                fileInput.click();
+            });
+        }
+        if (this.uploadAreaOptions.allowDragDrop) {
+            this.targetElement.addEventListener("dragenter", (e) => {
+                console.log("dragenter");
+                console.log(e);
+            });
+            this.targetElement.addEventListener("drop", (e) => {
+                console.log(e);
+                console.log("dragdrop");
+            });
+            this.targetElement.addEventListener("dragstart", (e) => {
+                console.log("dragstart");
+                console.log(e);
+            });
+            this.targetElement.addEventListener("dragend", (e) => {
+                console.log("dragend");
+                console.log(e);
+            });
+        }
+        // attach to body
+        document.body.appendChild(fileInput);
     }
 }

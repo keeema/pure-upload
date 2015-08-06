@@ -45,7 +45,7 @@ interface IUploadArea {
   targetElement: Element;
   uploadCore: IUploadCore;
   uploadAreaOptions: IUploadAreaOptions;
-  queue: IUploadQueue;
+  uploader: IUploader;
 
   init() : void;
 }
@@ -57,6 +57,8 @@ interface IUploadAreaOptions extends IUploadOptions {
   accept: string;
   multiple: boolean;
 }
+
+declare var getUploader: (options: IUploadQueueOptions) => IUploader;
 
 interface IUploader {
   uploadAreas: IUploadArea[];
