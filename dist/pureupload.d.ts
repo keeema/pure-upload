@@ -63,17 +63,11 @@ declare var getUploader: (options: IUploaderOptions) => IUploader;
 interface IUploader {
   uploadAreas: IUploadArea[];
   queue: IUploadQueue;
-  uploaderOptions: IUploaderOptions;
+  uploaderOptions: IUploadQueueOptions;
 
   registerArea(element: Element, options: IUploadAreaOptions) : void;
   unregisterArea(area: IUploadArea) : void;
-  setOptions(options: IUploaderOptions) : void;
-}
-
-interface IUploaderOptions {
-  maxParallelUploads: number;
-  autoStart: boolean;
-  autoRemove: boolean;
+  setOptions(options: IUploadQueueOptions) : void;
 }
 
 interface IUploadQueue {
@@ -81,7 +75,12 @@ interface IUploadQueue {
 
   addFiles(files: IUploadFile[]);
   removeFile(file: IUploadFile);
-  getWaitingFiles();
-  getWaitingFiles(maxParallelCount:number);
+  filesChanged();
   clearFiles();
+}
+
+interface IUploadQueueOptions {
+  maxParallelUploads?: number;
+  autoStart?: boolean;
+  autoRemove?: boolean;
 }

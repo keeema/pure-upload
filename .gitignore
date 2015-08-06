@@ -3,6 +3,7 @@
 /node_modules
 /uploads
 /build
+/specs
 
 !/dist/*.*
 !/gulpfile.js
