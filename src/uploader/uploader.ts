@@ -1,9 +1,9 @@
 class Uploader implements IUploader {
     uploadAreas: IUploadArea[];
     queue: IUploadQueue;
-    uploaderOptions: IUploaderOptions;
+    uploaderOptions: IUploadQueueOptions;
 
-    setOptions(options: IUploaderOptions) : void {
+    setOptions(options: IUploadQueueOptions) : void {
         this.uploaderOptions = options;
     }
 

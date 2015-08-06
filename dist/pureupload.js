@@ -69,6 +69,7 @@ var UploaderCore = (function () {
             xhr.abort();
             file.uploadStatus = uploadStatus.canceled;
             _this.options.onCancelledCallback(file);
+            _this.options.onFinishedCallback(file);
         };
         xhr.onload = function (e) { return _this.onload(file, xhr); };
         xhr.onerror = function () { return _this.handleError(file, xhr); };
@@ -148,16 +149,28 @@ var UploaderCore = (function () {
 })();
 
 var UploadQueue = (function () {
-    function UploadQueue() {
+    function UploadQueue(options) {
+        this.options = options;
         this.queuedFiles = [];
+        this.setFullOptions();
     }
+    UploadQueue.prototype.filesChanged = function () {
+        if (this.options.autoRemove)
+            this.removeFinishedFiles();
+        if (this.options.autoStart)
+            this.startWaitingFiles();
+    };
     UploadQueue.prototype.addFiles = function (files) {
         var _this = this;
         files.forEach(function (file) {
             _this.queuedFiles.push(file);
             file.uploadStatus = uploadStatus.queued;
-            file.remove = function () { return _this.removeFile(file); };
+            file.remove = function () {
+                _this.removeFile(file);
+                _this.filesChanged();
+            };
         });
+        this.filesChanged();
     };
     UploadQueue.prototype.removeFile = function (file) {
         var index = this.queuedFiles.indexOf(file);
@@ -166,6 +179,26 @@ var UploadQueue = (function () {
         this.deactivateFile(file);
         this.queuedFiles.splice(index, 1);
     };
+    UploadQueue.prototype.clearFiles = function () {
+        var _this = this;
+        this.queuedFiles.forEach(function (file) { return _this.deactivateFile(file); });
+        this.queuedFiles = [];
+    };
+    UploadQueue.prototype.setFullOptions = function () {
+        this.options.maxParallelUploads = this.options.maxParallelUploads || 0;
+        this.options.autoStart = this.options.autoStart || false;
+        this.options.autoRemove = this.options.autoRemove || false;
+    };
+    UploadQueue.prototype.startWaitingFiles = function () {
+        this.getWaitingFiles()
+            .forEach(function (file) { return file.start(); });
+    };
+    UploadQueue.prototype.removeFinishedFiles = function () {
+        var _this = this;
+        this.queuedFiles
+            .filter(function (file) { return file.uploadStatus == uploadStatus.queued; })
+            .forEach(function (file) { return _this.removeFile(file); });
+    };
     UploadQueue.prototype.deactivateFile = function (file) {
         if (file.uploadStatus == uploadStatus.uploading)
             file.cancel();
@@ -173,25 +206,21 @@ var UploadQueue = (function () {
         file.remove = function () { };
         file.start = function () { };
     };
-    UploadQueue.prototype.getWaitingFiles = function (maxParallelCount) {
-        if (maxParallelCount === void 0) { maxParallelCount = 0; }
+    UploadQueue.prototype.getWaitingFiles = function () {
+        if (!this.options.autoStart)
+            return [];
         var result = this.queuedFiles
             .filter(function (file) { return file.uploadStatus == uploadStatus.queued; });
-        if (maxParallelCount > 0) {
+        if (this.options.maxParallelUploads > 0) {
             var uploadingFilesCount = this.queuedFiles
                 .filter(function (file) { return file.uploadStatus == uploadStatus.uploading; })
                 .length;
-            var count = maxParallelCount - uploadingFilesCount;
+            var count = this.options.maxParallelUploads - uploadingFilesCount;
             if (count <= 0)
                 return [];
             result = result.slice(0, count);
         }
         return result;
-    };
-    UploadQueue.prototype.clearFiles = function () {
-        var _this = this;
-        this.queuedFiles.forEach(function (file) { return _this.deactivateFile(file); });
-        this.queuedFiles = [];
     };
     return UploadQueue;
 })();

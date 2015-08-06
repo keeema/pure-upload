@@ -75,6 +75,7 @@ class UploaderCore implements IUploadCore {
             xhr.abort();
             file.uploadStatus = uploadStatus.canceled;
             this.options.onCancelledCallback(file);
+            this.options.onFinishedCallback(file);
         }
 
         xhr.onload = (e) => this.onload(file, xhr)
