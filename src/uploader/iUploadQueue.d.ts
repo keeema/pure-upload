@@ -1,7 +1,7 @@
 interface IUploadQueue {
-  queuedFiles: any[];
+  queuedFiles: IUploadFile[];
 
-  addFiles(files: any[]);
-  removeFile(file: any);
+  addFiles(files: IUploadFile[]);
+  removeFile(file: IUploadFile);
   clearFiles();
 }

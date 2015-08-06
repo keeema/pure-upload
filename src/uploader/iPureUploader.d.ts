@@ -3,6 +3,7 @@ interface IPureUploader {
   queue: IUploadQueue;
   uploaderOptions: IUploaderOptions;
 
-  register(element: Element, options: any);
-  setOptions(options: IUploaderOptions);
+  registerArea(element: Element, options: IUploadAreaOptions) : void;
+  unregisterArea(area: IUploadArea) : void;
+  setOptions(options: IUploaderOptions) : void;
 }

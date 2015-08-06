@@ -16,6 +16,8 @@
         "./uploader/iPureUploader.d.ts",
         "./uploader/iUploadArea.d.ts",
         "./uploader/iUploadQueue.d.ts",
-        "./uploader/iUploaderOptions.d.ts"
+        "./uploader/iUploaderOptions.d.ts",
+        "./uploader/pureUploader.ts",
+        "./uploader/uploadArea.ts"
     ]
 }
