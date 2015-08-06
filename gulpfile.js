@@ -63,16 +63,12 @@ gulp.task('uglify', ['bundle'], function() {
     .pipe(gulp.dest(dist));
 });
 
-gulp.task('release', ['uglify'], function() {});
-
-gulp.task('debug', ['uglify'], function() {
-  return gulp;
-});
+gulp.task('default', ['uglify'], function() {});
 
 gulp.task('dw', function() {
-  gulp.start('debug');
+  gulp.start('default');
   watch('./src/**/*.ts', function() {
     console.log('Build started', (new Date(Date.now())).toString());
-    return gulp.start('debug');
+    return gulp.start('default');
   });
 });
