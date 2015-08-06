@@ -1,5 +1,5 @@
 class UploadQueue implements IUploadQueue {
-    private queuedFiles: IUploadFile[] = [];
+    queuedFiles: IUploadFile[] = [];
 
     addFiles(files: IUploadFile[]): void {
         files.forEach(file => {
@@ -15,6 +15,7 @@ class UploadQueue implements IUploadQueue {
             return;
 
         this.deactivateFile(file);
+        this.queuedFiles.splice(index, 1);
     }
 
     private deactivateFile(file: IUploadFile) {

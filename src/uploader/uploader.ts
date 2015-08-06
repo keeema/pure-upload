@@ -1,4 +1,4 @@
-class PureUploader implements IPureUploader {
+class Uploader implements IUploader {
     uploadAreas: IUploadArea[];
     queue: IUploadQueue;
     uploaderOptions: IUploaderOptions;
