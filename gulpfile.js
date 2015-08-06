@@ -1,16 +1,19 @@
-var gulp =  require('gulp'),
-  concat =  require('gulp-concat');
-  clean =   require('gulp-clean');
-  uglify =  require('gulp-uglify');
-  rename =  require('gulp-rename');
-  ts =      require('gulp-typescript');
-  copy =    require('gulp-copy');
-  flatten = require('gulp-flatten');
-  watch =   require('gulp-watch');
-  karma =   require('gulp-karma');
+var gulp =      require('gulp'),
+  concat =      require('gulp-concat');
+  clean =       require('gulp-clean');
+  uglify =      require('gulp-uglify');
+  rename =      require('gulp-rename');
+  ts =          require('gulp-typescript');
+  copy =        require('gulp-copy');
+  flatten =     require('gulp-flatten');
+  watch =       require('gulp-watch');
+  karma =       require('gulp-karma');
+  gulpFilter =  require('gulp-filter');
 
 var dist = './dist/'
 var build = './build/'
+var specs = './specs/'
+
 var tsProject = ts.createProject('./src/tsconfig.json');
 
 gulp.task('cleanDist', function() {
@@ -27,14 +30,29 @@ gulp.task('cleanBuild', function() {
     .pipe(clean());
 });
 
+gulp.task('cleanSpecs', function() {
+  return gulp.src(specs, {
+      force: true
+    })
+    .pipe(clean());
+});
+
 gulp.task('compileTs', ['cleanBuild'], function() {
   var tsResult = tsProject.src()
-    .pipe(ts({
-      module: 'commonjs'
-    }));
+    .pipe(ts({ module: 'commonjs' }));
   return tsResult.js
     .pipe(flatten())
+    .pipe(gulpFilter(['*','!*.spec.js']))
     .pipe(gulp.dest(build));
+});
+
+gulp.task('compileSpecsTs', ['cleanSpecs'], function() {
+  var tsResult = tsProject.src()
+    .pipe(ts({ module: 'commonjs' }));
+  return tsResult.js
+    .pipe(flatten())
+    .pipe(gulpFilter(['*.spec.js']))
+    .pipe(gulp.dest(specs));
 });
 
 gulp.task('bundle', ['compileTs', 'cleanDist', 'copyDecl'], function() {
@@ -55,7 +73,7 @@ gulp.task('copyDecl', function() {
     .pipe(gulp.dest(dist));
 });
 
-gulp.task('uglify', ['bundle'], function() {
+gulp.task('uglify', ['test'], function() {
   return gulp.src('./dist/pureupload.js')
     .pipe(rename({
       suffix: '.min'
@@ -64,16 +82,19 @@ gulp.task('uglify', ['bundle'], function() {
     .pipe(gulp.dest(dist));
 });
 
-gulp.task('test', ['compileTs'], function() {
+gulp.task('test', ['bundle','compileSpecsTs'], function() {
   // Be sure to return the stream
-  return gulp.src('./build/*.spec.js')
+  return gulp.src([
+      './dist/pureupload.js',
+      './specs/*.spec.js'
+    ])
     .pipe(karma({
       configFile: './karma.conf.js',
       action: 'run'
     }));
 });
 
-gulp.task('default', ['uglify', 'test'], function() {});
+gulp.task('default', ['uglify'], function() {});
 
 gulp.task('dw', function() {
   gulp.start('default');

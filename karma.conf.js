@@ -13,8 +13,10 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
 
 
+
     // list of files / patterns to load in the browser
     files: [
+      './dist/pureupload.js',
       './build/*.spec.js'
     ],
 
