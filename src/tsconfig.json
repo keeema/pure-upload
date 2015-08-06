@@ -8,14 +8,15 @@
         "./**/*.ts"
     ],
     "files": [
+        "./UploadQueue.ts",
         "./core/iUploadCore.d.ts",
         "./core/iUploadFile.d.ts",
         "./core/iUploadOptions.d.ts",
         "./core/uploadCore.ts",
         "./uploader/IUploadAreaOptions.d.ts",
-        "./uploader/iPureUploader.d.ts",
         "./uploader/iUploadArea.d.ts",
         "./uploader/iUploadQueue.d.ts",
+        "./uploader/iUploader.d.ts",
         "./uploader/iUploaderOptions.d.ts",
         "./uploader/pureUploader.ts",
         "./uploader/uploadArea.ts"

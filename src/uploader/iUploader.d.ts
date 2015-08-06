@@ -1,4 +1,4 @@
-interface IPureUploader {
+interface IUploader {
   uploadAreas: IUploadArea[];
   queue: IUploadQueue;
   uploaderOptions: IUploaderOptions;
