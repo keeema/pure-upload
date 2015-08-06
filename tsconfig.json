@@ -11,14 +11,7 @@
         "./example/**/*.ts"
     ],
     "files": [
-        "./dist/IUploadAreaOptions.d.ts",
-        "./dist/iUploadArea.d.ts",
-        "./dist/iUploadCore.d.ts",
-        "./dist/iUploadFile.d.ts",
-        "./dist/iUploadOptions.d.ts",
-        "./dist/iUploadQueue.d.ts",
-        "./dist/iUploader.d.ts",
-        "./dist/iUploaderOptions.d.ts",
+        "./dist/pureupload.d.ts",
         "./decl/express/express.d.ts",
         "./decl/mime/mime.d.ts",
         "./decl/multer/multer.d.ts",
