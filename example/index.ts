@@ -1,5 +1,15 @@
 window.onload = () => {
-    document.getElementsByName('ok')[0].addEventListener('click', event  => {
+    var uploaderExample1 = getUploader({ maxParallelUploads: 2, autoStart: true, autoRemove: true });
+    uploaderExample1.registerArea(document.getElementById('example1'), {
+        url: "/api/test",
+        method: "POST",
+        maxFileSize: 2000,
+        allowDragDrop: true,
+        clickable: true,
+        accept: "pdf",
+        multiple: true,
+    });    
+    /*document.getElementsByName('ok')[0].addEventListener('click', event  => {
         var fileInput = <any>document.getElementsByName('file')[0];
         var progressElement = document.getElementById('progress');
         var options = {
@@ -11,5 +21,5 @@ window.onload = () => {
         var uploader = getUploadCore(options);
         uploader.upload(fileInput.files);
         event.preventDefault();
-    });
+    });*/
 }

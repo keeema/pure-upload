@@ -2,7 +2,7 @@ interface IUploadArea {
   targetElement: Element;
   uploadCore: IUploadCore;
   uploadAreaOptions: IUploadAreaOptions;
-  queue: IUploadQueue;
+  uploader: IUploader;
 
   init() : void;
 }
