@@ -5,24 +5,25 @@
         "module": "commonjs"
     },
     "filesGlob": [
-        "./**/*.d.ts",
+        "./dist/**/*.d.ts",
+        "./decl/**/*.d.ts",
         "./*.ts",
         "./example/**/*.ts"
     ],
     "files": [
+        "./dist/IUploadAreaOptions.d.ts",
+        "./dist/iUploadArea.d.ts",
+        "./dist/iUploadCore.d.ts",
+        "./dist/iUploadFile.d.ts",
+        "./dist/iUploadOptions.d.ts",
+        "./dist/iUploadQueue.d.ts",
+        "./dist/iUploader.d.ts",
+        "./dist/iUploaderOptions.d.ts",
         "./decl/express/express.d.ts",
         "./decl/mime/mime.d.ts",
         "./decl/multer/multer.d.ts",
         "./decl/node/node.d.ts",
         "./decl/serve-static/serve-static.d.ts",
-        "./src/core/iUploadCore.d.ts",
-        "./src/core/iUploadFile.d.ts",
-        "./src/core/iUploadOptions.d.ts",
-        "./src/uploader/IUploadAreaOptions.d.ts",
-        "./src/uploader/iUploadArea.d.ts",
-        "./src/uploader/iUploadQueue.d.ts",
-        "./src/uploader/iUploader.d.ts",
-        "./src/uploader/iUploaderOptions.d.ts",
         "./example.ts",
         "./example/index.ts"
     ]

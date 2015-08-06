@@ -19,7 +19,7 @@ app.use('/api/test', multer({
 }));
 
 app.use(express.static('example'));
-app.use(express.static('src'));
+app.use(express.static('dist'));
 
 app.post('/api/test', (req, res: express.Response) => {
     if (done == true) {

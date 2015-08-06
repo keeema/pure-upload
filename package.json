@@ -1,9 +1,44 @@
 {
-  "name": "inspire_upload",
+  "name": "pure-upload",
   "version": "0.0.1",
+  "description": "The pure upload library without dependencies",
+  "contributors": [
+    {
+      "name": "Tomáš Růt",
+      "email": "rut.tomas@hotmail.com"
+    },
+    {
+      "name": "Marek Horyna",
+      "email": "marek.horyna@outlook.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keeema/pure-upload.git"
+  },
+  "bugs": {
+    "url": "https://github.com/keeema/pure-upload/issues"
+  },
+  "keywords": [
+    "pure",
+    "upload",
+    "javascript",
+    "typescript",
+    "web",
+    "file",
+    "api"
+  ],
   "dependencies": {},
   "devDependencies": {
     "express": "~4.10.2",
-    "multer": "~0.1.6"
+    "multer": "~0.1.6",
+    "gulp": "^3.9.0",
+    "gulp-clean": "^0.3.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-copy": "0.0.2",
+    "gulp-flatten": "^0.1.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-typescript": "^2.8.0",
+    "gulp-uglify": "^1.2.0"
   }
 }
