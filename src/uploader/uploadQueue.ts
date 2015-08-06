@@ -18,8 +18,8 @@ class UploadQueue implements IUploadQueue {
             this.queuedFiles.push(file);
             file.uploadStatus = uploadStatus.queued;
             file.remove = () => {
-              this.removeFile(file);
-              this.filesChanged();
+                this.removeFile(file);
+                this.filesChanged();
             }
         });
 
@@ -48,14 +48,13 @@ class UploadQueue implements IUploadQueue {
     }
 
     private startWaitingFiles(): void {
-        this.getWaitingFiles()
-            .forEach(file=> file.start())
+        var files = this.getWaitingFiles().forEach(file=> file.start())
     }
 
     private removeFinishedFiles(): void {
-      this.queuedFiles
-          .filter(file=> file.uploadStatus == uploadStatus.queued)
-          .forEach(file => this.removeFile(file));
+        this.queuedFiles
+            .filter(file=> [uploadStatus.uploaded, uploadStatus.failed, uploadStatus.canceled].indexOf(file.uploadStatus) >= 0)
+            .forEach(file => this.removeFile(file));
     }
 
     private deactivateFile(file: IUploadFile) {
@@ -75,14 +74,16 @@ class UploadQueue implements IUploadQueue {
             .filter(file=> file.uploadStatus == uploadStatus.queued)
 
         if (this.options.maxParallelUploads > 0) {
+
             var uploadingFilesCount = this.queuedFiles
                 .filter(file=> file.uploadStatus == uploadStatus.uploading)
                 .length;
 
             var count = this.options.maxParallelUploads - uploadingFilesCount;
 
-            if (count <= 0)
+            if (count <= 0) {
                 return [];
+            }
 
             result = result.slice(0, count);
         }

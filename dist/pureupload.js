@@ -190,13 +190,12 @@ var UploadQueue = (function () {
         this.options.autoRemove = this.options.autoRemove || false;
     };
     UploadQueue.prototype.startWaitingFiles = function () {
-        this.getWaitingFiles()
-            .forEach(function (file) { return file.start(); });
+        var files = this.getWaitingFiles().forEach(function (file) { return file.start(); });
     };
     UploadQueue.prototype.removeFinishedFiles = function () {
         var _this = this;
         this.queuedFiles
-            .filter(function (file) { return file.uploadStatus == uploadStatus.queued; })
+            .filter(function (file) { return [uploadStatus.uploaded, uploadStatus.failed, uploadStatus.canceled].indexOf(file.uploadStatus) >= 0; })
             .forEach(function (file) { return _this.removeFile(file); });
     };
     UploadQueue.prototype.deactivateFile = function (file) {
@@ -216,8 +215,9 @@ var UploadQueue = (function () {
                 .filter(function (file) { return file.uploadStatus == uploadStatus.uploading; })
                 .length;
             var count = this.options.maxParallelUploads - uploadingFilesCount;
-            if (count <= 0)
+            if (count <= 0) {
                 return [];
+            }
             result = result.slice(0, count);
         }
         return result;
