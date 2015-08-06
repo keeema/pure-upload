@@ -54,6 +54,42 @@ describe('uploadQueue', () => {
         })
     });
 
+    describe('callbacks', () => {
+        let file: IUploadFile;
+        let callback: jasmine.Spy;
+        let uploadQueue: UploadQueue;
+
+        beforeEach(()=>{
+          file = <IUploadFile>{};
+        })
+
+        it('triggers onFileAddedCallback', () => {
+            callback = jasmine.createSpy('onFileAddedCallback');
+            uploadQueue = new UploadQueue({ onFileAddedCallback: callback });
+            uploadQueue.addFiles([file]);
+            expect(callback).toHaveBeenCalledWith(file);
+        })
+
+        it('triggers onFileRemovedCallback', () => {
+            callback = jasmine.createSpy('onFileRemovedCallback');
+            uploadQueue = new UploadQueue({ onFileRemovedCallback: callback });
+            uploadQueue.addFiles([file]);
+            file.remove();
+            expect(callback).toHaveBeenCalledWith(file);
+        })
+
+        it('triggers onAllFinishedCallback', () => {
+            let file2: IUploadFile= <IUploadFile>{};
+            callback = jasmine.createSpy('onAllFinishedCallback');
+            uploadQueue = new UploadQueue({ onAllFinishedCallback: callback });
+            uploadQueue.addFiles([file, file2]);
+            file.remove();
+            expect(callback).not.toHaveBeenCalled();
+            file2.remove();
+            expect(callback).toHaveBeenCalled();
+        })
+    })
+
     describe('filesChanged', () => {
         describe('autoRemove', () => {
             let files: IUploadFile[] = [

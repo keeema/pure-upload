@@ -9,7 +9,8 @@ interface IUploadStatus {
     uploading: IUploadStatus,
     uploaded: IUploadStatus,
     failed: IUploadStatus,
-    canceled: IUploadStatus
+    canceled: IUploadStatus,
+    removed: IUploadStatus;
 }
 
 declare var uploadStatus: IUploadStatus;
@@ -83,4 +84,8 @@ interface IUploadQueueOptions {
   maxParallelUploads?: number;
   autoStart?: boolean;
   autoRemove?: boolean;
+
+  onFileAddedCallback?: (file: IUploadFile) => void;
+  onFileRemovedCallback?: (file: IUploadFile) => void;
+  onAllFinishedCallback?: () => void;
 }
