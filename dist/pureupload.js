@@ -196,7 +196,7 @@ var UploadQueue = (function () {
     UploadQueue.prototype.removeFinishedFiles = function () {
         var _this = this;
         this.queuedFiles
-            .filter(function (file) { return file.uploadStatus == uploadStatus.queued; })
+            .filter(function (file) { return [uploadStatus.uploaded, uploadStatus.failed, uploadStatus.canceled].indexOf(file.uploadStatus) >= 0; })
             .forEach(function (file) { return _this.removeFile(file); });
     };
     UploadQueue.prototype.deactivateFile = function (file) {
@@ -236,13 +236,17 @@ var UploadArea = (function () {
         this.setupHiddenInput();
     };
     UploadArea.prototype.putFilesToQueue = function (files) {
-        var _this = this;
         var file;
         file = files[0];
+        var filesToGo;
+        filesToGo = [];
+        filesToGo.push(file);
         var _class = this;
         file.start = function () {
-            _class.uploadCore.upload(_this);
+            _class.uploadCore.upload(filesToGo);
+            file.start = function () { };
         };
+        this.uploader.queue.addFiles(filesToGo);
     };
     UploadArea.prototype.setupHiddenInput = function () {
         var _this = this;
@@ -255,8 +259,8 @@ var UploadArea = (function () {
         }
         if (this.uploader.uploaderOptions.autoStart) {
             fileInput.addEventListener("change", function (e) {
-                // console.log("changed");
-                // console.log(e);
+                console.log("changed");
+                console.log(e);
                 _this.putFilesToQueue(e.target.files);
             });
         }
@@ -267,20 +271,20 @@ var UploadArea = (function () {
         }
         if (this.uploadAreaOptions.allowDragDrop) {
             this.targetElement.addEventListener("dragenter", function (e) {
-                // console.log("dragenter");
-                // console.log(e);
+                console.log("dragenter");
+                console.log(e);
             });
             this.targetElement.addEventListener("drop", function (e) {
-                // console.log(e);
-                // console.log("dragdrop");
+                console.log(e);
+                console.log("dragdrop");
             });
             this.targetElement.addEventListener("dragstart", function (e) {
-                // console.log("dragstart");
-                // console.log(e);
+                console.log("dragstart");
+                console.log(e);
             });
             this.targetElement.addEventListener("dragend", function (e) {
-                // console.log("dragend");
-                // console.log(e);
+                console.log("dragend");
+                console.log(e);
             });
         }
         // attach to body
@@ -296,6 +300,7 @@ var Uploader = (function () {
     function Uploader(options) {
         this.setOptions(options);
         this.uploadAreas = [];
+        this.queue = new UploadQueue(options);
     }
     Uploader.prototype.setOptions = function (options) {
         this.uploaderOptions = options;

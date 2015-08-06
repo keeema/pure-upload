@@ -58,7 +58,7 @@ interface IUploadAreaOptions extends IUploadOptions {
   multiple: boolean;
 }
 
-declare var getUploader: (options: IUploaderOptions) => IUploader;
+declare var getUploader: (options: IUploadQueueOptions) => IUploader;
 
 interface IUploader {
   uploadAreas: IUploadArea[];

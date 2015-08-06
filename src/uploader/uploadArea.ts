@@ -15,14 +15,20 @@ class UploadArea implements IUploadArea {
         this.setupHiddenInput();
     }
 
-    private putFilesToQueue(files: File[]): void {
+    private putFilesToQueue(files: FileList): void {
         let file: IUploadFile;
         file = <IUploadFile>files[0];
 
+        let filesToGo: IUploadFile[];
+        filesToGo = [];
+        filesToGo.push(file);
+
         var _class = this;
         file.start = () => {
-          _class.uploadCore.upload(this);
+            _class.uploadCore.upload(filesToGo);
+            file.start = () => { };
         };
+        this.uploader.queue.addFiles(filesToGo);
     }
 
     private setupHiddenInput(): void {
@@ -35,8 +41,8 @@ class UploadArea implements IUploadArea {
         }
         if (this.uploader.uploaderOptions.autoStart) {
             fileInput.addEventListener("change", (e: any) => {
-                // console.log("changed");
-                // console.log(e);
+                console.log("changed");
+                console.log(e);
                 this.putFilesToQueue(e.target.files);
             });
         }
@@ -47,20 +53,20 @@ class UploadArea implements IUploadArea {
         }
         if (this.uploadAreaOptions.allowDragDrop) {
             this.targetElement.addEventListener("dragenter", (e) => {
-                // console.log("dragenter");
-                // console.log(e);
+                console.log("dragenter");
+                console.log(e);
             });
             this.targetElement.addEventListener("drop", (e) => {
-                // console.log(e);
-                // console.log("dragdrop");
+                console.log(e);
+                console.log("dragdrop");
             });
             this.targetElement.addEventListener("dragstart", (e) => {
-                // console.log("dragstart");
-                // console.log(e);
+                console.log("dragstart");
+                console.log(e);
             });
             this.targetElement.addEventListener("dragend", (e) => {
-                // console.log("dragend");
-                // console.log(e);
+                console.log("dragend");
+                console.log(e);
             });
         }
         // attach to body

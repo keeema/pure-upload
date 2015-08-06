@@ -1,18 +1,19 @@
-var getUploader = function (options: IUploaderOptions): IUploader {
+var getUploader = function (options: IUploadQueueOptions): IUploader {
     return new Uploader(options);
 }
 
 class Uploader implements IUploader {
     uploadAreas: IUploadArea[];
     queue: IUploadQueue;
-    uploaderOptions: IUploaderOptions;
+    uploaderOptions: IUploadQueueOptions;
 
-    constructor(options: IUploaderOptions) {
+    constructor(options: IUploadQueueOptions) {
         this.setOptions(options);
         this.uploadAreas = [];
+        this.queue = new UploadQueue(options);
     }
 
-    setOptions(options: IUploaderOptions) : void {
+    setOptions(options: IUploadQueueOptions) : void {
         this.uploaderOptions = options;
     }
 

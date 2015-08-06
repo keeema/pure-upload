@@ -8,7 +8,7 @@ window.onload = () => {
         clickable: true,
         accept: "pdf",
         multiple: true,
-    });    
+    });
     /*document.getElementsByName('ok')[0].addEventListener('click', event  => {
         var fileInput = <any>document.getElementsByName('file')[0];
         var progressElement = document.getElementById('progress');

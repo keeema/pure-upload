@@ -53,9 +53,9 @@ class UploadQueue implements IUploadQueue {
     }
 
     private removeFinishedFiles(): void {
-      this.queuedFiles
-          .filter(file=> file.uploadStatus == uploadStatus.queued)
-          .forEach(file => this.removeFile(file));
+        this.queuedFiles
+            .filter(file=> [uploadStatus.uploaded, uploadStatus.failed, uploadStatus.canceled].indexOf(file.uploadStatus) >= 0)
+            .forEach(file => this.removeFile(file));
     }
 
     private deactivateFile(file: IUploadFile) {
