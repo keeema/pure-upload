@@ -5,20 +5,23 @@
         "module": "commonjs"
     },
     "filesGlob": [
-        "./**/*.ts"
+        "./**/*.ts",
+        "../decl/jasmine/**/*.d.ts"
     ],
     "files": [
         "./core/iUploadCore.d.ts",
         "./core/iUploadFile.d.ts",
         "./core/iUploadOptions.d.ts",
         "./core/uploadCore.ts",
-        "./uploader/IUploadAreaOptions.d.ts",
         "./uploader/iUploadArea.d.ts",
+        "./uploader/iUploadAreaOptions.d.ts",
         "./uploader/iUploadQueue.d.ts",
         "./uploader/iUploader.d.ts",
         "./uploader/iUploaderOptions.d.ts",
         "./uploader/uploadArea.ts",
+        "./uploader/uploadQueue.spec.ts",
         "./uploader/uploadQueue.ts",
-        "./uploader/uploader.ts"
+        "./uploader/uploader.ts",
+        "../decl/jasmine/jasmine.d.ts"
     ]
 }

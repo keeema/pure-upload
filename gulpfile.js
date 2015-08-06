@@ -1,12 +1,13 @@
-var gulp = require('gulp'),
-  concat = require('gulp-concat');
-clean = require('gulp-clean');
-uglify = require('gulp-uglify');
-rename = require('gulp-rename');
-ts = require('gulp-typescript');
-copy = require('gulp-copy');
-flatten = require('gulp-flatten');
-watch = require('gulp-watch');
+var gulp =  require('gulp'),
+  concat =  require('gulp-concat');
+  clean =   require('gulp-clean');
+  uglify =  require('gulp-uglify');
+  rename =  require('gulp-rename');
+  ts =      require('gulp-typescript');
+  copy =    require('gulp-copy');
+  flatten = require('gulp-flatten');
+  watch =   require('gulp-watch');
+  karma =   require('gulp-karma');
 
 var dist = './dist/'
 var build = './build/'
@@ -63,7 +64,16 @@ gulp.task('uglify', ['bundle'], function() {
     .pipe(gulp.dest(dist));
 });
 
-gulp.task('default', ['uglify'], function() {});
+gulp.task('test', ['compileTs'], function() {
+  // Be sure to return the stream
+  return gulp.src('./build/*.spec.js')
+    .pipe(karma({
+      configFile: './karma.conf.js',
+      action: 'run'
+    }));
+});
+
+gulp.task('default', ['uglify', 'test'], function() {});
 
 gulp.task('dw', function() {
   gulp.start('default');
