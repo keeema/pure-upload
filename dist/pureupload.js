@@ -161,6 +161,7 @@ var UploadQueue = (function () {
         if (this.options.autoStart)
             this.startWaitingFiles();
         this.checkAllFinished();
+        this.options.onQueueChangedCallback(this.queuedFiles);
     };
     UploadQueue.prototype.checkAllFinished = function () {
         var unfinishedFiles = this.queuedFiles
@@ -207,6 +208,7 @@ var UploadQueue = (function () {
         this.options.onFileAddedCallback = this.options.onFileAddedCallback || (function () { });
         this.options.onFileRemovedCallback = this.options.onFileRemovedCallback || (function () { });
         this.options.onAllFinishedCallback = this.options.onAllFinishedCallback || (function () { });
+        this.options.onQueueChangedCallback = this.options.onQueueChangedCallback || (function () { });
     };
     UploadQueue.prototype.startWaitingFiles = function () {
         var files = this.getWaitingFiles().forEach(function (file) { return file.start(); });

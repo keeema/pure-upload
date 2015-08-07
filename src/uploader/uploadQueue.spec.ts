@@ -21,12 +21,12 @@ describe('uploadQueue', () => {
             expect(uploadQueue.queuedFiles[0].remove).toBeDefined();
         })
 
-        it('triggers filesChanged after adding files', () => {
+        it('calls filesChanged after adding files', () => {
             uploadQueue.addFiles([]);
             expect(filesChangedSpy.calls.count()).toEqual(1);
         })
 
-        it('triggers filesChanged after removing files', () => {
+        it('calls filesChanged after removing files', () => {
             let file = <IUploadFile>{};
             uploadQueue.addFiles([file]);
             filesChangedSpy.calls.reset();
@@ -57,29 +57,33 @@ describe('uploadQueue', () => {
     describe('callbacks', () => {
         let file: IUploadFile;
         let callback: jasmine.Spy;
+        let queueChangedCallbackSpy: jasmine.Spy;
         let uploadQueue: UploadQueue;
 
-        beforeEach(()=>{
-          file = <IUploadFile>{};
+        beforeEach(() => {
+            file = <IUploadFile>{};
+            queueChangedCallbackSpy = jasmine.createSpy('queueChangedCallback');
         })
 
-        it('triggers onFileAddedCallback', () => {
+        it('triggers onFileAddedCallback and queueChangedCallback', () => {
             callback = jasmine.createSpy('onFileAddedCallback');
-            uploadQueue = new UploadQueue({ onFileAddedCallback: callback });
+            uploadQueue = new UploadQueue({ onFileAddedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
             uploadQueue.addFiles([file]);
             expect(callback).toHaveBeenCalledWith(file);
+            expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
         })
 
-        it('triggers onFileRemovedCallback', () => {
+        it('triggers onFileRemovedCallback and queueChangedCallback', () => {
             callback = jasmine.createSpy('onFileRemovedCallback');
-            uploadQueue = new UploadQueue({ onFileRemovedCallback: callback });
-            uploadQueue.addFiles([file]);
-            file.remove();
+            uploadQueue = new UploadQueue({ onFileRemovedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
+            uploadQueue.queuedFiles.push(file);
+            uploadQueue.removeFile(file);
             expect(callback).toHaveBeenCalledWith(file);
+            expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
         })
 
         it('triggers onAllFinishedCallback', () => {
-            let file2: IUploadFile= <IUploadFile>{};
+            let file2: IUploadFile = <IUploadFile>{};
             callback = jasmine.createSpy('onAllFinishedCallback');
             uploadQueue = new UploadQueue({ onAllFinishedCallback: callback });
             uploadQueue.addFiles([file, file2]);

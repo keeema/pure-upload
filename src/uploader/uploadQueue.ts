@@ -1,7 +1,7 @@
 class UploadQueue implements IUploadQueue {
     queuedFiles: IUploadFile[] = [];
 
-    constructor(private options: IUploadQueueOptions) {
+    constructor(public options: IUploadQueueOptions) {
         this.setFullOptions();
     }
 
@@ -12,7 +12,8 @@ class UploadQueue implements IUploadQueue {
         if (this.options.autoStart)
             this.startWaitingFiles();
 
-        this.checkAllFinished();
+        this.checkAllFinished();        
+        this.options.onQueueChangedCallback(this.queuedFiles);
     }
 
     private checkAllFinished(): void {
@@ -54,8 +55,8 @@ class UploadQueue implements IUploadQueue {
 
         this.deactivateFile(file);
         this.queuedFiles.splice(index, 1);
-        this.options.onFileRemovedCallback(file);
 
+        this.options.onFileRemovedCallback(file);
         this.filesChanged()
     }
 
@@ -71,6 +72,7 @@ class UploadQueue implements IUploadQueue {
         this.options.onFileAddedCallback = this.options.onFileAddedCallback || (() => { });
         this.options.onFileRemovedCallback = this.options.onFileRemovedCallback || (() => { });
         this.options.onAllFinishedCallback = this.options.onAllFinishedCallback || (() => { });
+        this.options.onQueueChangedCallback = this.options.onQueueChangedCallback || (() => { });
     }
 
     private startWaitingFiles(): void {

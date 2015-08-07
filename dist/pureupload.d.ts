@@ -72,6 +72,7 @@ interface IUploader {
 }
 
 interface IUploadQueue {
+  options:IUploadQueueOptions;
   queuedFiles: IUploadFile[];
 
   addFiles(files: IUploadFile[]);
@@ -81,11 +82,12 @@ interface IUploadQueue {
 }
 
 interface IUploadQueueOptions {
-  maxParallelUploads?: number;
-  autoStart?: boolean;
-  autoRemove?: boolean;
+    maxParallelUploads?: number;
+    autoStart?: boolean;
+    autoRemove?: boolean;
 
-  onFileAddedCallback?: (file: IUploadFile) => void;
-  onFileRemovedCallback?: (file: IUploadFile) => void;
-  onAllFinishedCallback?: () => void;
+    onFileAddedCallback?: (file: IUploadFile) => void;
+    onFileRemovedCallback?: (file: IUploadFile) => void;
+    onAllFinishedCallback?: () => void;
+    onQueueChangedCallback?: (queue: IUploadFile[]) => void;
 }

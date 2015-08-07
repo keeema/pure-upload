@@ -1,4 +1,5 @@
 interface IUploadQueue {
+  options:IUploadQueueOptions;
   queuedFiles: IUploadFile[];
 
   addFiles(files: IUploadFile[]);
