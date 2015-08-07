@@ -26,6 +26,8 @@
         "./uploader/uploadQueue.spec.ts",
         "./uploader/uploadQueue.ts",
         "./uploader/uploader.ts",
+        "./utils/files.ts",
+        "./utils/functions.ts",
         "../decl/jasmine/jasmine.d.ts"
     ]
 }

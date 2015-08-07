@@ -5,6 +5,5 @@ interface IUploadQueue {
 
   addFiles(files: IUploadFile[]);
   removeFile(file: IUploadFile);
-  filesChanged();
   clearFiles();
 }

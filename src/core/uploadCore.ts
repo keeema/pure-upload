@@ -9,7 +9,7 @@ class UploaderCore implements IUploadCore {
     }
 
     upload(fileList: File[]| Object): void {
-        var files = this.castFiles(fileList);
+        var files = castFiles(fileList, uploadStatus.uploading);
         files.forEach((file: IUploadFile) => this.processFile(file));
     }
 
@@ -17,27 +17,6 @@ class UploaderCore implements IUploadCore {
         var xhr = this.createRequest();
         this.setCallbacks(xhr, file);
         this.send(xhr, file);
-    }
-
-    private castFiles(fileList: File[]| Object): File[] {
-        let files: IUploadFile[];
-
-        if (typeof fileList === 'object') {
-            files = Object.keys(fileList).map((key) => fileList[key]);
-        } else {
-            files = <IUploadFile[]>fileList;
-        }
-
-        files.forEach((file: IUploadFile) => {
-            file.uploadStatus = uploadStatus.uploading
-            file.responseCode = 0;
-            file.responseText = '';
-            file.progress = 0;
-            file.sentBytes = 0;
-            file.cancel = () => { };
-        });
-
-        return files;
     }
 
     private createRequest(): XMLHttpRequest {
@@ -61,12 +40,13 @@ class UploaderCore implements IUploadCore {
     }
 
     private setCallbacks(xhr: XMLHttpRequest, file: IUploadFile) {
-        file.cancel = () => {
+        var originalCancelFn = file.cancel;
+        file.cancel = decorateSimpleFunction(file.cancel, () => {
             xhr.abort();
             file.uploadStatus = uploadStatus.canceled;
             this.callbacks.onCancelledCallback(file);
             this.callbacks.onFinishedCallback(file);
-        }
+        }, true);
 
         xhr.onload = (e) => this.onload(file, xhr)
         xhr.onerror = () => this.handleError(file, xhr);

@@ -1,3 +1,31 @@
+function decorateSimpleFunction(origFn, newFn, reverseOrder) {
+    if (reverseOrder === void 0) { reverseOrder = false; }
+    if (!origFn)
+        return newFn;
+    return reverseOrder
+        ? function () { origFn(); newFn(); }
+        : function () { newFn(); origFn(); };
+}
+
+function castFiles(fileList, status) {
+    var files;
+    if (typeof fileList === 'object') {
+        files = Object.keys(fileList).map(function (key) { return fileList[key]; });
+    }
+    else {
+        files = fileList;
+    }
+    files.forEach(function (file) {
+        file.uploadStatus = status;
+        file.responseCode = file.responseCode || 0;
+        file.responseText = file.responseText || '';
+        file.progress = file.progress || 0;
+        file.sentBytes = file.sentBytes || 0;
+        file.cancel = file.cancel || (function () { });
+    });
+    return files;
+}
+
 var UploadStatusStatic = (function () {
     function UploadStatusStatic() {
     }
@@ -23,31 +51,13 @@ var UploaderCore = (function () {
     }
     UploaderCore.prototype.upload = function (fileList) {
         var _this = this;
-        var files = this.castFiles(fileList);
+        var files = castFiles(fileList, uploadStatus.uploading);
         files.forEach(function (file) { return _this.processFile(file); });
     };
     UploaderCore.prototype.processFile = function (file) {
         var xhr = this.createRequest();
         this.setCallbacks(xhr, file);
         this.send(xhr, file);
-    };
-    UploaderCore.prototype.castFiles = function (fileList) {
-        var files;
-        if (typeof fileList === 'object') {
-            files = Object.keys(fileList).map(function (key) { return fileList[key]; });
-        }
-        else {
-            files = fileList;
-        }
-        files.forEach(function (file) {
-            file.uploadStatus = uploadStatus.uploading;
-            file.responseCode = 0;
-            file.responseText = '';
-            file.progress = 0;
-            file.sentBytes = 0;
-            file.cancel = function () { };
-        });
-        return files;
     };
     UploaderCore.prototype.createRequest = function () {
         var xhr = new XMLHttpRequest();
@@ -69,12 +79,13 @@ var UploaderCore = (function () {
     };
     UploaderCore.prototype.setCallbacks = function (xhr, file) {
         var _this = this;
-        file.cancel = function () {
+        var originalCancelFn = file.cancel;
+        file.cancel = decorateSimpleFunction(file.cancel, function () {
             xhr.abort();
             file.uploadStatus = uploadStatus.canceled;
             _this.callbacks.onCancelledCallback(file);
             _this.callbacks.onFinishedCallback(file);
-        };
+        }, true);
         xhr.onload = function (e) { return _this.onload(file, xhr); };
         xhr.onerror = function () { return _this.handleError(file, xhr); };
         xhr.upload.onprogress = function (e) { return _this.updateProgress(file, e); };
@@ -160,36 +171,25 @@ var UploadQueue = (function () {
         this.setFullOptions();
         this.setFullCallbacks();
     }
-    UploadQueue.prototype.filesChanged = function () {
-        if (this.options.autoRemove)
-            this.removeFinishedFiles();
-        if (this.options.autoStart)
-            this.startWaitingFiles();
-        this.checkAllFinished();
-        this.callbacks.onQueueChangedCallback(this.queuedFiles);
-    };
-    UploadQueue.prototype.checkAllFinished = function () {
-        var unfinishedFiles = this.queuedFiles
-            .filter(function (file) { return [uploadStatus.queued, uploadStatus.uploading]
-            .indexOf(file.uploadStatus) >= 0; });
-        if (unfinishedFiles.length == 0) {
-            this.callbacks.onAllFinishedCallback();
-        }
-    };
     UploadQueue.prototype.addFiles = function (files) {
         var _this = this;
         files.forEach(function (file) {
             _this.queuedFiles.push(file);
             file.uploadStatus = uploadStatus.queued;
-            file.remove = function () {
+            file.remove = decorateSimpleFunction(file.remove, function () {
                 _this.removeFile(file);
-            };
-            if (!file.start)
-                file.start = function () { };
-            if (!file.cancel)
-                file.cancel = function () { };
+            });
+            file.start = decorateSimpleFunction(file.start, function () {
+                _this.callbacks.onQueueChangedCallback(_this.queuedFiles);
+                _this.checkAllFinished();
+            });
+            file.cancel = decorateSimpleFunction(file.cancel, function () {
+                _this.callbacks.onQueueChangedCallback(_this.queuedFiles);
+                _this.checkAllFinished();
+            });
             _this.callbacks.onFileAddedCallback(file);
         });
+        this.callbacks.onQueueChangedCallback(this.queuedFiles);
         this.filesChanged();
     };
     UploadQueue.prototype.removeFile = function (file) {
@@ -199,12 +199,28 @@ var UploadQueue = (function () {
         this.deactivateFile(file);
         this.queuedFiles.splice(index, 1);
         this.callbacks.onFileRemovedCallback(file);
+        this.callbacks.onQueueChangedCallback(this.queuedFiles);
         this.filesChanged();
     };
     UploadQueue.prototype.clearFiles = function () {
         var _this = this;
         this.queuedFiles.forEach(function (file) { return _this.deactivateFile(file); });
         this.queuedFiles = [];
+    };
+    UploadQueue.prototype.filesChanged = function () {
+        if (this.options.autoRemove)
+            this.removeFinishedFiles();
+        if (this.options.autoStart)
+            this.startWaitingFiles();
+        this.checkAllFinished();
+    };
+    UploadQueue.prototype.checkAllFinished = function () {
+        var unfinishedFiles = this.queuedFiles
+            .filter(function (file) { return [uploadStatus.queued, uploadStatus.uploading]
+            .indexOf(file.uploadStatus) >= 0; });
+        if (unfinishedFiles.length == 0) {
+            this.callbacks.onAllFinishedCallback();
+        }
     };
     UploadQueue.prototype.setFullOptions = function () {
         this.options.maxParallelUploads = this.options.maxParallelUploads || 0;

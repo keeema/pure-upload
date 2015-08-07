@@ -6,7 +6,6 @@ describe('uploadQueue', () => {
 
         beforeEach(() => {
             uploadQueue = new UploadQueue({}, {});
-            filesChangedSpy = uploadQueue.filesChanged = jasmine.createSpy('filesChanged');
         })
 
         it('sets the \'queued\' state for newly added files', () => {
@@ -19,20 +18,6 @@ describe('uploadQueue', () => {
             let file = <IUploadFile>{};
             uploadQueue.addFiles([file]);
             expect(uploadQueue.queuedFiles[0].remove).toBeDefined();
-        })
-
-        it('calls filesChanged after adding files', () => {
-            uploadQueue.addFiles([]);
-            expect(filesChangedSpy.calls.count()).toEqual(1);
-        })
-
-        it('calls filesChanged after removing files', () => {
-            let file = <IUploadFile>{};
-            uploadQueue.addFiles([file]);
-            filesChangedSpy.calls.reset();
-
-            file.remove();
-            expect(filesChangedSpy.calls.count()).toEqual(1);
         })
 
         it('removes file callbacks on remove', () => {
@@ -65,32 +50,39 @@ describe('uploadQueue', () => {
             queueChangedCallbackSpy = jasmine.createSpy('queueChangedCallback');
         })
 
-        it('triggers onFileAddedCallback and queueChangedCallback', () => {
+        it('triggers onFileAddedCallback and queueChangedCallback on add', () => {
             callback = jasmine.createSpy('onFileAddedCallback');
             uploadQueue = new UploadQueue({}, { onFileAddedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
-            uploadQueue.addFiles([file]);
+
+          uploadQueue.addFiles([file]);
             expect(callback).toHaveBeenCalledWith(file);
             expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
+            expect(queueChangedCallbackSpy.calls.count()).toEqual(1);
         })
 
         it('triggers onFileRemovedCallback and queueChangedCallback', () => {
             callback = jasmine.createSpy('onFileRemovedCallback');
             uploadQueue = new UploadQueue({}, { onFileRemovedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
             uploadQueue.queuedFiles.push(file);
+
             uploadQueue.removeFile(file);
             expect(callback).toHaveBeenCalledWith(file);
             expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
+            expect(queueChangedCallbackSpy.calls.count()).toEqual(1);
         })
 
-        it('triggers onAllFinishedCallback', () => {
+        it('triggers onAllFinishedCallback and queueChangedCallback in correct count after all files removed', () => {
             let file2: IUploadFile = <IUploadFile>{};
             callback = jasmine.createSpy('onAllFinishedCallback');
-            uploadQueue = new UploadQueue({}, { onAllFinishedCallback: callback });
+            uploadQueue = new UploadQueue({}, { onAllFinishedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
+
             uploadQueue.addFiles([file, file2]);
             file.remove();
             expect(callback).not.toHaveBeenCalled();
             file2.remove();
-            expect(callback).toHaveBeenCalled();
+            expect(callback.calls.count()).toEqual(1);
+            expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
+            expect(queueChangedCallbackSpy.calls.count()).toEqual(3);
         })
     })
 
@@ -108,7 +100,7 @@ describe('uploadQueue', () => {
                 uploadQueue = new UploadQueue({ autoRemove: false }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
 
-                uploadQueue.filesChanged()
+                uploadQueue['filesChanged']()
                 expect(uploadQueue.queuedFiles).toEqual(files);
             })
 
@@ -116,7 +108,7 @@ describe('uploadQueue', () => {
                 uploadQueue = new UploadQueue({ autoRemove: true }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
 
-                uploadQueue.filesChanged()
+                uploadQueue['filesChanged']()
 
                 expect(uploadQueue.queuedFiles.length).toEqual(2);
                 expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.queued);
@@ -145,14 +137,14 @@ describe('uploadQueue', () => {
                 uploadQueue = new UploadQueue({ autoStart: false }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
 
-                uploadQueue.filesChanged();
+                uploadQueue['filesChanged']();
                 expect(uploadQueue.queuedFiles).toEqual(files);
             })
 
             it('starts all queued files when there is no limit and autoStart is turned on', () => {
                 uploadQueue = new UploadQueue({ autoStart: true }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
-                uploadQueue.filesChanged()
+                uploadQueue['filesChanged']()
 
                 expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.uploading);
                 expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.uploading);
@@ -167,7 +159,7 @@ describe('uploadQueue', () => {
             it('starts only limited count of files when set limit and autoStart is turned on', () => {
                 uploadQueue = new UploadQueue({ autoStart: true, maxParallelUploads: 2 }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
-                uploadQueue.filesChanged()
+                uploadQueue['filesChanged']()
 
                 expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.queued);
                 expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.queued);
@@ -179,7 +171,7 @@ describe('uploadQueue', () => {
                 expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(uploadStatus.canceled);
 
                 uploadQueue.queuedFiles[4].uploadStatus = uploadStatus.uploaded;
-                uploadQueue.filesChanged();
+                uploadQueue['filesChanged']();
 
                 expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.uploading);
                 expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.queued);
@@ -192,7 +184,7 @@ describe('uploadQueue', () => {
 
                 uploadQueue.queuedFiles[0].uploadStatus = uploadStatus.uploaded;
                 uploadQueue.queuedFiles[3].uploadStatus = uploadStatus.uploaded;
-                uploadQueue.filesChanged();
+                uploadQueue['filesChanged']();
 
                 expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.uploaded);
                 expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.uploading);
