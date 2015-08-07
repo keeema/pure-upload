@@ -1,4 +1,4 @@
-function castFiles(fileList: File[]| Object, status:IUploadStatus): IUploadFile[] {
+function castFiles(fileList: File[]| Object, status?:IUploadStatus): IUploadFile[] {
     let files: IUploadFile[];
 
     if (typeof fileList === 'object') {
@@ -8,7 +8,7 @@ function castFiles(fileList: File[]| Object, status:IUploadStatus): IUploadFile[
     }
 
     files.forEach((file: IUploadFile) => {
-      file.uploadStatus = status
+      file.uploadStatus = status || file.uploadStatus;
       file.responseCode = file.responseCode || 0;
       file.responseText = file.responseText || '';
       file.progress = file.progress || 0;

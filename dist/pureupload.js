@@ -16,7 +16,7 @@ function castFiles(fileList, status) {
         files = fileList;
     }
     files.forEach(function (file) {
-        file.uploadStatus = status;
+        file.uploadStatus = status || file.uploadStatus;
         file.responseCode = file.responseCode || 0;
         file.responseText = file.responseText || '';
         file.progress = file.progress || 0;
@@ -282,18 +282,16 @@ var UploadArea = (function () {
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
         this.setupHiddenInput();
     }
-    UploadArea.prototype.putFilesToQueue = function (files) {
-        var file;
-        file = files[0];
-        var filesToGo;
-        filesToGo = [];
-        filesToGo.push(file);
-        var _class = this;
-        file.start = function () {
-            _class.uploadCore.upload(filesToGo);
-            file.start = function () { };
-        };
-        this.uploader.queue.addFiles(filesToGo);
+    UploadArea.prototype.putFilesToQueue = function (fileList) {
+        var _this = this;
+        var uploadFiles = castFiles(fileList);
+        uploadFiles.forEach(function (file) {
+            file.start = function () {
+                _this.uploadCore.upload([file]);
+                file.start = function () { };
+            };
+        });
+        this.uploader.queue.addFiles(uploadFiles);
     };
     UploadArea.prototype.setupHiddenInput = function () {
         var _this = this;

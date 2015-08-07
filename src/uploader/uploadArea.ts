@@ -6,20 +6,15 @@ class UploadArea implements IUploadArea {
         this.setupHiddenInput();
     }
 
-    private putFilesToQueue(files: FileList): void {
-        let file: IUploadFile;
-        file = <IUploadFile>files[0];
-
-        let filesToGo: IUploadFile[];
-        filesToGo = [];
-        filesToGo.push(file);
-
-        var _class = this;
-        file.start = () => {
-            _class.uploadCore.upload(filesToGo);
-            file.start = () => { };
-        };
-        this.uploader.queue.addFiles(filesToGo);
+    private putFilesToQueue(fileList: FileList): void {
+        var uploadFiles = castFiles(fileList);
+        uploadFiles.forEach((file: IUploadFile) => {
+          file.start = () => {
+              this.uploadCore.upload([file]);
+              file.start = () => { };
+          };
+        });
+        this.uploader.queue.addFiles(uploadFiles);
     }
 
     private setupHiddenInput(): void {
@@ -48,25 +43,25 @@ class UploadArea implements IUploadArea {
             //     console.log("dragenter");
             //     console.log(e);
             // });
-            this.targetElement.addEventListener("dragover", (e : DragEvent) => {
-              var efct;
-              try {
-                efct = e.dataTransfer.effectAllowed;
-              } catch (_error) {}
-              e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
-              this.stopEventPropagation(e);
+            this.targetElement.addEventListener("dragover", (e: DragEvent) => {
+                var efct;
+                try {
+                    efct = e.dataTransfer.effectAllowed;
+                } catch (_error) { }
+                e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
+                this.stopEventPropagation(e);
             });
 
-            this.targetElement.addEventListener("drop", (e : DragEvent) => {
-              if (!e.dataTransfer) {
-                return;
-              }
-              var files = e.dataTransfer.files;
-              if (files.length) {
-                var items = e.dataTransfer.files;
-                this.putFilesToQueue(items);
-              }
-              this.stopEventPropagation(e);
+            this.targetElement.addEventListener("drop", (e: DragEvent) => {
+                if (!e.dataTransfer) {
+                    return;
+                }
+                var files = e.dataTransfer.files;
+                if (files.length) {
+                    var items = e.dataTransfer.files;
+                    this.putFilesToQueue(items);
+                }
+                this.stopEventPropagation(e);
             });
             // this.targetElement.addEventListener("dragstart", (e) => {
             //     console.log("dragstart");
@@ -82,9 +77,9 @@ class UploadArea implements IUploadArea {
     }
 
     private stopEventPropagation(e) {
-      e.stopPropagation();
-      if (e.preventDefault) {
-        e.preventDefault();
-      }
+        e.stopPropagation();
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
     }
 }
