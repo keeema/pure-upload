@@ -1,17 +1,8 @@
 class UploadArea implements IUploadArea {
-    targetElement: Element;
-    uploadCore: IUploadCore;
-    uploadAreaOptions: IUploadAreaOptions;
-    uploader: IUploader;
+    private uploadCore: IUploadCore;
 
-    constructor(element: Element, options: IUploadAreaOptions, uploader: IUploader) {
-        this.targetElement = element;
-        this.uploadAreaOptions = options;
-        this.uploader = uploader;
-    }
-
-    init(): void {
-        this.uploadCore = getUploadCore(this.uploadAreaOptions);
+    constructor(public targetElement: Element, public options: IUploadAreaOptions, public uploader: IUploader) {
+        this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
         this.setupHiddenInput();
     }
 
@@ -35,8 +26,8 @@ class UploadArea implements IUploadArea {
         var fileInput = document.createElement("input");
         fileInput.setAttribute("type", "file");
         fileInput.style.display = "none";
-        fileInput.accept = this.uploadAreaOptions.accept;
-        if (this.uploadAreaOptions.multiple) {
+        fileInput.accept = this.options.accept;
+        if (this.options.multiple) {
             fileInput.setAttribute("multiple", "");
         }
         if (this.uploader.uploaderOptions.autoStart) {
@@ -46,12 +37,12 @@ class UploadArea implements IUploadArea {
                 this.putFilesToQueue(e.target.files);
             });
         }
-        if (this.uploadAreaOptions.clickable) {
+        if (this.options.clickable) {
             this.targetElement.addEventListener("click", (e) => {
                 fileInput.click();
             });
         }
-        if (this.uploadAreaOptions.allowDragDrop) {
+        if (this.options.allowDragDrop) {
             this.targetElement.addEventListener("dragenter", (e) => {
                 console.log("dragenter");
                 console.log(e);

@@ -1,16 +1,7 @@
-declare var getUploadCore: (options: IUploadOptions) => IUploadCore;
+declare var getUploadCore: (options: IUploadOptions, callbacks:IUploadCallbacks) => IUploadCore;
 
 interface IUploadCore {
+    options: IUploadOptions;
+    callbacks:IUploadCallbacks
     upload(fileList: File[]| Object): void
 }
-
-interface IUploadStatus {
-    queued: IUploadStatus,
-    uploading: IUploadStatus,
-    uploaded: IUploadStatus,
-    failed: IUploadStatus,
-    canceled: IUploadStatus,
-    removed: IUploadStatus;
-}
-
-declare var uploadStatus: IUploadStatus;

@@ -1,5 +1,5 @@
 window.onload = () => {
-    var uploaderExample1 = getUploader({ maxParallelUploads: 2, autoStart: true, autoRemove: true });
+    var uploaderExample1 = getUploader({ maxParallelUploads: 2, autoStart: true, autoRemove: true },{});
     uploaderExample1.registerArea(document.getElementById('example1'), {
         url: "/api/test",
         method: "POST",

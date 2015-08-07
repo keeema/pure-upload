@@ -1,4 +1,4 @@
-declare var getUploader: (options: IUploadQueueOptions) => IUploader;
+declare var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => IUploader;
 
 interface IUploader {
   uploadAreas: IUploadArea[];

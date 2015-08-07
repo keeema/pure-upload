@@ -1,19 +1,19 @@
-declare var getUploadCore: (options: IUploadOptions) => IUploadCore;
+interface IUploadCallbacks {
+    onProgressCallback?: (file: IUploadFile) => void;
+    onCancelledCallback?: (file: IUploadFile) => void;
+    onFinishedCallback?: (file: IUploadFile) => void;
+    onUploadedCallback?: (file: IUploadFile) => void;
+    onErrorCallback?: (file: IUploadFile) => void;
+    onUploadStartedCallback?: (file: IUploadFile) => void;
+}
+
+declare var getUploadCore: (options: IUploadOptions, callbacks:IUploadCallbacks) => IUploadCore;
 
 interface IUploadCore {
+    options: IUploadOptions;
+    callbacks:IUploadCallbacks
     upload(fileList: File[]| Object): void
 }
-
-interface IUploadStatus {
-    queued: IUploadStatus,
-    uploading: IUploadStatus,
-    uploaded: IUploadStatus,
-    failed: IUploadStatus,
-    canceled: IUploadStatus,
-    removed: IUploadStatus;
-}
-
-declare var uploadStatus: IUploadStatus;
 
 interface IUploadFile extends File {
     uploadStatus: IUploadStatus;
@@ -33,22 +33,23 @@ interface IUploadOptions {
     withCredentials?: boolean;
     headers?: {[key:string]:any}
     params?: {[key:string]:any}
-
-    onProgressCallback?: (file: IUploadFile) => void;
-    onCancelledCallback?: (file: IUploadFile) => void;
-    onFinishedCallback?: (file: IUploadFile) => void;
-    onUploadedCallback?: (file: IUploadFile) => void;
-    onErrorCallback?: (file: IUploadFile) => void;
-    onUploadStartedCallback?: (file: IUploadFile) => void;
 }
+
+interface IUploadStatus {
+    queued: IUploadStatus,
+    uploading: IUploadStatus,
+    uploaded: IUploadStatus,
+    failed: IUploadStatus,
+    canceled: IUploadStatus,
+    removed: IUploadStatus;
+}
+
+declare var uploadStatus: IUploadStatus;
 
 interface IUploadArea {
   targetElement: Element;
-  uploadCore: IUploadCore;
-  uploadAreaOptions: IUploadAreaOptions;
+  options: IUploadAreaOptions;
   uploader: IUploader;
-
-  init() : void;
 }
 
 interface IUploadAreaOptions extends IUploadOptions {
@@ -59,7 +60,7 @@ interface IUploadAreaOptions extends IUploadOptions {
   multiple: boolean;
 }
 
-declare var getUploader: (options: IUploadQueueOptions) => IUploader;
+declare var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => IUploader;
 
 interface IUploader {
   uploadAreas: IUploadArea[];
@@ -73,6 +74,7 @@ interface IUploader {
 
 interface IUploadQueue {
   options:IUploadQueueOptions;
+  callbacks:IUploadQueueCallbacks;
   queuedFiles: IUploadFile[];
 
   addFiles(files: IUploadFile[]);
@@ -81,13 +83,15 @@ interface IUploadQueue {
   clearFiles();
 }
 
-interface IUploadQueueOptions {
-    maxParallelUploads?: number;
-    autoStart?: boolean;
-    autoRemove?: boolean;
-
+interface IUploadQueueCallbacks extends IUploadCallbacks {
     onFileAddedCallback?: (file: IUploadFile) => void;
     onFileRemovedCallback?: (file: IUploadFile) => void;
     onAllFinishedCallback?: () => void;
     onQueueChangedCallback?: (queue: IUploadFile[]) => void;
+}
+
+interface IUploadQueueOptions {
+    maxParallelUploads?: number;
+    autoStart?: boolean;
+    autoRemove?: boolean;
 }

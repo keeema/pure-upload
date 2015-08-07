@@ -57,6 +57,7 @@ gulp.task('compileSpecsTs', ['cleanSpecs'], function() {
 
 gulp.task('bundle', ['compileTs', 'cleanDist', 'copyDecl'], function() {
   return gulp.src([
+      'build/uploadStatus.js',
       'build/uploadCore.js',
       'build/uploadQueue.js',
       'build/uploadArea.js',

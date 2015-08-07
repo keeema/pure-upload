@@ -1,21 +1,11 @@
-class UploadStatusStatic {
-    static queued: string = 'queued';
-    static uploading: string = 'uploading';
-    static uploaded: string = 'uploaded';
-    static failed: string = 'failed';
-    static canceled: string = 'canceled';
-    static removed: string = 'removed';
-}
-
-var uploadStatus: IUploadStatus = <any>UploadStatusStatic;
-
-var getUploadCore = function(options: IUploadOptions): IUploadCore {
-    return new UploaderCore(options);
+var getUploadCore = function(options: IUploadOptions, callbacks: IUploadCallbacks): IUploadCore {
+    return new UploaderCore(options, callbacks);
 }
 
 class UploaderCore implements IUploadCore {
-    constructor(private options: IUploadOptions) {
-        this.options = this.getFullOptions(options);
+    constructor(public options: IUploadOptions, public callbacks: IUploadCallbacks) {
+        this.setFullOptions(options);
+        this.setFullCallbacks(callbacks);
     }
 
     upload(fileList: File[]| Object): void {
@@ -74,8 +64,8 @@ class UploaderCore implements IUploadCore {
         file.cancel = () => {
             xhr.abort();
             file.uploadStatus = uploadStatus.canceled;
-            this.options.onCancelledCallback(file);
-            this.options.onFinishedCallback(file);
+            this.callbacks.onCancelledCallback(file);
+            this.callbacks.onFinishedCallback(file);
         }
 
         xhr.onload = (e) => this.onload(file, xhr)
@@ -85,7 +75,7 @@ class UploaderCore implements IUploadCore {
 
     private send(xhr: XMLHttpRequest, file: IUploadFile) {
         var formData = this.createFormData(file)
-        this.options.onUploadStartedCallback(file);
+        this.callbacks.onUploadStartedCallback(file);
         xhr.send(formData);
     }
 
@@ -104,8 +94,8 @@ class UploaderCore implements IUploadCore {
     private handleError(file: IUploadFile, xhr: XMLHttpRequest): void {
         file.uploadStatus = uploadStatus.failed;
         this.setResponse(file, xhr);
-        this.options.onErrorCallback(file);
-        this.options.onFinishedCallback(file);
+        this.callbacks.onErrorCallback(file);
+        this.callbacks.onFinishedCallback(file);
     }
 
     private updateProgress(file: IUploadFile, e?: ProgressEvent) {
@@ -119,7 +109,7 @@ class UploaderCore implements IUploadCore {
         }
 
         file.uploadStatus = file.progress === 100 ? uploadStatus.uploaded : uploadStatus.uploading;
-        this.options.onProgressCallback(file);
+        this.callbacks.onProgressCallback(file);
     }
 
     private onload(file: IUploadFile, xhr: XMLHttpRequest) {
@@ -138,8 +128,8 @@ class UploaderCore implements IUploadCore {
     private finished(file: IUploadFile, xhr: XMLHttpRequest) {
         file.uploadStatus = uploadStatus.uploaded;
         this.setResponse(file, xhr);
-        this.options.onUploadedCallback(file);
-        this.options.onFinishedCallback(file);
+        this.callbacks.onUploadedCallback(file);
+        this.callbacks.onFinishedCallback(file);
     };
 
     private setResponse(file: IUploadFile, xhr: XMLHttpRequest) {
@@ -147,19 +137,21 @@ class UploaderCore implements IUploadCore {
         file.responseText = (xhr.statusText || xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
     }
 
-    private getFullOptions(options: IUploadOptions) {
-        return <IUploadOptions>{
-            url: options.url,
-            method: options.method,
-            headers: options.headers || {},
-            params: options.params || {},
-            withCredentials: options.withCredentials || false,
-            onProgressCallback: options.onProgressCallback || (() => { }),
-            onCancelledCallback: options.onCancelledCallback || (() => { }),
-            onFinishedCallback: options.onFinishedCallback || (() => { }),
-            onUploadedCallback: options.onUploadedCallback || (() => { }),
-            onErrorCallback: options.onErrorCallback || (() => { }),
-            onUploadStartedCallback: options.onUploadStartedCallback || (() => { }),
-        }
+    private setFullOptions(options: IUploadOptions): void {
+
+        this.options.url = options.url,
+        this.options.method = options.method,
+        this.options.headers = options.headers || {},
+        this.options.params = options.params || {},
+        this.options.withCredentials = options.withCredentials || false
+    }
+
+    private setFullCallbacks(callbacks: IUploadCallbacks) {
+        this.callbacks.onProgressCallback = callbacks.onProgressCallback || (() => { }),
+        this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (() => { }),
+        this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (() => { }),
+        this.callbacks.onUploadedCallback = callbacks.onUploadedCallback || (() => { }),
+        this.callbacks.onErrorCallback = callbacks.onErrorCallback || (() => { }),
+        this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (() => { })
     }
 }

@@ -5,7 +5,7 @@ describe('uploadQueue', () => {
         let filesChangedSpy: jasmine.Spy;
 
         beforeEach(() => {
-            uploadQueue = new UploadQueue({});
+            uploadQueue = new UploadQueue({}, {});
             filesChangedSpy = uploadQueue.filesChanged = jasmine.createSpy('filesChanged');
         })
 
@@ -67,7 +67,7 @@ describe('uploadQueue', () => {
 
         it('triggers onFileAddedCallback and queueChangedCallback', () => {
             callback = jasmine.createSpy('onFileAddedCallback');
-            uploadQueue = new UploadQueue({ onFileAddedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
+            uploadQueue = new UploadQueue({}, { onFileAddedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
             uploadQueue.addFiles([file]);
             expect(callback).toHaveBeenCalledWith(file);
             expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
@@ -75,7 +75,7 @@ describe('uploadQueue', () => {
 
         it('triggers onFileRemovedCallback and queueChangedCallback', () => {
             callback = jasmine.createSpy('onFileRemovedCallback');
-            uploadQueue = new UploadQueue({ onFileRemovedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
+            uploadQueue = new UploadQueue({}, { onFileRemovedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
             uploadQueue.queuedFiles.push(file);
             uploadQueue.removeFile(file);
             expect(callback).toHaveBeenCalledWith(file);
@@ -85,7 +85,7 @@ describe('uploadQueue', () => {
         it('triggers onAllFinishedCallback', () => {
             let file2: IUploadFile = <IUploadFile>{};
             callback = jasmine.createSpy('onAllFinishedCallback');
-            uploadQueue = new UploadQueue({ onAllFinishedCallback: callback });
+            uploadQueue = new UploadQueue({}, { onAllFinishedCallback: callback });
             uploadQueue.addFiles([file, file2]);
             file.remove();
             expect(callback).not.toHaveBeenCalled();
@@ -105,7 +105,7 @@ describe('uploadQueue', () => {
             ];
 
             it('does note removes finished files when autoRemove is turned off', () => {
-                uploadQueue = new UploadQueue({ autoRemove: false });
+                uploadQueue = new UploadQueue({ autoRemove: false }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
 
                 uploadQueue.filesChanged()
@@ -113,7 +113,7 @@ describe('uploadQueue', () => {
             })
 
             it('removes finished files when autoRemove is turned on', () => {
-                uploadQueue = new UploadQueue({ autoRemove: true });
+                uploadQueue = new UploadQueue({ autoRemove: true }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
 
                 uploadQueue.filesChanged()
@@ -142,7 +142,7 @@ describe('uploadQueue', () => {
             })
 
             it('does not start any file when there is no limit and autoStart is turned off', () => {
-                uploadQueue = new UploadQueue({ autoStart: false });
+                uploadQueue = new UploadQueue({ autoStart: false }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
 
                 uploadQueue.filesChanged();
@@ -150,7 +150,7 @@ describe('uploadQueue', () => {
             })
 
             it('starts all queued files when there is no limit and autoStart is turned on', () => {
-                uploadQueue = new UploadQueue({ autoStart: true });
+                uploadQueue = new UploadQueue({ autoStart: true }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
                 uploadQueue.filesChanged()
 
@@ -165,7 +165,7 @@ describe('uploadQueue', () => {
             })
 
             it('starts only limited count of files when set limit and autoStart is turned on', () => {
-                uploadQueue = new UploadQueue({ autoStart: true, maxParallelUploads: 2 });
+                uploadQueue = new UploadQueue({ autoStart: true, maxParallelUploads: 2 }, {});
                 files.forEach(file=> uploadQueue.queuedFiles.push(file));
                 uploadQueue.filesChanged()
 

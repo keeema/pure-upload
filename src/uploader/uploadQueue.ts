@@ -1,8 +1,9 @@
 class UploadQueue implements IUploadQueue {
     queuedFiles: IUploadFile[] = [];
 
-    constructor(public options: IUploadQueueOptions) {
+    constructor(public options: IUploadQueueOptions, public callbacks:IUploadQueueCallbacks) {
         this.setFullOptions();
+        this.setFullCallbacks();
     }
 
     filesChanged(): void {
@@ -12,8 +13,8 @@ class UploadQueue implements IUploadQueue {
         if (this.options.autoStart)
             this.startWaitingFiles();
 
-        this.checkAllFinished();        
-        this.options.onQueueChangedCallback(this.queuedFiles);
+        this.checkAllFinished();
+        this.callbacks.onQueueChangedCallback(this.queuedFiles);
     }
 
     private checkAllFinished(): void {
@@ -22,7 +23,7 @@ class UploadQueue implements IUploadQueue {
               .indexOf(file.uploadStatus) >= 0)
 
         if(unfinishedFiles.length == 0){
-          this.options.onAllFinishedCallback();
+          this.callbacks.onAllFinishedCallback();
         }
     }
 
@@ -41,7 +42,7 @@ class UploadQueue implements IUploadQueue {
             if (!file.cancel)
                 file.cancel = () => { }
 
-            this.options.onFileAddedCallback(file);
+            this.callbacks.onFileAddedCallback(file);
         });
 
         this.filesChanged()
@@ -56,7 +57,7 @@ class UploadQueue implements IUploadQueue {
         this.deactivateFile(file);
         this.queuedFiles.splice(index, 1);
 
-        this.options.onFileRemovedCallback(file);
+        this.callbacks.onFileRemovedCallback(file);
         this.filesChanged()
     }
 
@@ -69,10 +70,14 @@ class UploadQueue implements IUploadQueue {
         this.options.maxParallelUploads = this.options.maxParallelUploads || 0;
         this.options.autoStart = this.options.autoStart || false;
         this.options.autoRemove = this.options.autoRemove || false;
-        this.options.onFileAddedCallback = this.options.onFileAddedCallback || (() => { });
-        this.options.onFileRemovedCallback = this.options.onFileRemovedCallback || (() => { });
-        this.options.onAllFinishedCallback = this.options.onAllFinishedCallback || (() => { });
-        this.options.onQueueChangedCallback = this.options.onQueueChangedCallback || (() => { });
+
+    }
+
+    private setFullCallbacks(): void {
+        this.callbacks.onFileAddedCallback = this.callbacks.onFileAddedCallback || (() => { });
+        this.callbacks.onFileRemovedCallback = this.callbacks.onFileRemovedCallback || (() => { });
+        this.callbacks.onAllFinishedCallback = this.callbacks.onAllFinishedCallback || (() => { });
+        this.callbacks.onQueueChangedCallback = this.callbacks.onQueueChangedCallback || (() => { });
     }
 
     private startWaitingFiles(): void {

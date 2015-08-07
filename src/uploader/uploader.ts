@@ -1,5 +1,5 @@
-var getUploader = function (options: IUploadQueueOptions): IUploader {
-    return new Uploader(options);
+var getUploader = function (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): IUploader {
+    return new Uploader(options, callbacks);
 }
 
 class Uploader implements IUploader {
@@ -7,10 +7,10 @@ class Uploader implements IUploader {
     queue: IUploadQueue;
     uploaderOptions: IUploadQueueOptions;
 
-    constructor(options: IUploadQueueOptions) {
+    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) {
         this.setOptions(options);
         this.uploadAreas = [];
-        this.queue = new UploadQueue(options);
+        this.queue = new UploadQueue(options,callbacks);
     }
 
     setOptions(options: IUploadQueueOptions) : void {
@@ -19,7 +19,6 @@ class Uploader implements IUploader {
 
     registerArea(element: Element, options: IUploadAreaOptions) : void {
         var uploadArea = new UploadArea(element, options, this);
-        uploadArea.init();
         this.uploadAreas.push(uploadArea);
     }
 
