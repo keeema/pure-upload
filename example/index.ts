@@ -28,37 +28,41 @@ window.onload = () => {
         createQueue('example1-queue');
     };
 
-    function createQueue(queueid:string){
-      var queue = document.getElementById(queueid);
-      var queueElement = document.createElement('div');
-      uploaderExample1.queue.queuedFiles.forEach((file: IUploadFile) => {
-          var fileItem = document.createElement("p");
-          var info = document.createElement('div');
-          info.innerHTML = file.name + " " + file.uploadStatus + " " + file.progress + "%\n";
+    function createQueue(queueid: string) {
+        var queue = document.getElementById(queueid);
+        var child: Node;
+        if (queue.childNodes)
+            child = queue.childNodes[0];
 
-          var deleteFromQueue = document.createElement("button");
-          deleteFromQueue.innerHTML = "delete";
-          deleteFromQueue.addEventListener("click", () => file.remove());
+        var queueElement = document.createElement('div');
+        uploaderExample1.queue.queuedFiles.forEach((file: IUploadFile) => {
+            var fileItem = document.createElement("p");
+            var info = document.createElement('div');
+            info.innerHTML = file.name + " " + file.uploadStatus + " " + file.progress + "%\n";
 
-          var cancelInQueue = document.createElement("button");
-          cancelInQueue.innerHTML = "cancel";
-          cancelInQueue.addEventListener("click", () => {
-            file.cancel()
-          });
+            var deleteFromQueue = document.createElement("button");
+            deleteFromQueue.innerHTML = "delete";
+            deleteFromQueue.addEventListener("mousedown", () => file.remove());
 
-          var startInQueue = document.createElement("button");
-          startInQueue.innerHTML = "start";
-          startInQueue.addEventListener("click", () => file.start());
+            var cancelInQueue = document.createElement("button");
+            cancelInQueue.innerHTML = "cancel";
+            cancelInQueue.addEventListener("mousedown", () =>  file.cancel());
 
-          fileItem.appendChild(info);
-          fileItem.appendChild(startInQueue);
-          fileItem.appendChild(cancelInQueue);
-          fileItem.appendChild(deleteFromQueue);
+            var startInQueue = document.createElement("button");
+            startInQueue.innerHTML = "start";
+            startInQueue.addEventListener("mousedown", () => file.start());
 
-          queueElement.appendChild(fileItem);
-      });
+            fileItem.appendChild(info);
+            fileItem.appendChild(startInQueue);
+            fileItem.appendChild(cancelInQueue);
+            fileItem.appendChild(deleteFromQueue);
 
-      queue.innerHTML ='';
-      queue.appendChild(queueElement);
+            queueElement.appendChild(fileItem);
+        });
+
+        queue.appendChild(queueElement)
+        if (child)
+            queue.removeChild(child);
+
     }
 }
