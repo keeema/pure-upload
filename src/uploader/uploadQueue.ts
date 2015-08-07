@@ -1,7 +1,11 @@
+// internal interface
+interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
+}
+
 class UploadQueue implements IUploadQueue {
     queuedFiles: IUploadFile[] = [];
 
-    constructor(public options: IUploadQueueOptions, public callbacks: IUploadQueueCallbacks) {
+    constructor(public options: IUploadQueueOptions, public callbacks: IUploadQueueCallbacksExt) {
         this.setFullOptions();
         this.setFullCallbacks();
     }
@@ -15,25 +19,13 @@ class UploadQueue implements IUploadQueue {
                 this.removeFile(file);
             });
 
-            file.start = decorateSimpleFunction(file.start, () => {
-                this.callbacks.onQueueChangedCallback(this.queuedFiles);
-                this.checkAllFinished();
-            });
-            
-            file.cancel = decorateSimpleFunction(file.cancel, () => {
-                this.callbacks.onQueueChangedCallback(this.queuedFiles);
-                this.checkAllFinished();
-            });
-
             this.callbacks.onFileAddedCallback(file);
         });
 
-
-        this.callbacks.onQueueChangedCallback(this.queuedFiles);
         this.filesChanged()
     }
 
-    removeFile(file: IUploadFile) {
+    removeFile(file: IUploadFile, blockRecursive: boolean = false) {
         var index = this.queuedFiles.indexOf(file);
 
         if (index < 0)
@@ -43,8 +35,9 @@ class UploadQueue implements IUploadQueue {
         this.queuedFiles.splice(index, 1);
 
         this.callbacks.onFileRemovedCallback(file);
-        this.callbacks.onQueueChangedCallback(this.queuedFiles);
-        this.filesChanged();
+
+        if (!blockRecursive)
+            this.filesChanged();
     }
 
     clearFiles() {
@@ -53,6 +46,8 @@ class UploadQueue implements IUploadQueue {
     }
 
     private filesChanged(): void {
+        this.callbacks.onQueueChangedCallback(this.queuedFiles);
+
         if (this.options.autoRemove)
             this.removeFinishedFiles();
 
@@ -84,6 +79,8 @@ class UploadQueue implements IUploadQueue {
         this.callbacks.onFileRemovedCallback = this.callbacks.onFileRemovedCallback || (() => { });
         this.callbacks.onAllFinishedCallback = this.callbacks.onAllFinishedCallback || (() => { });
         this.callbacks.onQueueChangedCallback = this.callbacks.onQueueChangedCallback || (() => { });
+
+        this.callbacks.onFileStateChangedCallback = () => this.filesChanged();
     }
 
     private startWaitingFiles(): void {
@@ -97,7 +94,7 @@ class UploadQueue implements IUploadQueue {
                 uploadStatus.failed,
                 uploadStatus.canceled
             ].indexOf(file.uploadStatus) >= 0)
-            .forEach(file => this.removeFile(file));
+            .forEach(file => this.removeFile(file, true));
     }
 
     private deactivateFile(file: IUploadFile) {

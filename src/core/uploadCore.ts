@@ -1,9 +1,14 @@
+//internal interface
+interface IUploadCallbacksExt extends IUploadCallbacks {
+    onFileStateChangedCallback?: (file: IUploadFile) => void;
+}
+
 var getUploadCore = function(options: IUploadOptions, callbacks: IUploadCallbacks): IUploadCore {
     return new UploaderCore(options, callbacks);
 }
 
 class UploaderCore implements IUploadCore {
-    constructor(public options: IUploadOptions, public callbacks: IUploadCallbacks) {
+    constructor(public options: IUploadOptions, public callbacks: IUploadCallbacksExt) {
         this.setFullOptions(options);
         this.setFullCallbacks(callbacks);
     }
@@ -45,6 +50,7 @@ class UploaderCore implements IUploadCore {
             xhr.abort();
             file.uploadStatus = uploadStatus.canceled;
             this.callbacks.onCancelledCallback(file);
+            this.callbacks.onFileStateChangedCallback(file);
             this.callbacks.onFinishedCallback(file);
         }, true);
 
@@ -56,6 +62,7 @@ class UploaderCore implements IUploadCore {
     private send(xhr: XMLHttpRequest, file: IUploadFile) {
         var formData = this.createFormData(file)
         this.callbacks.onUploadStartedCallback(file);
+        this.callbacks.onFileStateChangedCallback(file);
         xhr.send(formData);
     }
 
@@ -75,6 +82,7 @@ class UploaderCore implements IUploadCore {
         file.uploadStatus = uploadStatus.failed;
         this.setResponse(file, xhr);
         this.callbacks.onErrorCallback(file);
+        this.callbacks.onFileStateChangedCallback(file);
         this.callbacks.onFinishedCallback(file);
     }
 
@@ -109,6 +117,7 @@ class UploaderCore implements IUploadCore {
         file.uploadStatus = uploadStatus.uploaded;
         this.setResponse(file, xhr);
         this.callbacks.onUploadedCallback(file);
+        this.callbacks.onFileStateChangedCallback(file);
         this.callbacks.onFinishedCallback(file);
     };
 
@@ -126,12 +135,13 @@ class UploaderCore implements IUploadCore {
         this.options.withCredentials = options.withCredentials || false
     }
 
-    private setFullCallbacks(callbacks: IUploadCallbacks) {
+    private setFullCallbacks(callbacks: IUploadCallbacksExt) {
         this.callbacks.onProgressCallback = callbacks.onProgressCallback || (() => { }),
         this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (() => { }),
         this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (() => { }),
         this.callbacks.onUploadedCallback = callbacks.onUploadedCallback || (() => { }),
         this.callbacks.onErrorCallback = callbacks.onErrorCallback || (() => { }),
         this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (() => { })
+        this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (() => { })
     }
 }

@@ -54,7 +54,7 @@ describe('uploadQueue', () => {
             callback = jasmine.createSpy('onFileAddedCallback');
             uploadQueue = new UploadQueue({}, { onFileAddedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
 
-          uploadQueue.addFiles([file]);
+            uploadQueue.addFiles([file]);
             expect(callback).toHaveBeenCalledWith(file);
             expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
             expect(queueChangedCallbackSpy.calls.count()).toEqual(1);

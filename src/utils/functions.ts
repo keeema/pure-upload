@@ -1,8 +1,8 @@
-function decorateSimpleFunction(origFn: () => void, newFn: () => void, reverseOrder: boolean = false): () => void {
+function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst: boolean = false): () => void {
     if (!origFn)
         return newFn;
 
-    return reverseOrder
-        ? () => { origFn(); newFn(); }
-        : () => { newFn(); origFn(); }
+    return newFirst
+        ? () => { newFn(); origFn(); }
+        : () => { origFn(); newFn(); }
 }
