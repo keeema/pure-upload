@@ -296,25 +296,39 @@ var UploadArea = (function () {
             });
         }
         if (this.uploadAreaOptions.allowDragDrop) {
-            this.targetElement.addEventListener("dragenter", function (e) {
-                console.log("dragenter");
-                console.log(e);
+            // this.targetElement.addEventListener("dragenter", (e) => {
+            //     console.log("dragenter");
+            //     console.log(e);
+            // });
+            this.targetElement.addEventListener("dragover", function (e) {
+                var efct;
+                try {
+                    efct = e.dataTransfer.effectAllowed;
+                }
+                catch (_error) { }
+                e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
+                _this.stopEventPropagation(e);
             });
             this.targetElement.addEventListener("drop", function (e) {
-                console.log(e);
-                console.log("dragdrop");
-            });
-            this.targetElement.addEventListener("dragstart", function (e) {
-                console.log("dragstart");
-                console.log(e);
-            });
-            this.targetElement.addEventListener("dragend", function (e) {
-                console.log("dragend");
-                console.log(e);
+                if (!e.dataTransfer) {
+                    return;
+                }
+                var files = e.dataTransfer.files;
+                if (files.length) {
+                    var items = e.dataTransfer.files;
+                    _this.putFilesToQueue(items);
+                }
+                _this.stopEventPropagation(e);
             });
         }
         // attach to body
         document.body.appendChild(fileInput);
+    };
+    UploadArea.prototype.stopEventPropagation = function (e) {
+        e.stopPropagation();
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
     };
     return UploadArea;
 })();

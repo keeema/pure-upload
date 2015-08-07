@@ -1,25 +1,32 @@
 window.onload = () => {
-    var uploaderExample1 = getUploader({ maxParallelUploads: 2, autoStart: true, autoRemove: true });
-    uploaderExample1.registerArea(document.getElementById('example1'), {
+    var uploaderExample1 = getUploader({ maxParallelUploads: 2, autoStart: true, autoRemove: false });
+    uploaderExample1.registerArea(document.getElementById('example1-dnd-area'), {
         url: "/api/test",
         method: "POST",
         maxFileSize: 2000,
         allowDragDrop: true,
         clickable: true,
-        accept: "pdf",
+        accept: "*",
         multiple: true,
     });
-    /*document.getElementsByName('ok')[0].addEventListener('click', event  => {
-        var fileInput = <any>document.getElementsByName('file')[0];
-        var progressElement = document.getElementById('progress');
-        var options = {
-            url: '/api/test',
-            method: 'POST',
-            onProgressCallback: (file: IUploadFile) => progressElement.innerText = file.progress + '%',
-            onErrorCallback: (file: IUploadFile) => alert(file.responseText + ' (' + file.responseCode + ')')
-        }
-        var uploader = getUploadCore(options);
-        uploader.upload(fileInput.files);
-        event.preventDefault();
-    });*/
+
+    var area2 = uploaderExample1.registerArea(document.getElementById('example1-button'), {
+        url: "/api/test",
+        method: "POST",
+        maxFileSize: 5000,
+        allowDragDrop: true,
+        clickable: true,
+        accept: "*",
+        multiple: true,
+    });
+
+    uploaderExample1.uploaderOptions.onQueueChangedCallback = (result: IUploadFile[]) => {
+      var queue = document.getElementById('example1-queue');
+      queue.innerHTML = "";
+      result.forEach( (file: IUploadFile) => {
+        var fileItem = document.createElement("p");
+        fileItem.innerHTML = file.name + " " + file.uploadStatus + " " + file.progress + "%\n";
+        queue.appendChild(fileItem);
+      });
+    };
 }

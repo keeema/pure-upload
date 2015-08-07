@@ -12,7 +12,7 @@ class UploadQueue implements IUploadQueue {
         if (this.options.autoStart)
             this.startWaitingFiles();
 
-        this.checkAllFinished();        
+        this.checkAllFinished();
         this.options.onQueueChangedCallback(this.queuedFiles);
     }
 
