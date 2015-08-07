@@ -25,6 +25,7 @@ class Uploader implements IUploader {
     unregisterArea(area: IUploadArea) : void {
         var areaIndex = this.uploadAreas.indexOf(area)
         if (areaIndex >= 0) {
+          this.uploadAreas[areaIndex].destroy();
           this.uploadAreas.splice(areaIndex, 1);
         }
     }
