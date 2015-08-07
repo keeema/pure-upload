@@ -42,25 +42,49 @@ class UploadArea implements IUploadArea {
                 fileInput.click();
             });
         }
+
         if (this.options.allowDragDrop) {
-            this.targetElement.addEventListener("dragenter", (e) => {
-                console.log("dragenter");
-                console.log(e);
+            // this.targetElement.addEventListener("dragenter", (e) => {
+            //     console.log("dragenter");
+            //     console.log(e);
+            // });
+            this.targetElement.addEventListener("dragover", (e : DragEvent) => {
+              var efct;
+              try {
+                efct = e.dataTransfer.effectAllowed;
+              } catch (_error) {}
+              e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
+              this.stopEventPropagation(e);
             });
-            this.targetElement.addEventListener("drop", (e) => {
-                console.log(e);
-                console.log("dragdrop");
+
+            this.targetElement.addEventListener("drop", (e : DragEvent) => {
+              if (!e.dataTransfer) {
+                return;
+              }
+              var files = e.dataTransfer.files;
+              if (files.length) {
+                var items = e.dataTransfer.files;
+                this.putFilesToQueue(items);
+              }
+              this.stopEventPropagation(e);
             });
-            this.targetElement.addEventListener("dragstart", (e) => {
-                console.log("dragstart");
-                console.log(e);
-            });
-            this.targetElement.addEventListener("dragend", (e) => {
-                console.log("dragend");
-                console.log(e);
-            });
+            // this.targetElement.addEventListener("dragstart", (e) => {
+            //     console.log("dragstart");
+            //     console.log(e);
+            // });
+            // this.targetElement.addEventListener("dragend", (e) => {
+            //     console.log("dragend");
+            //     console.log(e);
+            // });
         }
         // attach to body
         document.body.appendChild(fileInput);
+    }
+
+    private stopEventPropagation(e) {
+      e.stopPropagation();
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
     }
 }
