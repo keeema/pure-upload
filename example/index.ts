@@ -1,5 +1,5 @@
 window.onload = () => {
-    var uploaderExample1 = getUploader({ maxParallelUploads: 2, autoStart: true, autoRemove: false }, {});
+    var uploaderExample1 = getUploader({ maxParallelUploads: 2, autoStart: false, autoRemove: false }, {});
     uploaderExample1.registerArea(document.getElementById('example1-dnd-area'), {
         url: "/api/test",
         method: "POST",
@@ -21,64 +21,44 @@ window.onload = () => {
     });
 
     uploaderExample1.queue.callbacks.onQueueChangedCallback = (result: IUploadFile[]) => {
-        var queue = document.getElementById('example1-queue');
-        queue.innerHTML = "";
-        result.forEach((file: IUploadFile) => {
-            console.log(file);
-
-            var fileItem = document.createElement("p");
-            fileItem.innerHTML = file.name + " " + file.uploadStatus + " " + file.progress + "%\n";
-
-            var deleteFromQueue = document.createElement("a");
-            deleteFromQueue.setAttribute("href", "#");
-            deleteFromQueue.innerHTML = "delete";
-            deleteFromQueue.addEventListener("click", () => file.remove());
-
-            var cancelInQueue = document.createElement("a");
-            cancelInQueue.setAttribute("href", "#");
-            cancelInQueue.innerHTML = "cancel";
-            cancelInQueue.addEventListener("click", () => file.cancel());
-
-            var startInQueue = document.createElement("a");
-            startInQueue.setAttribute("href", "#");
-            startInQueue.innerHTML = "start";
-            startInQueue.addEventListener("click", () => file.start());
-
-            fileItem.appendChild(startInQueue); fileItem.innerHTML += " ";
-            fileItem.appendChild(cancelInQueue); fileItem.innerHTML += " ";
-            fileItem.appendChild(deleteFromQueue);
-
-            queue.appendChild(fileItem);
-        });
+        createQueue('example1-queue');
     };
 
     uploaderExample1.queue.callbacks.onProgressCallback = (file: IUploadFile) => {
-        var queue = document.getElementById('example1-queue');
-        queue.innerHTML = "";
-        uploaderExample1.queue.queuedFiles.forEach((file: IUploadFile) => {
-            var fileItem = document.createElement("p");
-            fileItem.innerHTML = file.name + " " + file.uploadStatus + " " + file.progress + "%\n";
-
-            var deleteFromQueue = document.createElement("a");
-            deleteFromQueue.setAttribute("href", "#");
-            deleteFromQueue.innerHTML = "delete";
-            deleteFromQueue.addEventListener("click", () => file.remove());
-
-            var cancelInQueue = document.createElement("a");
-            cancelInQueue.setAttribute("href", "#");
-            cancelInQueue.innerHTML = "cancel";
-            cancelInQueue.addEventListener("click", () => file.cancel());
-
-            var startInQueue = document.createElement("a");
-            startInQueue.setAttribute("href", "#");
-            startInQueue.innerHTML = "start";
-            startInQueue.addEventListener("click", () => file.start());
-
-            fileItem.appendChild(startInQueue); fileItem.innerHTML += " ";
-            fileItem.appendChild(cancelInQueue); fileItem.innerHTML += " ";
-            fileItem.appendChild(deleteFromQueue);
-
-            queue.appendChild(fileItem);
-        });
+        createQueue('example1-queue');
     };
+
+    function createQueue(queueid:string){
+      var queue = document.getElementById(queueid);
+      var queueElement = document.createElement('div');
+      uploaderExample1.queue.queuedFiles.forEach((file: IUploadFile) => {
+          var fileItem = document.createElement("p");
+          var info = document.createElement('div');
+          info.innerHTML = file.name + " " + file.uploadStatus + " " + file.progress + "%\n";
+
+          var deleteFromQueue = document.createElement("button");
+          deleteFromQueue.innerHTML = "delete";
+          deleteFromQueue.addEventListener("click", () => file.remove());
+
+          var cancelInQueue = document.createElement("button");
+          cancelInQueue.innerHTML = "cancel";
+          cancelInQueue.addEventListener("click", () => {
+            file.cancel()
+          });
+
+          var startInQueue = document.createElement("button");
+          startInQueue.innerHTML = "start";
+          startInQueue.addEventListener("click", () => file.start());
+
+          fileItem.appendChild(info);
+          fileItem.appendChild(startInQueue);
+          fileItem.appendChild(cancelInQueue);
+          fileItem.appendChild(deleteFromQueue);
+
+          queueElement.appendChild(fileItem);
+      });
+
+      queue.innerHTML ='';
+      queue.appendChild(queueElement);
+    }
 }
