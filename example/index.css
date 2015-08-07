@@ -1,5 +1,8 @@
 #example1-dnd-area {
   width: 320px;
   height: 150px;
-  border: 1px solid gray;
+}
+
+.dnd-area {
+  border: 3px solid black;
 }

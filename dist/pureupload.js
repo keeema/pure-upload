@@ -295,15 +295,15 @@ var UploadArea = (function () {
     };
     UploadArea.prototype.setupHiddenInput = function () {
         var _this = this;
-        var fileInput = document.createElement("input");
-        fileInput.setAttribute("type", "file");
-        fileInput.style.display = "none";
-        fileInput.accept = this.options.accept;
+        this.fileInput = document.createElement("input");
+        this.fileInput.setAttribute("type", "file");
+        this.fileInput.style.display = "none";
+        this.fileInput.accept = this.options.accept;
         if (this.options.multiple) {
-            fileInput.setAttribute("multiple", "");
+            this.fileInput.setAttribute("multiple", "");
         }
         if (this.uploader.uploaderOptions.autoStart) {
-            fileInput.addEventListener("change", function (e) {
+            this.fileInput.addEventListener("change", function (e) {
                 console.log("changed");
                 console.log(e);
                 _this.putFilesToQueue(e.target.files);
@@ -311,14 +311,10 @@ var UploadArea = (function () {
         }
         if (this.options.clickable) {
             this.targetElement.addEventListener("click", function (e) {
-                fileInput.click();
+                _this.fileInput.click();
             });
         }
         if (this.options.allowDragDrop) {
-            // this.targetElement.addEventListener("dragenter", (e) => {
-            //     console.log("dragenter");
-            //     console.log(e);
-            // });
             this.targetElement.addEventListener("dragover", function (e) {
                 var efct;
                 try {
@@ -341,13 +337,16 @@ var UploadArea = (function () {
             });
         }
         // attach to body
-        document.body.appendChild(fileInput);
+        document.body.appendChild(this.fileInput);
     };
     UploadArea.prototype.stopEventPropagation = function (e) {
         e.stopPropagation();
         if (e.preventDefault) {
             e.preventDefault();
         }
+    };
+    UploadArea.prototype.destroy = function () {
+        document.body.removeChild(this.fileInput);
     };
     return UploadArea;
 })();
@@ -371,6 +370,7 @@ var Uploader = (function () {
     Uploader.prototype.unregisterArea = function (area) {
         var areaIndex = this.uploadAreas.indexOf(area);
         if (areaIndex >= 0) {
+            this.uploadAreas[areaIndex].destroy();
             this.uploadAreas.splice(areaIndex, 1);
         }
     };

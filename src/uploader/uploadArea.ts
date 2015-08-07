@@ -1,5 +1,6 @@
 class UploadArea implements IUploadArea {
     private uploadCore: IUploadCore;
+    private fileInput: HTMLInputElement;
 
     constructor(public targetElement: Element, public options: IUploadAreaOptions, public uploader: IUploader) {
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
@@ -18,15 +19,15 @@ class UploadArea implements IUploadArea {
     }
 
     private setupHiddenInput(): void {
-        var fileInput = document.createElement("input");
-        fileInput.setAttribute("type", "file");
-        fileInput.style.display = "none";
-        fileInput.accept = this.options.accept;
+        this.fileInput = document.createElement("input");
+        this.fileInput.setAttribute("type", "file");
+        this.fileInput.style.display = "none";
+        this.fileInput.accept = this.options.accept;
         if (this.options.multiple) {
-            fileInput.setAttribute("multiple", "");
+            this.fileInput.setAttribute("multiple", "");
         }
         if (this.uploader.uploaderOptions.autoStart) {
-            fileInput.addEventListener("change", (e: any) => {
+            this.fileInput.addEventListener("change", (e: any) => {
                 console.log("changed");
                 console.log(e);
                 this.putFilesToQueue(e.target.files);
@@ -34,15 +35,11 @@ class UploadArea implements IUploadArea {
         }
         if (this.options.clickable) {
             this.targetElement.addEventListener("click", (e) => {
-                fileInput.click();
+                this.fileInput.click();
             });
         }
 
         if (this.options.allowDragDrop) {
-            // this.targetElement.addEventListener("dragenter", (e) => {
-            //     console.log("dragenter");
-            //     console.log(e);
-            // });
             this.targetElement.addEventListener("dragover", (e: DragEvent) => {
                 var efct;
                 try {
@@ -63,6 +60,10 @@ class UploadArea implements IUploadArea {
                 }
                 this.stopEventPropagation(e);
             });
+            // this.targetElement.addEventListener("dragenter", (e) => {
+            //     console.log("dragenter");
+            //     console.log(e);
+            // });
             // this.targetElement.addEventListener("dragstart", (e) => {
             //     console.log("dragstart");
             //     console.log(e);
@@ -73,7 +74,7 @@ class UploadArea implements IUploadArea {
             // });
         }
         // attach to body
-        document.body.appendChild(fileInput);
+        document.body.appendChild(this.fileInput);
     }
 
     private stopEventPropagation(e) {
@@ -81,5 +82,9 @@ class UploadArea implements IUploadArea {
         if (e.preventDefault) {
             e.preventDefault();
         }
+    }
+
+    destroy() : void {
+        document.body.removeChild(this.fileInput);
     }
 }

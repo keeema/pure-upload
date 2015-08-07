@@ -19,7 +19,7 @@ class UploadQueue implements IUploadQueue {
                 this.callbacks.onQueueChangedCallback(this.queuedFiles);
                 this.checkAllFinished();
             });
-            
+
             file.cancel = decorateSimpleFunction(file.cancel, () => {
                 this.callbacks.onQueueChangedCallback(this.queuedFiles);
                 this.checkAllFinished();
