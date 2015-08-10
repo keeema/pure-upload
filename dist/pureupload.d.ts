@@ -1,3 +1,19 @@
+interface IUploadArea {
+  targetElement: Element;
+  options: IUploadAreaOptions;
+  uploader: IUploader;
+
+  destroy() : void;
+}
+
+interface IUploadAreaOptions extends IUploadOptions {
+  maxFileSize: number;
+  allowDragDrop: boolean;
+  clickable: boolean;
+  accept: string;
+  multiple: boolean;
+}
+
 interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;
     onCancelledCallback?: (file: IUploadFile) => void;
@@ -46,34 +62,6 @@ interface IUploadStatus {
 
 declare var uploadStatus: IUploadStatus;
 
-interface IUploadArea {
-  targetElement: Element;
-  options: IUploadAreaOptions;
-  uploader: IUploader;
-
-  destroy() : void;
-}
-
-interface IUploadAreaOptions extends IUploadOptions {
-  maxFileSize: number;
-  allowDragDrop: boolean;
-  clickable: boolean;
-  accept: string;
-  multiple: boolean;
-}
-
-declare var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => IUploader;
-
-interface IUploader {
-  uploadAreas: IUploadArea[];
-  queue: IUploadQueue;
-  uploaderOptions: IUploadQueueOptions;
-
-  registerArea(element: Element, options: IUploadAreaOptions) : void;
-  unregisterArea(area: IUploadArea) : void;
-  setOptions(options: IUploadQueueOptions) : void;
-}
-
 interface IUploadQueue {
   options:IUploadQueueOptions;
   callbacks:IUploadQueueCallbacks;
@@ -95,4 +83,16 @@ interface IUploadQueueOptions {
     maxParallelUploads?: number;
     autoStart?: boolean;
     autoRemove?: boolean;
+}
+
+declare var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => IUploader;
+
+interface IUploader {
+  uploadAreas: IUploadArea[];
+  queue: IUploadQueue;
+  uploaderOptions: IUploadQueueOptions;
+
+  registerArea(element: Element, options: IUploadAreaOptions) : void;
+  unregisterArea(area: IUploadArea) : void;
+  setOptions(options: IUploadQueueOptions) : void;
 }
