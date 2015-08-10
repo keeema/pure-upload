@@ -54,7 +54,7 @@ class UploadCore {
         var formData = this.createFormData(file)
         this.callbacks.onUploadStartedCallback(file);
         this.callbacks.onFileStateChangedCallback(file);
-        xhr.send(formData);
+        xhr.send(<any>formData);
     }
 
     private createFormData(file: IUploadFile): FormData {

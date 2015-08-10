@@ -5,6 +5,7 @@
 /build
 /specs
 
+!/package/*.*
 !/dist/*.*
 !/gulpfile.js
 !/karma.conf.js

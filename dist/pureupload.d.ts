@@ -19,41 +19,6 @@ declare class UploadArea {
     destroy(): void;
 }
 
-interface IUploadQueueCallbacks extends IUploadCallbacks {
-    onFileAddedCallback?: (file: IUploadFile) => void;
-    onFileRemovedCallback?: (file: IUploadFile) => void;
-    onAllFinishedCallback?: () => void;
-    onQueueChangedCallback?: (queue: IUploadFile[]) => void;
-}
-
-interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
-}
-
-interface IUploadQueueOptions {
-    maxParallelUploads?: number;
-    autoStart?: boolean;
-    autoRemove?: boolean;
-}
-
-declare class UploadQueue {
-    options: IUploadQueueOptions;
-    callbacks: IUploadQueueCallbacksExt;
-    queuedFiles: IUploadFile[];
-    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacksExt);
-    addFiles(files: IUploadFile[]): void;
-    removeFile(file: IUploadFile, blockRecursive?: boolean): void;
-    clearFiles(): void;
-    private filesChanged();
-    private checkAllFinished();
-    private setFullOptions();
-    private setFullCallbacks();
-    private startWaitingFiles();
-    private removeFinishedFiles();
-    private deactivateFile(file);
-    private getWaitingFiles();
-}
-
-
 declare var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
 
 interface IUploadCallbacks {
@@ -131,6 +96,41 @@ declare class UploadStatusStatic {
     static canceled: string;
     static removed: string;
 }
+
+interface IUploadQueueCallbacks extends IUploadCallbacks {
+    onFileAddedCallback?: (file: IUploadFile) => void;
+    onFileRemovedCallback?: (file: IUploadFile) => void;
+    onAllFinishedCallback?: () => void;
+    onQueueChangedCallback?: (queue: IUploadFile[]) => void;
+}
+
+interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
+}
+
+interface IUploadQueueOptions {
+    maxParallelUploads?: number;
+    autoStart?: boolean;
+    autoRemove?: boolean;
+}
+
+declare class UploadQueue {
+    options: IUploadQueueOptions;
+    callbacks: IUploadQueueCallbacksExt;
+    queuedFiles: IUploadFile[];
+    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacksExt);
+    addFiles(files: IUploadFile[]): void;
+    removeFile(file: IUploadFile, blockRecursive?: boolean): void;
+    clearFiles(): void;
+    private filesChanged();
+    private checkAllFinished();
+    private setFullOptions();
+    private setFullCallbacks();
+    private startWaitingFiles();
+    private removeFinishedFiles();
+    private deactivateFile(file);
+    private getWaitingFiles();
+}
+
 
 declare var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
 
