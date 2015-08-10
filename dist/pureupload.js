@@ -1,12 +1,3 @@
-function decorateSimpleFunction(origFn, newFn, newFirst) {
-    if (newFirst === void 0) { newFirst = false; }
-    if (!origFn)
-        return newFn;
-    return newFirst
-        ? function () { newFn(); origFn(); }
-        : function () { origFn(); newFn(); };
-}
-
 function castFiles(fileList, status) {
     var files;
     if (typeof fileList === 'object') {
@@ -25,21 +16,96 @@ function castFiles(fileList, status) {
     });
     return files;
 }
-
-var UploadStatusStatic = (function () {
-    function UploadStatusStatic() {
+function decorateSimpleFunction(origFn, newFn, newFirst) {
+    if (newFirst === void 0) { newFirst = false; }
+    if (!origFn)
+        return newFn;
+    return newFirst
+        ? function () { newFn(); origFn(); }
+        : function () { origFn(); newFn(); };
+}
+var getUploadCore = function (options, callbacks) {
+    return new UploadCore(options, callbacks);
+};
+var getUploader = function (options, callbacks) {
+    return new Uploader(options, callbacks);
+};
+var UploadArea = (function () {
+    function UploadArea(targetElement, options, uploader) {
+        this.targetElement = targetElement;
+        this.options = options;
+        this.uploader = uploader;
+        this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
+        this.setupHiddenInput();
     }
-    UploadStatusStatic.queued = 'queued';
-    UploadStatusStatic.uploading = 'uploading';
-    UploadStatusStatic.uploaded = 'uploaded';
-    UploadStatusStatic.failed = 'failed';
-    UploadStatusStatic.canceled = 'canceled';
-    UploadStatusStatic.removed = 'removed';
-    return UploadStatusStatic;
+    UploadArea.prototype.putFilesToQueue = function (fileList) {
+        var _this = this;
+        var uploadFiles = castFiles(fileList);
+        uploadFiles.forEach(function (file) {
+            file.start = function () {
+                _this.uploadCore.upload([file]);
+                file.start = function () { };
+            };
+        });
+        this.uploader.queue.addFiles(uploadFiles);
+    };
+    UploadArea.prototype.setupHiddenInput = function () {
+        var _this = this;
+        this.fileInput = document.createElement("input");
+        this.fileInput.setAttribute("type", "file");
+        this.fileInput.style.display = "none";
+        this.fileInput.accept = this.options.accept;
+        if (this.options.multiple) {
+            this.fileInput.setAttribute("multiple", "");
+        }
+        if (this.uploader.uploaderOptions.autoStart) {
+            this.fileInput.addEventListener("change", function (e) {
+                console.log("changed");
+                console.log(e);
+                _this.putFilesToQueue(e.target.files);
+            });
+        }
+        if (this.options.clickable) {
+            this.targetElement.addEventListener("click", function (e) {
+                _this.fileInput.click();
+            });
+        }
+        if (this.options.allowDragDrop) {
+            this.targetElement.addEventListener("dragover", function (e) {
+                var efct;
+                try {
+                    efct = e.dataTransfer.effectAllowed;
+                }
+                catch (_error) { }
+                e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
+                _this.stopEventPropagation(e);
+            });
+            this.targetElement.addEventListener("drop", function (e) {
+                if (!e.dataTransfer) {
+                    return;
+                }
+                var files = e.dataTransfer.files;
+                if (files.length) {
+                    var items = e.dataTransfer.files;
+                    _this.putFilesToQueue(items);
+                }
+                _this.stopEventPropagation(e);
+            });
+        }
+        // attach to body
+        document.body.appendChild(this.fileInput);
+    };
+    UploadArea.prototype.stopEventPropagation = function (e) {
+        e.stopPropagation();
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+    };
+    UploadArea.prototype.destroy = function () {
+        document.body.removeChild(this.fileInput);
+    };
+    return UploadArea;
 })();
-
-var uploadStatus = UploadStatusStatic;
-
 var UploadCore = (function () {
     function UploadCore(options, callbacks) {
         this.options = options;
@@ -165,11 +231,28 @@ var UploadCore = (function () {
     };
     return UploadCore;
 })();
-
-var getUploadCore = function (options, callbacks) {
-    return new UploadCore(options, callbacks);
-};
-
+var Uploader = (function () {
+    function Uploader(options, callbacks) {
+        this.setOptions(options);
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options, callbacks);
+    }
+    Uploader.prototype.setOptions = function (options) {
+        this.uploaderOptions = options;
+    };
+    Uploader.prototype.registerArea = function (element, options) {
+        var uploadArea = new UploadArea(element, options, this);
+        this.uploadAreas.push(uploadArea);
+    };
+    Uploader.prototype.unregisterArea = function (area) {
+        var areaIndex = this.uploadAreas.indexOf(area);
+        if (areaIndex >= 0) {
+            this.uploadAreas[areaIndex].destroy();
+            this.uploadAreas.splice(areaIndex, 1);
+        }
+    };
+    return Uploader;
+})();
 var UploadQueue = (function () {
     function UploadQueue(options, callbacks) {
         this.options = options;
@@ -275,107 +358,15 @@ var UploadQueue = (function () {
     };
     return UploadQueue;
 })();
-
-var UploadArea = (function () {
-    function UploadArea(targetElement, options, uploader) {
-        this.targetElement = targetElement;
-        this.options = options;
-        this.uploader = uploader;
-        this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
-        this.setupHiddenInput();
+var UploadStatusStatic = (function () {
+    function UploadStatusStatic() {
     }
-    UploadArea.prototype.putFilesToQueue = function (fileList) {
-        var _this = this;
-        var uploadFiles = castFiles(fileList);
-        uploadFiles.forEach(function (file) {
-            file.start = function () {
-                _this.uploadCore.upload([file]);
-                file.start = function () { };
-            };
-        });
-        this.uploader.queue.addFiles(uploadFiles);
-    };
-    UploadArea.prototype.setupHiddenInput = function () {
-        var _this = this;
-        this.fileInput = document.createElement("input");
-        this.fileInput.setAttribute("type", "file");
-        this.fileInput.style.display = "none";
-        this.fileInput.accept = this.options.accept;
-        if (this.options.multiple) {
-            this.fileInput.setAttribute("multiple", "");
-        }
-        if (this.uploader.uploaderOptions.autoStart) {
-            this.fileInput.addEventListener("change", function (e) {
-                console.log("changed");
-                console.log(e);
-                _this.putFilesToQueue(e.target.files);
-            });
-        }
-        if (this.options.clickable) {
-            this.targetElement.addEventListener("click", function (e) {
-                _this.fileInput.click();
-            });
-        }
-        if (this.options.allowDragDrop) {
-            this.targetElement.addEventListener("dragover", function (e) {
-                var efct;
-                try {
-                    efct = e.dataTransfer.effectAllowed;
-                }
-                catch (_error) { }
-                e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
-                _this.stopEventPropagation(e);
-            });
-            this.targetElement.addEventListener("drop", function (e) {
-                if (!e.dataTransfer) {
-                    return;
-                }
-                var files = e.dataTransfer.files;
-                if (files.length) {
-                    var items = e.dataTransfer.files;
-                    _this.putFilesToQueue(items);
-                }
-                _this.stopEventPropagation(e);
-            });
-        }
-        // attach to body
-        document.body.appendChild(this.fileInput);
-    };
-    UploadArea.prototype.stopEventPropagation = function (e) {
-        e.stopPropagation();
-        if (e.preventDefault) {
-            e.preventDefault();
-        }
-    };
-    UploadArea.prototype.destroy = function () {
-        document.body.removeChild(this.fileInput);
-    };
-    return UploadArea;
+    UploadStatusStatic.queued = 'queued';
+    UploadStatusStatic.uploading = 'uploading';
+    UploadStatusStatic.uploaded = 'uploaded';
+    UploadStatusStatic.failed = 'failed';
+    UploadStatusStatic.canceled = 'canceled';
+    UploadStatusStatic.removed = 'removed';
+    return UploadStatusStatic;
 })();
-
-var Uploader = (function () {
-    function Uploader(options, callbacks) {
-        this.setOptions(options);
-        this.uploadAreas = [];
-        this.queue = new UploadQueue(options, callbacks);
-    }
-    Uploader.prototype.setOptions = function (options) {
-        this.uploaderOptions = options;
-    };
-    Uploader.prototype.registerArea = function (element, options) {
-        var uploadArea = new UploadArea(element, options, this);
-        this.uploadAreas.push(uploadArea);
-    };
-    Uploader.prototype.unregisterArea = function (area) {
-        var areaIndex = this.uploadAreas.indexOf(area);
-        if (areaIndex >= 0) {
-            this.uploadAreas[areaIndex].destroy();
-            this.uploadAreas.splice(areaIndex, 1);
-        }
-    };
-    return Uploader;
-})();
-
-var getUploader = function (options, callbacks) {
-    return new Uploader(options, callbacks);
-};
+var uploadStatus = UploadStatusStatic;

@@ -16,8 +16,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      './dist/pureupload.js',
-      './build/*.spec.js'
+      './specs/pureupload.js',
+      './specs/*.spec.js'
     ],
 
 

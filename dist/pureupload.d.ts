@@ -1,3 +1,7 @@
+declare function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+declare function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+declare var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
+declare var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
 interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize: number;
     allowDragDrop: boolean;
@@ -5,7 +9,59 @@ interface IUploadAreaOptions extends IUploadOptions {
     accept: string;
     multiple: boolean;
 }
-
+interface IUploadCallbacks {
+    onProgressCallback?: (file: IUploadFile) => void;
+    onCancelledCallback?: (file: IUploadFile) => void;
+    onFinishedCallback?: (file: IUploadFile) => void;
+    onUploadedCallback?: (file: IUploadFile) => void;
+    onErrorCallback?: (file: IUploadFile) => void;
+    onUploadStartedCallback?: (file: IUploadFile) => void;
+}
+interface IUploadCallbacksExt extends IUploadCallbacks {
+    onFileStateChangedCallback?: (file: IUploadFile) => void;
+}
+interface IUploadFile extends File {
+    uploadStatus: IUploadStatus;
+    responseCode: number;
+    responseText: string;
+    progress: number;
+    sentBytes: number;
+    cancel: () => void;
+    remove: () => void;
+    start: () => void;
+}
+interface IUploadOptions {
+    url: string;
+    method: string;
+    withCredentials?: boolean;
+    headers?: {
+        [key: string]: any;
+    };
+    params?: {
+        [key: string]: any;
+    };
+}
+interface IUploadQueueCallbacks extends IUploadCallbacks {
+    onFileAddedCallback?: (file: IUploadFile) => void;
+    onFileRemovedCallback?: (file: IUploadFile) => void;
+    onAllFinishedCallback?: () => void;
+    onQueueChangedCallback?: (queue: IUploadFile[]) => void;
+}
+interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
+}
+interface IUploadQueueOptions {
+    maxParallelUploads?: number;
+    autoStart?: boolean;
+    autoRemove?: boolean;
+}
+interface IUploadStatus {
+    queued: IUploadStatus;
+    uploading: IUploadStatus;
+    uploaded: IUploadStatus;
+    failed: IUploadStatus;
+    canceled: IUploadStatus;
+    removed: IUploadStatus;
+}
 declare class UploadArea {
     targetElement: Element;
     options: IUploadAreaOptions;
@@ -18,54 +74,6 @@ declare class UploadArea {
     private stopEventPropagation(e);
     destroy(): void;
 }
-
-declare var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
-
-interface IUploadCallbacks {
-    onProgressCallback?: (file: IUploadFile) => void;
-    onCancelledCallback?: (file: IUploadFile) => void;
-    onFinishedCallback?: (file: IUploadFile) => void;
-    onUploadedCallback?: (file: IUploadFile) => void;
-    onErrorCallback?: (file: IUploadFile) => void;
-    onUploadStartedCallback?: (file: IUploadFile) => void;
-}
-
-interface IUploadCallbacksExt extends IUploadCallbacks {
-    onFileStateChangedCallback?: (file: IUploadFile) => void;
-}
-
-interface IUploadFile extends File {
-    uploadStatus: IUploadStatus;
-    responseCode: number;
-    responseText: string;
-    progress: number;
-    sentBytes: number;
-    cancel: () => void;
-    remove: () => void;
-    start: () => void;
-}
-
-interface IUploadOptions {
-    url: string;
-    method: string;
-    withCredentials?: boolean;
-    headers?: {
-        [key: string]: any;
-    };
-    params?: {
-        [key: string]: any;
-    };
-}
-
-interface IUploadStatus {
-    queued: IUploadStatus;
-    uploading: IUploadStatus;
-    uploaded: IUploadStatus;
-    failed: IUploadStatus;
-    canceled: IUploadStatus;
-    removed: IUploadStatus;
-}
-
 declare class UploadCore {
     options: IUploadOptions;
     callbacks: IUploadCallbacksExt;
@@ -85,34 +93,15 @@ declare class UploadCore {
     private setFullOptions(options);
     private setFullCallbacks(callbacks);
 }
-
-declare class UploadStatusStatic {
-    static queued: string;
-    static uploading: string;
-    static uploaded: string;
-    static failed: string;
-    static canceled: string;
-    static removed: string;
+declare class Uploader {
+    uploadAreas: UploadArea[];
+    queue: UploadQueue;
+    uploaderOptions: IUploadQueueOptions;
+    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks);
+    setOptions(options: IUploadQueueOptions): void;
+    registerArea(element: Element, options: IUploadAreaOptions): void;
+    unregisterArea(area: UploadArea): void;
 }
-
-declare var uploadStatus: IUploadStatus;
-
-interface IUploadQueueCallbacks extends IUploadCallbacks {
-    onFileAddedCallback?: (file: IUploadFile) => void;
-    onFileRemovedCallback?: (file: IUploadFile) => void;
-    onAllFinishedCallback?: () => void;
-    onQueueChangedCallback?: (queue: IUploadFile[]) => void;
-}
-
-interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
-}
-
-interface IUploadQueueOptions {
-    maxParallelUploads?: number;
-    autoStart?: boolean;
-    autoRemove?: boolean;
-}
-
 declare class UploadQueue {
     options: IUploadQueueOptions;
     callbacks: IUploadQueueCallbacksExt;
@@ -130,20 +119,12 @@ declare class UploadQueue {
     private deactivateFile(file);
     private getWaitingFiles();
 }
-
-
-declare var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
-
-declare class Uploader {
-    uploadAreas: UploadArea[];
-    queue: UploadQueue;
-    uploaderOptions: IUploadQueueOptions;
-    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks);
-    setOptions(options: IUploadQueueOptions): void;
-    registerArea(element: Element, options: IUploadAreaOptions): void;
-    unregisterArea(area: UploadArea): void;
+declare class UploadStatusStatic {
+    static queued: string;
+    static uploading: string;
+    static uploaded: string;
+    static failed: string;
+    static canceled: string;
+    static removed: string;
 }
-
-declare function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
-
-declare function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+declare var uploadStatus: IUploadStatus;

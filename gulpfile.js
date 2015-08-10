@@ -17,12 +17,15 @@ var dist = './dist/'
 var build = './build/'
 var specs = './specs/'
 var pkg = './package/'
+var bundle = './bundle'
 
-var tsProject = ts.createProject('./src/tsconfig.json');
-var tsPkgProject = ts.createProject('./package/tsconfig.json');
+var tsProject = ts.createProject({
+  module: 'commonjs',
+  declarationFiles: true
+});
 
-gulp.task('cleanPkg', function() {
-  return gulp.src(['package/*.*', '!package/tsconfig.json'], {
+gulp.task('cleanBuild', function() {
+  return gulp.src(build, {
       force: true
     })
     .pipe(clean());
@@ -35,13 +38,52 @@ gulp.task('cleanDist', function() {
     .pipe(clean());
 });
 
-gulp.task('cleanBuild', function() {
-  return gulp.src(build, {
+gulp.task('copyTsToBuild', ['cleanBuild'], function() {
+  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts', '!./src/**/*.spec.ts'])
+    .pipe(flatten())
+    .pipe(gulp.dest(build));
+});
+
+gulp.task('bundleTs', ['copyTsToBuild'], function() {
+  return gulp.src(['./build/*.ts', '!./build/*.spec.ts'])
+    .pipe(concat('pureupload.ts'))
+    .pipe(gulp.dest(build));
+});
+
+gulp.task('removeCompileSources',['bundleTs'], function() {
+  return gulp.src(['./build/*.ts','!./build/pureupload.ts', '!./build/*.spec.ts'], {
       force: true
     })
     .pipe(clean());
 });
 
+gulp.task('compileTs', ['removeCompileSources', 'cleanDist'], function() {
+  var tsResult = gulp.src([
+    './build/*.ts',
+    './decl/jasmine/**/*.d.ts'
+    ])
+    .pipe(ts(tsProject));
+
+  return merge([
+    tsResult.dts.pipe(gulpFilter(['*.*', '!*.spec.d.ts'])).pipe(gulp.dest(dist)),
+    tsResult.js.pipe(gulpFilter(['*.spec.js'])).pipe(gulp.dest(specs)),
+    tsResult.js.pipe(gulpFilter(['*.*', '!*.spec.js'])).pipe(gulp.dest(dist))
+
+  ]);
+});
+
+gulp.task('uglify', ['compileTs'], function() {
+  return gulp.src('./dist/pureupload.js')
+    .pipe(rename({
+      suffix: '.min'
+    }))
+    .pipe(uglify())
+    .pipe(gulp.dest(dist));
+});
+
+gulp.task('default', ['uglify'], function() {});
+
+///////////////////////////////
 gulp.task('cleanSpecs', function() {
   return gulp.src(specs, {
       force: true
@@ -49,59 +91,72 @@ gulp.task('cleanSpecs', function() {
     .pipe(clean());
 });
 
-gulp.task('compileTs', ['cleanBuild'], function() {
-  var tsResult = tsProject.src()
-    .pipe(ts({
-      module: 'commonjs'
-    }));
-  return tsResult.js
+gulp.task('copyTsToSpecs', ['cleanSpecs'], function() {
+  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts'])
     .pipe(flatten())
-    .pipe(gulpFilter(['*', '!*.spec.js']))
-    .pipe(gulp.dest(build));
-});
-
-gulp.task('compileSpecsTs', ['cleanSpecs'], function() {
-  var tsResult = tsProject.src()
-    .pipe(ts({
-      module: 'commonjs'
-    }));
-  return tsResult.js
-    .pipe(flatten())
-    .pipe(gulpFilter(['*.spec.js']))
     .pipe(gulp.dest(specs));
 });
 
-gulp.task('bundle', ['compileTs', 'cleanDist', 'copyDecl'], function() {
-  return gulp.src([
-      'build/functions.js',
-      'build/files.js',
-      'build/uploadStatusStatic.js',
-      'build/uploadStatusStaticDef.js',
-      'build/uploadCore.js',
-      'build/getUploadCore.js',
-      'build/uploadQueue.js',
-      'build/uploadArea.js',
-      'build/uploader.js',
-      'build/getUploader.js'
+gulp.task('bundleTsSpec', ['copyTsToSpecs'], function() {
+  return gulp.src(['./specs/*.ts', '!./specs/*.spec.ts'])
+    .pipe(concat('pureupload.ts'))
+    .pipe(gulp.dest(specs));
+});
+
+gulp.task('removeCompileSourcesSpecs', ['bundleTsSpec'], function() {
+  return gulp.src(['./specs/*.ts','!./specs/pureupload.ts', '!./specs/*.spec.ts'], {
+      force: true
+    })
+    .pipe(clean());
+});
+
+gulp.task('compileSpecsTs', ['removeCompileSourcesSpecs'], function() {
+  var tsResult = gulp.src([
+    './specs/*.ts',
+    './decl/jasmine/**/*.d.ts'
     ])
-    .pipe(concat('pureupload.js'))
-    .pipe(gulp.dest(dist));
+    .pipe(ts(tsProject));
+
+  return merge([
+    tsResult.dts.pipe(gulp.dest(specs)),
+    tsResult.js.pipe(gulp.dest(specs))
+  ]);
 });
 
-gulp.task('copyDecl', function() {
-  return gulp.src('./src/**/*.d.ts')
-    .pipe(flatten())
-    .pipe(concat('pureupload.d.ts'))
-    .pipe(gulp.dest(dist));
+gulp.task('removeSpecsTs', ['compileSpecsTs'], function() {
+  return gulp.src(['./specs/*.ts'], {
+      force: true
+    })
+    .pipe(clean());
 });
 
-gulp.task('copyTsToPkgDecl', ['cleanPkg'], function() {
+gulp.task('test', ['removeSpecsTs'], function() {
+  // Be sure to return the stream
+  return gulp.src([
+      './specs/pureupload.js',
+      './specs/*.spec.js'
+    ])
+    .pipe(karma({
+      configFile: './karma.conf.js',
+      action: 'run'
+    }));
+});
+
+///////////////////////////////
+gulp.task('cleanPkg', function() {
+  return gulp.src(pkg, {
+      force: true
+    })
+    .pipe(clean());
+});
+
+gulp.task('copyTsToPkg', ['cleanPkg'], function() {
   return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts', '!./src/**/*.spec.ts'])
     .pipe(flatten())
     .pipe(gulp.dest(pkg));
 });
 
-gulp.task('addExports', ['copyTsToPkgDecl'], function() {
+gulp.task('addExports', ['copyTsToPkg'], function() {
   return gulp.src('package/*.ts')
     .pipe(foreach(function(stream, file) {
       return stream
@@ -123,11 +178,9 @@ gulp.task('removeBundledParts', ['bundlePackgageParts'], function() {
 });
 
 gulp.task('compilePkgTs', ['removeBundledParts'], function() {
-  var tsResult = tsPkgProject.src()
-    .pipe(ts({
-      module: 'commonjs',
-      declarationFiles: true
-    }));
+  var tsResult = gulp.src('./package/*.ts')
+      .pipe(ts(tsProject));
+
   return merge([
     tsResult.dts.pipe(gulp.dest(pkg)),
     tsResult.js.pipe(gulp.dest(pkg))
@@ -136,33 +189,10 @@ gulp.task('compilePkgTs', ['removeBundledParts'], function() {
 
 gulp.task('package', ['compilePkgTs'], function() {});
 
-gulp.task('uglify', ['test'], function() {
-  return gulp.src('./dist/pureupload.js')
-    .pipe(rename({
-      suffix: '.min'
-    }))
-    .pipe(uglify())
-    .pipe(gulp.dest(dist));
-});
-
-gulp.task('test', ['bundle', 'compileSpecsTs'], function() {
-  // Be sure to return the stream
-  return gulp.src([
-      './dist/pureupload.js',
-      './specs/*.spec.js'
-    ])
-    .pipe(karma({
-      configFile: './karma.conf.js',
-      action: 'run'
-    }));
-});
-
-gulp.task('default', ['uglify'], function() {});
-
 gulp.task('dw', function() {
-  gulp.start('default');
+  gulp.start('test');
   watch('./src/**/*.ts', function() {
     console.log('Build started', (new Date(Date.now())).toString());
-    return gulp.start('default');
+    return gulp.start('test');
   });
 });
