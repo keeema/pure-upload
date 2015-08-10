@@ -1,5 +1,5 @@
 window.onload = () => {
-    var uploaderExample1 = getUploader({ maxParallelUploads: 2, autoStart: false, autoRemove: false }, {});
+    var uploaderExample1 = pu.getUploader({ maxParallelUploads: 2, autoStart: false, autoRemove: false }, {});
     uploaderExample1.registerArea(document.getElementById('example1-dnd-area'), {
         url: "/api/test",
         method: "POST",
@@ -20,11 +20,11 @@ window.onload = () => {
         multiple: true,
     });
 
-    uploaderExample1.queue.callbacks.onQueueChangedCallback = (result: IUploadFile[]) => {
+    uploaderExample1.queue.callbacks.onQueueChangedCallback = (result: pu.IUploadFile[]) => {
         createQueue('example1-queue');
     };
 
-    uploaderExample1.queue.callbacks.onProgressCallback = (file: IUploadFile) => {
+    uploaderExample1.queue.callbacks.onProgressCallback = (file: pu.IUploadFile) => {
         createQueue('example1-queue');
     };
 
@@ -35,7 +35,7 @@ window.onload = () => {
             child = queue.childNodes[0];
 
         var queueElement = document.createElement('div');
-        uploaderExample1.queue.queuedFiles.forEach((file: IUploadFile) => {
+        uploaderExample1.queue.queuedFiles.forEach((file: pu.IUploadFile) => {
             var fileItem = document.createElement("p");
             var info = document.createElement('div');
             info.innerHTML = file.name + " " + file.uploadStatus + " " + file.progress + "%\n";

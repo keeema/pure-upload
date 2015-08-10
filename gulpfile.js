@@ -44,7 +44,16 @@ gulp.task('copyTsToBuild', ['cleanBuild'], function() {
     .pipe(gulp.dest(build));
 });
 
-gulp.task('bundleTs', ['copyTsToBuild'], function() {
+gulp.task('addExports', ['copyTsToBuild'], function() {
+  return gulp.src('build/*.ts')
+    .pipe(foreach(function(stream, file) {
+      return stream
+        .pipe(insert.prepend('export '))
+    }))
+    .pipe(gulp.dest(build));
+});
+
+gulp.task('bundleTs', ['addExports'], function() {
   return gulp.src(['./build/*.ts', '!./build/*.spec.ts'])
     .pipe(concat('pureupload.ts'))
     .pipe(gulp.dest(build));
@@ -57,18 +66,22 @@ gulp.task('removeCompileSources',['bundleTs'], function() {
     .pipe(clean());
 });
 
-gulp.task('compileTs', ['removeCompileSources', 'cleanDist'], function() {
-  var tsResult = gulp.src([
-    './build/*.ts',
-    './decl/jasmine/**/*.d.ts'
-    ])
+gulp.task('addModule', ['removeCompileSources'], function() {
+  return gulp.src('build/pureupload.ts')
+    .pipe(foreach(function(stream, file) {
+      return stream
+        .pipe(insert.prepend('module pu {'))
+        .pipe(insert.append('}'))
+    }))
+    .pipe(gulp.dest(build));
+});
+gulp.task('compileTs', ['addModule', 'cleanDist'], function() {
+  var tsResult = gulp.src(['./build/*.ts'])
     .pipe(ts(tsProject));
 
   return merge([
-    tsResult.dts.pipe(gulpFilter(['*.*', '!*.spec.d.ts'])).pipe(gulp.dest(dist)),
-    tsResult.js.pipe(gulpFilter(['*.spec.js'])).pipe(gulp.dest(specs)),
-    tsResult.js.pipe(gulpFilter(['*.*', '!*.spec.js'])).pipe(gulp.dest(dist))
-
+    tsResult.dts.pipe(gulp.dest(dist)),
+    tsResult.js.pipe(gulp.dest(dist))
   ]);
 });
 
@@ -156,7 +169,7 @@ gulp.task('copyTsToPkg', ['cleanPkg'], function() {
     .pipe(gulp.dest(pkg));
 });
 
-gulp.task('addExports', ['copyTsToPkg'], function() {
+gulp.task('addExportsPkg', ['copyTsToPkg'], function() {
   return gulp.src('package/*.ts')
     .pipe(foreach(function(stream, file) {
       return stream
@@ -165,7 +178,7 @@ gulp.task('addExports', ['copyTsToPkg'], function() {
     .pipe(gulp.dest(pkg));
 });
 
-gulp.task('bundlePackgageParts', ['addExports'], function() {
+gulp.task('bundlePackgageParts', ['addExportsPkg'], function() {
   return gulp.src('package/*.ts')
     .pipe(concat('index.ts'))
     .pipe(gulp.dest(pkg));
