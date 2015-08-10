@@ -1,16 +1,17 @@
-var gulp =      require('gulp'),
-  concat =      require('gulp-concat');
-  clean =       require('gulp-clean');
-  uglify =      require('gulp-uglify');
-  rename =      require('gulp-rename');
-  ts =          require('gulp-typescript');
-  copy =        require('gulp-copy');
-  flatten =     require('gulp-flatten');
-  watch =       require('gulp-watch');
-  karma =       require('gulp-karma');
-  gulpFilter =  require('gulp-filter');
-  foreach =     require('gulp-foreach');
-  insert =      require('gulp-insert');
+var gulp     = require('gulp'),
+  concat     = require('gulp-concat');
+  clean      = require('gulp-clean');
+  uglify     = require('gulp-uglify');
+  rename     = require('gulp-rename');
+  ts         = require('gulp-typescript');
+  copy       = require('gulp-copy');
+  flatten    = require('gulp-flatten');
+  watch      = require('gulp-watch');
+  karma      = require('gulp-karma');
+  gulpFilter = require('gulp-filter');
+  foreach    = require('gulp-foreach');
+  insert     = require('gulp-insert');
+  merge      = require('merge2');
 
 var dist = './dist/'
 var build = './build/'
@@ -50,16 +51,20 @@ gulp.task('cleanSpecs', function() {
 
 gulp.task('compileTs', ['cleanBuild'], function() {
   var tsResult = tsProject.src()
-    .pipe(ts({ module: 'commonjs' }));
+    .pipe(ts({
+      module: 'commonjs'
+    }));
   return tsResult.js
     .pipe(flatten())
-    .pipe(gulpFilter(['*','!*.spec.js']))
+    .pipe(gulpFilter(['*', '!*.spec.js']))
     .pipe(gulp.dest(build));
 });
 
 gulp.task('compileSpecsTs', ['cleanSpecs'], function() {
   var tsResult = tsProject.src()
-    .pipe(ts({ module: 'commonjs' }));
+    .pipe(ts({
+      module: 'commonjs'
+    }));
   return tsResult.js
     .pipe(flatten())
     .pipe(gulpFilter(['*.spec.js']))
@@ -71,7 +76,7 @@ gulp.task('bundle', ['compileTs', 'cleanDist', 'copyDecl'], function() {
       'build/functions.js',
       'build/files.js',
       'build/uploadStatusStatic.js',
-      'build/uploadStatus.js',
+      'build/uploadStatusStaticDef.js',
       'build/uploadCore.js',
       'build/getUploadCore.js',
       'build/uploadQueue.js',
@@ -96,9 +101,9 @@ gulp.task('copyTsToPkgDecl', ['cleanPkg'], function() {
     .pipe(gulp.dest(pkg));
 });
 
-gulp.task('addExports',['copyTsToPkgDecl'], function () {
+gulp.task('addExports', ['copyTsToPkgDecl'], function() {
   return gulp.src('package/*.ts')
-    .pipe(foreach(function(stream, file){
+    .pipe(foreach(function(stream, file) {
       return stream
         .pipe(insert.prepend('export '))
     }))
@@ -111,7 +116,7 @@ gulp.task('bundlePackgageParts', ['addExports'], function() {
     .pipe(gulp.dest(pkg));
 });
 gulp.task('removeBundledParts', ['bundlePackgageParts'], function() {
-  return gulp.src(['package/*.ts','!package/index.ts'], {
+  return gulp.src(['package/*.ts', '!package/index.ts'], {
       force: true
     })
     .pipe(clean());
@@ -119,9 +124,14 @@ gulp.task('removeBundledParts', ['bundlePackgageParts'], function() {
 
 gulp.task('compilePkgTs', ['removeBundledParts'], function() {
   var tsResult = tsPkgProject.src()
-    .pipe(ts({ module: 'commonjs' }));
-  return tsResult.js
-    .pipe(gulp.dest(pkg));
+    .pipe(ts({
+      module: 'commonjs',
+      declarationFiles: true
+    }));
+  return merge([
+    tsResult.dts.pipe(gulp.dest(pkg)),
+    tsResult.js.pipe(gulp.dest(pkg))
+  ]);
 });
 
 gulp.task('package', ['compilePkgTs'], function() {});
@@ -135,7 +145,7 @@ gulp.task('uglify', ['test'], function() {
     .pipe(gulp.dest(dist));
 });
 
-gulp.task('test', ['bundle','compileSpecsTs'], function() {
+gulp.task('test', ['bundle', 'compileSpecsTs'], function() {
   // Be sure to return the stream
   return gulp.src([
       './dist/pureupload.js',

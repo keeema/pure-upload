@@ -86,8 +86,6 @@ declare class UploadCore {
     private setFullCallbacks(callbacks);
 }
 
-declare var uploadStatus: IUploadStatus;
-
 declare class UploadStatusStatic {
     static queued: string;
     static uploading: string;
@@ -96,6 +94,8 @@ declare class UploadStatusStatic {
     static canceled: string;
     static removed: string;
 }
+
+declare var uploadStatus: IUploadStatus;
 
 interface IUploadQueueCallbacks extends IUploadCallbacks {
     onFileAddedCallback?: (file: IUploadFile) => void;

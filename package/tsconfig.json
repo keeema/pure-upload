@@ -6,7 +6,8 @@
         "module": "commonjs"
     },
     "filesGlob": [
-        "./**/*.ts"
+        "./**/*.ts",
+        "!./**/*.d.ts"
     ],
     "files": [
         "./index.ts"

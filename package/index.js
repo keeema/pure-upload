@@ -364,7 +364,6 @@ var UploadQueue = (function () {
     return UploadQueue;
 })();
 exports.UploadQueue = UploadQueue;
-exports.uploadStatus = UploadStatusStatic;
 var UploadStatusStatic = (function () {
     function UploadStatusStatic() {
     }
@@ -377,3 +376,4 @@ var UploadStatusStatic = (function () {
     return UploadStatusStatic;
 })();
 exports.UploadStatusStatic = UploadStatusStatic;
+exports.uploadStatus = UploadStatusStatic;

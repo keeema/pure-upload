@@ -491,8 +491,6 @@ export class UploadQueue {
     }
 }
 
-export var uploadStatus: IUploadStatus = <any>UploadStatusStatic;
-
 export class UploadStatusStatic {
     static queued: string = 'queued';
     static uploading: string = 'uploading';
@@ -501,3 +499,5 @@ export class UploadStatusStatic {
     static canceled: string = 'canceled';
     static removed: string = 'removed';
 }
+
+export var uploadStatus: IUploadStatus = <any>UploadStatusStatic;
