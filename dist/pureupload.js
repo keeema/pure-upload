@@ -37,36 +37,34 @@ var UploadStatusStatic = (function () {
     UploadStatusStatic.removed = 'removed';
     return UploadStatusStatic;
 })();
+
 var uploadStatus = UploadStatusStatic;
 
-var getUploadCore = function (options, callbacks) {
-    return new UploaderCore(options, callbacks);
-};
-var UploaderCore = (function () {
-    function UploaderCore(options, callbacks) {
+var UploadCore = (function () {
+    function UploadCore(options, callbacks) {
         this.options = options;
         this.callbacks = callbacks;
         this.setFullOptions(options);
         this.setFullCallbacks(callbacks);
     }
-    UploaderCore.prototype.upload = function (fileList) {
+    UploadCore.prototype.upload = function (fileList) {
         var _this = this;
         var files = castFiles(fileList, uploadStatus.uploading);
         files.forEach(function (file) { return _this.processFile(file); });
     };
-    UploaderCore.prototype.processFile = function (file) {
+    UploadCore.prototype.processFile = function (file) {
         var xhr = this.createRequest();
         this.setCallbacks(xhr, file);
         this.send(xhr, file);
     };
-    UploaderCore.prototype.createRequest = function () {
+    UploadCore.prototype.createRequest = function () {
         var xhr = new XMLHttpRequest();
         xhr.open(this.options.method, this.options.url, true);
         xhr.withCredentials = !!this.options.withCredentials;
         this.setHeaders(xhr);
         return xhr;
     };
-    UploaderCore.prototype.setHeaders = function (xhr) {
+    UploadCore.prototype.setHeaders = function (xhr) {
         var _this = this;
         this.options.headers['Accept'] = this.options.headers['Accept'] || 'application/json';
         this.options.headers['Cache-Control'] = this.options.headers['Cache-Control'] || 'no-cache';
@@ -77,7 +75,7 @@ var UploaderCore = (function () {
                 xhr.setRequestHeader(headerName, headerValue);
         });
     };
-    UploaderCore.prototype.setCallbacks = function (xhr, file) {
+    UploadCore.prototype.setCallbacks = function (xhr, file) {
         var _this = this;
         var originalCancelFn = file.cancel;
         file.cancel = decorateSimpleFunction(file.cancel, function () {
@@ -91,13 +89,13 @@ var UploaderCore = (function () {
         xhr.onerror = function () { return _this.handleError(file, xhr); };
         xhr.upload.onprogress = function (e) { return _this.updateProgress(file, e); };
     };
-    UploaderCore.prototype.send = function (xhr, file) {
+    UploadCore.prototype.send = function (xhr, file) {
         var formData = this.createFormData(file);
         this.callbacks.onUploadStartedCallback(file);
         this.callbacks.onFileStateChangedCallback(file);
         xhr.send(formData);
     };
-    UploaderCore.prototype.createFormData = function (file) {
+    UploadCore.prototype.createFormData = function (file) {
         var _this = this;
         var formData = new FormData();
         Object.keys(this.options.params).forEach(function (paramName) {
@@ -108,14 +106,14 @@ var UploaderCore = (function () {
         formData.append('file', file, file.name);
         return formData;
     };
-    UploaderCore.prototype.handleError = function (file, xhr) {
+    UploadCore.prototype.handleError = function (file, xhr) {
         file.uploadStatus = uploadStatus.failed;
         this.setResponse(file, xhr);
         this.callbacks.onErrorCallback(file);
         this.callbacks.onFileStateChangedCallback(file);
         this.callbacks.onFinishedCallback(file);
     };
-    UploaderCore.prototype.updateProgress = function (file, e) {
+    UploadCore.prototype.updateProgress = function (file, e) {
         if (e != null) {
             file.progress = Math.round(100 * (e.loaded / e.total));
             file.sentBytes = e.loaded;
@@ -127,7 +125,7 @@ var UploaderCore = (function () {
         file.uploadStatus = file.progress === 100 ? uploadStatus.uploaded : uploadStatus.uploading;
         this.callbacks.onProgressCallback(file);
     };
-    UploaderCore.prototype.onload = function (file, xhr) {
+    UploadCore.prototype.onload = function (file, xhr) {
         if (xhr.readyState !== 4)
             return;
         if (file.progress != 100)
@@ -137,7 +135,7 @@ var UploaderCore = (function () {
         else
             this.handleError(file, xhr);
     };
-    UploaderCore.prototype.finished = function (file, xhr) {
+    UploadCore.prototype.finished = function (file, xhr) {
         file.uploadStatus = uploadStatus.uploaded;
         this.setResponse(file, xhr);
         this.callbacks.onUploadedCallback(file);
@@ -145,18 +143,18 @@ var UploaderCore = (function () {
         this.callbacks.onFinishedCallback(file);
     };
     ;
-    UploaderCore.prototype.setResponse = function (file, xhr) {
+    UploadCore.prototype.setResponse = function (file, xhr) {
         file.responseCode = xhr.status;
         file.responseText = (xhr.statusText || xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
     };
-    UploaderCore.prototype.setFullOptions = function (options) {
+    UploadCore.prototype.setFullOptions = function (options) {
         this.options.url = options.url,
             this.options.method = options.method,
             this.options.headers = options.headers || {},
             this.options.params = options.params || {},
             this.options.withCredentials = options.withCredentials || false;
     };
-    UploaderCore.prototype.setFullCallbacks = function (callbacks) {
+    UploadCore.prototype.setFullCallbacks = function (callbacks) {
         this.callbacks.onProgressCallback = callbacks.onProgressCallback || (function () { }),
             this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (function () { }),
             this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (function () { }),
@@ -165,8 +163,12 @@ var UploaderCore = (function () {
             this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (function () { });
         this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (function () { });
     };
-    return UploaderCore;
+    return UploadCore;
 })();
+
+var getUploadCore = function (options, callbacks) {
+    return new UploadCore(options, callbacks);
+};
 
 var UploadQueue = (function () {
     function UploadQueue(options, callbacks) {
@@ -351,9 +353,6 @@ var UploadArea = (function () {
     return UploadArea;
 })();
 
-var getUploader = function (options, callbacks) {
-    return new Uploader(options, callbacks);
-};
 var Uploader = (function () {
     function Uploader(options, callbacks) {
         this.setOptions(options);
@@ -376,3 +375,7 @@ var Uploader = (function () {
     };
     return Uploader;
 })();
+
+var getUploader = function (options, callbacks) {
+    return new Uploader(options, callbacks);
+};

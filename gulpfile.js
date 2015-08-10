@@ -59,11 +59,14 @@ gulp.task('bundle', ['compileTs', 'cleanDist', 'copyDecl'], function() {
   return gulp.src([
       'build/functions.js',
       'build/files.js',
+      'build/uploadStatusStatic.js',
       'build/uploadStatus.js',
       'build/uploadCore.js',
+      'build/getUploadCore.js',
       'build/uploadQueue.js',
       'build/uploadArea.js',
-      'build/uploader.js'
+      'build/uploader.js',
+      'build/getUploader.js'
     ])
     .pipe(concat('pureupload.js'))
     .pipe(gulp.dest(dist));

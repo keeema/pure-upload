@@ -1,8 +1,4 @@
-// internal interface
-interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
-}
-
-class UploadQueue implements IUploadQueue {
+class UploadQueue {
     queuedFiles: IUploadFile[] = [];
 
     constructor(public options: IUploadQueueOptions, public callbacks: IUploadQueueCallbacksExt) {

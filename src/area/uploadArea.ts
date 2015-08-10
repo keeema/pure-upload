@@ -1,8 +1,8 @@
-class UploadArea implements IUploadArea {
-    private uploadCore: IUploadCore;
+class UploadArea {
+    private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
 
-    constructor(public targetElement: Element, public options: IUploadAreaOptions, public uploader: IUploader) {
+    constructor(public targetElement: Element, public options: IUploadAreaOptions, public uploader: Uploader) {
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
         this.setupHiddenInput();
     }

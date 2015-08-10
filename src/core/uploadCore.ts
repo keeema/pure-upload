@@ -1,13 +1,4 @@
-//internal interface
-interface IUploadCallbacksExt extends IUploadCallbacks {
-    onFileStateChangedCallback?: (file: IUploadFile) => void;
-}
-
-var getUploadCore = function(options: IUploadOptions, callbacks: IUploadCallbacks): IUploadCore {
-    return new UploaderCore(options, callbacks);
-}
-
-class UploaderCore implements IUploadCore {
+class UploadCore {
     constructor(public options: IUploadOptions, public callbacks: IUploadCallbacksExt) {
         this.setFullOptions(options);
         this.setFullCallbacks(callbacks);

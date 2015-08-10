@@ -1,10 +1,6 @@
-var getUploader = function (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): IUploader {
-    return new Uploader(options, callbacks);
-}
-
-class Uploader implements IUploader {
-    uploadAreas: IUploadArea[];
-    queue: IUploadQueue;
+class Uploader {
+    uploadAreas: UploadArea[];
+    queue: UploadQueue;
     uploaderOptions: IUploadQueueOptions;
 
     constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) {
@@ -22,7 +18,7 @@ class Uploader implements IUploader {
         this.uploadAreas.push(uploadArea);
     }
 
-    unregisterArea(area: IUploadArea) : void {
+    unregisterArea(area: UploadArea) : void {
         var areaIndex = this.uploadAreas.indexOf(area)
         if (areaIndex >= 0) {
           this.uploadAreas[areaIndex].destroy();
