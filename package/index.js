@@ -32,6 +32,17 @@ exports.getUploadCore = function (options, callbacks) {
 exports.getUploader = function (options, callbacks) {
     return new Uploader(options, callbacks);
 };
+function newGuid() {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = (d + Math.random() * 16) % 16 | 0;
+        d = Math.floor(d / 16);
+        return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+    return uuid;
+}
+exports.newGuid = newGuid;
+;
 var UploadArea = (function () {
     function UploadArea(targetElement, options, uploader) {
         this.targetElement = targetElement;
@@ -57,15 +68,11 @@ var UploadArea = (function () {
         this.fileInput.setAttribute("type", "file");
         this.fileInput.style.display = "none";
         this.fileInput.accept = this.options.accept;
+        this.fileInput.addEventListener("change", function (e) {
+            _this.putFilesToQueue(e.target.files);
+        });
         if (this.options.multiple) {
             this.fileInput.setAttribute("multiple", "");
-        }
-        if (this.uploader.uploaderOptions.autoStart) {
-            this.fileInput.addEventListener("change", function (e) {
-                console.log("changed");
-                console.log(e);
-                _this.putFilesToQueue(e.target.files);
-            });
         }
         if (this.options.clickable) {
             this.targetElement.addEventListener("click", function (e) {
@@ -270,6 +277,7 @@ var UploadQueue = (function () {
         var _this = this;
         files.forEach(function (file) {
             _this.queuedFiles.push(file);
+            file.guid = newGuid();
             file.uploadStatus = exports.uploadStatus.queued;
             file.remove = decorateSimpleFunction(file.remove, function () {
                 _this.removeFile(file);
