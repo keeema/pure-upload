@@ -52,6 +52,7 @@
     "karma-phantomjs-launcher": "^0.2.1",
     "merge2": "^0.3.6",
     "multer": "~0.1.6",
-    "phantomjs": "^1.9.17"
+    "phantomjs": "^1.9.17",
+    "run-sequence": "^1.1.2"
   }
 }

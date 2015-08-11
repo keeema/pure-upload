@@ -1,18 +1,19 @@
-var gulp     = require('gulp'),
-  concat     = require('gulp-concat');
-  clean      = require('gulp-clean');
-  uglify     = require('gulp-uglify');
-  rename     = require('gulp-rename');
-  ts         = require('gulp-typescript');
-  copy       = require('gulp-copy');
-  flatten    = require('gulp-flatten');
-  watch      = require('gulp-watch');
-  karma      = require('gulp-karma');
-  gulpFilter = require('gulp-filter');
-  foreach    = require('gulp-foreach');
-  insert     = require('gulp-insert');
-  merge      = require('merge2');
+var gulp      = require('gulp'),
+  concat      = require('gulp-concat');
+  clean       = require('gulp-clean');
+  uglify      = require('gulp-uglify');
+  rename      = require('gulp-rename');
+  ts          = require('gulp-typescript');
+  copy        = require('gulp-copy');
+  flatten     = require('gulp-flatten');
+  watch       = require('gulp-watch');
+  karma       = require('gulp-karma');
+  gulpFilter  = require('gulp-filter');
+  foreach     = require('gulp-foreach');
+  insert      = require('gulp-insert');
+  merge       = require('merge2');
   replace     = require('gulp-replace');
+  runSequence = require('run-sequence');
 
 var dist = './dist/'
 var build = './build/'
@@ -204,7 +205,7 @@ gulp.task('compilePkgTs', ['removeBundledParts'], function() {
 gulp.task('createPkgModuleDefinition', ['compilePkgTs'], function(){
   return gulp.src(['./package/index.d.ts'])
     .pipe(replace('declare ', ''))
-    .pipe(insert.prepend('declare module "pureupload" {\n'))
+    .pipe(insert.prepend('declare module "pure-upload" {\n'))
     .pipe(insert.append('}'))
     .pipe(gulp.dest(pkg));
 });
@@ -225,10 +226,13 @@ gulp.task('removeOriginalDefinition', ['renamePkgDefinition'], function() {
 
 gulp.task('package', ['removeOriginalDefinition'], function() {});
 
+/////////////////////////////
+
 gulp.task('dw', function() {
+  runSequence('default','test')
   gulp.start('test');
   watch('./src/**/*.ts', function() {
     console.log('Build started', (new Date(Date.now())).toString());
-    return gulp.start('test');
+    return runSequence('default','test');
   });
 });

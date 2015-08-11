@@ -1,4 +1,4 @@
-declare module "pureupload" {
+declare module "pure-upload" {
 export function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
 export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
 export var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
