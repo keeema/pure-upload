@@ -12,6 +12,7 @@ var gulp     = require('gulp'),
   foreach    = require('gulp-foreach');
   insert     = require('gulp-insert');
   merge      = require('merge2');
+  replace     = require('gulp-replace');
 
 var dist = './dist/'
 var build = './build/'
@@ -157,7 +158,7 @@ gulp.task('test', ['removeSpecsTs'], function() {
 
 ///////////////////////////////
 gulp.task('cleanPkg', function() {
-  return gulp.src(pkg, {
+  return gulp.src(['./package/*.*', '!./package/package.json'], {
       force: true
     })
     .pipe(clean());
@@ -200,7 +201,29 @@ gulp.task('compilePkgTs', ['removeBundledParts'], function() {
   ]);
 });
 
-gulp.task('package', ['compilePkgTs'], function() {});
+gulp.task('createPkgModuleDefinition', ['compilePkgTs'], function(){
+  return gulp.src(['./package/index.d.ts'])
+    .pipe(replace('declare ', ''))
+    .pipe(insert.prepend('declare module "pureupload" {\n'))
+    .pipe(insert.append('}'))
+    .pipe(gulp.dest(pkg));
+});
+
+gulp.task('renamePkgDefinition', ['createPkgModuleDefinition'], function(){
+  return gulp.src('./package/index.d.ts')
+    .pipe(rename('pureupload.d.ts'))
+    .pipe(gulp.dest(pkg));
+});
+
+gulp.task('removeOriginalDefinition', ['renamePkgDefinition'], function() {
+  return gulp.src('./package/index.d.ts', {
+      force: true
+    })
+    .pipe(clean());
+});
+
+
+gulp.task('package', ['removeOriginalDefinition'], function() {});
 
 gulp.task('dw', function() {
   gulp.start('test');

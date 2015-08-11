@@ -1,6 +1,6 @@
 {
   "name": "pure-upload",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "The pure upload library without dependencies",
   "contributors": [
     {
@@ -41,6 +41,7 @@
     "gulp-insert": "^0.5.0",
     "gulp-karma": "0.0.4",
     "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
     "gulp-typescript": "^2.8.0",
     "gulp-uglify": "^1.2.0",
     "gulp-watch": "^4.3.4",

@@ -1,7 +1,8 @@
-export declare function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
-export declare function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-export declare var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
-export declare var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
+declare module "pureupload" {
+export function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+export var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
+export var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize: number;
     allowDragDrop: boolean;
@@ -62,7 +63,7 @@ export interface IUploadStatus {
     canceled: IUploadStatus;
     removed: IUploadStatus;
 }
-export declare class UploadArea {
+export class UploadArea {
     targetElement: Element;
     options: IUploadAreaOptions;
     uploader: Uploader;
@@ -74,7 +75,7 @@ export declare class UploadArea {
     private stopEventPropagation(e);
     destroy(): void;
 }
-export declare class UploadCore {
+export class UploadCore {
     options: IUploadOptions;
     callbacks: IUploadCallbacksExt;
     constructor(options: IUploadOptions, callbacks: IUploadCallbacksExt);
@@ -93,7 +94,7 @@ export declare class UploadCore {
     private setFullOptions(options);
     private setFullCallbacks(callbacks);
 }
-export declare class Uploader {
+export class Uploader {
     uploadAreas: UploadArea[];
     queue: UploadQueue;
     uploaderOptions: IUploadQueueOptions;
@@ -102,7 +103,7 @@ export declare class Uploader {
     registerArea(element: Element, options: IUploadAreaOptions): void;
     unregisterArea(area: UploadArea): void;
 }
-export declare class UploadQueue {
+export class UploadQueue {
     options: IUploadQueueOptions;
     callbacks: IUploadQueueCallbacksExt;
     queuedFiles: IUploadFile[];
@@ -119,7 +120,7 @@ export declare class UploadQueue {
     private deactivateFile(file);
     private getWaitingFiles();
 }
-export declare class UploadStatusStatic {
+export class UploadStatusStatic {
     static queued: string;
     static uploading: string;
     static uploaded: string;
@@ -127,4 +128,5 @@ export declare class UploadStatusStatic {
     static canceled: string;
     static removed: string;
 }
-export declare var uploadStatus: IUploadStatus;
+export var uploadStatus: IUploadStatus;
+}

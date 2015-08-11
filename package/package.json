@@ -1,0 +1,32 @@
+{
+  "name": "pure-upload",
+  "version": "1.0.0",
+  "description": "The pure upload library without dependencies",
+  "contributors": [
+    {
+      "name": "Tomáš Růt",
+      "email": "rut.tomas@hotmail.com"
+    },
+    {
+      "name": "Marek Horyna",
+      "email": "marek.horyna@outlook.com"
+    }
+  ],
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keeema/pure-upload.git"
+  },
+  "bugs": {
+    "url": "https://github.com/keeema/pure-upload/issues"
+  },
+  "keywords": [
+    "pure",
+    "upload",
+    "javascript",
+    "typescript",
+    "web",
+    "file",
+    "api"
+  ]
+}
