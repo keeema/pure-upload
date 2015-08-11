@@ -30,6 +30,7 @@
         "./uploader/uploader.ts",
         "./utils/files.ts",
         "./utils/functions.ts",
+        "./utils/guidGenerator.ts",
         "../decl/jasmine/jasmine.d.ts"
     ]
 }

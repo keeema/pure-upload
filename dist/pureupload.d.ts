@@ -3,6 +3,7 @@ declare module pu {
     function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
     var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
     var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
+    function newGuid(): string;
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize: number;
         allowDragDrop: boolean;
@@ -22,6 +23,7 @@ declare module pu {
         onFileStateChangedCallback?: (file: IUploadFile) => void;
     }
     interface IUploadFile extends File {
+        guid: string;
         uploadStatus: IUploadStatus;
         responseCode: number;
         responseText: string;

@@ -23,22 +23,17 @@ class UploadArea {
         this.fileInput.setAttribute("type", "file");
         this.fileInput.style.display = "none";
         this.fileInput.accept = this.options.accept;
+        this.fileInput.addEventListener("change", (e: any) => {          
+            this.putFilesToQueue(e.target.files);
+        });
         if (this.options.multiple) {
             this.fileInput.setAttribute("multiple", "");
-        }
-        if (this.uploader.uploaderOptions.autoStart) {
-            this.fileInput.addEventListener("change", (e: any) => {
-                console.log("changed");
-                console.log(e);
-                this.putFilesToQueue(e.target.files);
-            });
         }
         if (this.options.clickable) {
             this.targetElement.addEventListener("click", (e) => {
                 this.fileInput.click();
             });
         }
-
         if (this.options.allowDragDrop) {
             this.targetElement.addEventListener("dragover", (e: DragEvent) => {
                 var efct;

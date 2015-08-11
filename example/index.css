@@ -1,8 +1,95 @@
-#example1-dnd-area {
-  width: 320px;
-  height: 150px;
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+h1 {
+  font-weight: 700;
+  font-size: 28px;
 }
 
 .dnd-area {
-  border: 3px solid black;
+  width: 620px;
+  height: 320px;
+  margin: 32px 0px;
+  border: 1px solid #666;
+}
+
+.dnd-caption {
+  width: 100%;
+  line-height: 320px;
+  text-align: center;
+  font-size: 32px;
+  font-weight: 300;
+  color: #999;
+  cursor: pointer;
+}
+
+.upload-button {
+  width: 240px;
+  height: 40px;
+  margin: 6px 16px;
+  background: #eee;
+  border: 1px solid #666;
+  color: #000;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.upload-button:hover {
+  color: #666;
+}
+
+.table-queue {
+  width: 640px;
+  height: 320px;
+  border: 1px solid #ccc;
+  color: #444;
+  overflow-y: scroll;
+}
+
+.table-header-title {
+  font-size: 22px;
+  font-weight: 400;
+  padding: 12px 16px;
+  background: #eee;
+}
+
+.table-row-item {
+  float: left;
+  line-height: 36px;
+  margin: 6px;
+}
+
+.table-row-item-status {
+  float: left;
+  font-size: 16px;
+  font-weight: 700;
+  width: 100px;
+}
+
+.table-row-item-progress {
+  float: left;
+  font-size: 16px;
+  font-weight: 400;
+  width: 40px;
+}
+
+.table-row-item-name {
+  float: left;
+  font-size: 16px;
+  font-weight: 300;
+  width: 320px;
+}
+
+.table-row-button {
+  margin: 6px;
+  width: 60px;
+  height: 30px;
+  background: #eee;
+  border: 1px solid #666;
+  color: #666;
+}
+
+.table-row-button:hover {
+  color: #bbb;
 }

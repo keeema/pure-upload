@@ -1,6 +1,8 @@
 window.onload = () => {
+    var queueRenderer = getQueueRenderer();
     var uploaderExample1 = pu.getUploader({ maxParallelUploads: 2, autoStart: false, autoRemove: false }, {});
-    uploaderExample1.registerArea(document.getElementById('example1-dnd-area'), {
+
+    var uploadSettings = {
         url: "/api/test",
         method: "POST",
         maxFileSize: 2000,
@@ -8,61 +10,26 @@ window.onload = () => {
         clickable: true,
         accept: "*",
         multiple: true,
-    });
-
-    var area2 = uploaderExample1.registerArea(document.getElementById('example1-button'), {
+    };
+    var queueUploadSettings = {
         url: "/api/test",
         method: "POST",
-        maxFileSize: 5000,
+        maxFileSize: 2000,
         allowDragDrop: true,
-        clickable: true,
+        clickable: false,
         accept: "*",
         multiple: true,
-    });
+    };
+
+    uploaderExample1.registerArea(document.getElementById('example-dnd-area'), uploadSettings);
+    uploaderExample1.registerArea(document.getElementById('example-button'), uploadSettings);
+    uploaderExample1.registerArea(document.getElementById('example-queue'), queueUploadSettings);
 
     uploaderExample1.queue.callbacks.onQueueChangedCallback = (result: pu.IUploadFile[]) => {
-        createQueue('example1-queue');
+        queueRenderer.renderQueue('example-queue', 'Example Queue', result, uploaderExample1.queue.options);
     };
 
     uploaderExample1.queue.callbacks.onProgressCallback = (file: pu.IUploadFile) => {
-        createQueue('example1-queue');
+        queueRenderer.renderItemProgress('example-queue', file);
     };
-
-    function createQueue(queueid: string) {
-        var queue = document.getElementById(queueid);
-        var child: Node;
-        if (queue.childNodes)
-            child = queue.childNodes[0];
-
-        var queueElement = document.createElement('div');
-        uploaderExample1.queue.queuedFiles.forEach((file: pu.IUploadFile) => {
-            var fileItem = document.createElement("p");
-            var info = document.createElement('div');
-            info.innerHTML = file.name + " " + file.uploadStatus + " " + file.progress + "%\n";
-
-            var deleteFromQueue = document.createElement("button");
-            deleteFromQueue.innerHTML = "delete";
-            deleteFromQueue.addEventListener("mousedown", () => file.remove());
-
-            var cancelInQueue = document.createElement("button");
-            cancelInQueue.innerHTML = "cancel";
-            cancelInQueue.addEventListener("mousedown", () =>  file.cancel());
-
-            var startInQueue = document.createElement("button");
-            startInQueue.innerHTML = "start";
-            startInQueue.addEventListener("mousedown", () => file.start());
-
-            fileItem.appendChild(info);
-            fileItem.appendChild(startInQueue);
-            fileItem.appendChild(cancelInQueue);
-            fileItem.appendChild(deleteFromQueue);
-
-            queueElement.appendChild(fileItem);
-        });
-
-        queue.appendChild(queueElement)
-        if (child)
-            queue.removeChild(child);
-
-    }
 }

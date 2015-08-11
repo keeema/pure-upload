@@ -1,4 +1,5 @@
 interface IUploadFile extends File {
+    guid: string;
     uploadStatus: IUploadStatus;
     responseCode: number;
     responseText: string;
