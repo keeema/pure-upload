@@ -70,41 +70,54 @@ var pu;
             this.fileInput.setAttribute("type", "file");
             this.fileInput.style.display = "none";
             this.fileInput.accept = this.options.accept;
-            this.fileInput.addEventListener("change", function (e) {
-                _this.putFilesToQueue(e.target.files);
-            });
+            var onChange = function (e) { return _this.onChange(e); };
+            this.fileInput.addEventListener("change", onChange);
+            this.unregisterOnChange = function () { return _this.fileInput.removeEventListener("onChange", onchange); };
             if (this.options.multiple) {
                 this.fileInput.setAttribute("multiple", "");
             }
             if (this.options.clickable) {
-                this.targetElement.addEventListener("click", function (e) {
-                    _this.fileInput.click();
-                });
+                var onClick = function () { return _this.onClick(); };
+                this.targetElement.addEventListener("click", onClick);
+                this.unregisterOnClick = function () { return _this.targetElement.removeEventListener("click", onClick); };
             }
             if (this.options.allowDragDrop) {
-                this.targetElement.addEventListener("dragover", function (e) {
-                    var efct;
-                    try {
-                        efct = e.dataTransfer.effectAllowed;
-                    }
-                    catch (_error) { }
-                    e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
-                    _this.stopEventPropagation(e);
-                });
-                this.targetElement.addEventListener("drop", function (e) {
-                    if (!e.dataTransfer) {
-                        return;
-                    }
-                    var files = e.dataTransfer.files;
-                    if (files.length) {
-                        var items = e.dataTransfer.files;
-                        _this.putFilesToQueue(items);
-                    }
-                    _this.stopEventPropagation(e);
-                });
+                var onDrag = function (e) { return _this.onDrag(e); };
+                this.targetElement.addEventListener("dragover", onDrag);
+                this.unregisterOnDragOver = function () { return _this.targetElement.removeEventListener("dragover", onDrag); };
+                var onDrop = function (e) { return _this.onDrop(e); };
+                this.targetElement.addEventListener("drop", onDrop);
+                this.unregisterOnDrop = function () { return _this.targetElement.removeEventListener("drop", onDrop); };
             }
             // attach to body
             document.body.appendChild(this.fileInput);
+        };
+        UploadArea.prototype.onChange = function (e) {
+            this.putFilesToQueue(e.target.files);
+        };
+        UploadArea.prototype.onDrag = function (e) {
+            var efct;
+            try {
+                efct = e.dataTransfer.effectAllowed;
+            }
+            catch (_error) { }
+            e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
+            this.stopEventPropagation(e);
+        };
+        UploadArea.prototype.onDrop = function (e) {
+            if (!e.dataTransfer) {
+                return;
+            }
+            var files = e.dataTransfer.files;
+            if (files.length) {
+                var items = e.dataTransfer.files;
+                this.putFilesToQueue(items);
+            }
+            this.stopEventPropagation(e);
+        };
+        UploadArea.prototype.onClick = function () {
+            this.fileInput.value = '';
+            this.fileInput.click();
         };
         UploadArea.prototype.stopEventPropagation = function (e) {
             e.stopPropagation();
@@ -113,6 +126,16 @@ var pu;
             }
         };
         UploadArea.prototype.destroy = function () {
+            if (this.unregisterOnClick)
+                this.unregisterOnClick();
+            if (this.unregisterOnDrop)
+                this.unregisterOnDrop();
+            if (this.unregisterOnChange)
+                this.unregisterOnChange();
+            if (this.unregisterOnDragOver)
+                this.unregisterOnDragOver();
+            this.targetElement.removeEventListener("dragover", this.onDrag);
+            this.targetElement.removeEventListener("drop", this.onDrop);
             document.body.removeChild(this.fileInput);
         };
         return UploadArea;
@@ -256,6 +279,7 @@ var pu;
         Uploader.prototype.registerArea = function (element, options) {
             var uploadArea = new UploadArea(element, options, this);
             this.uploadAreas.push(uploadArea);
+            return uploadArea;
         };
         Uploader.prototype.unregisterArea = function (area) {
             var areaIndex = this.uploadAreas.indexOf(area);

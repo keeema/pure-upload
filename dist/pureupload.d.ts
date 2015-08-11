@@ -71,9 +71,17 @@ declare module pu {
         uploader: Uploader;
         private uploadCore;
         private fileInput;
+        private unregisterOnClick;
+        private unregisterOnDrop;
+        private unregisterOnDragOver;
+        private unregisterOnChange;
         constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
         private putFilesToQueue(fileList);
         private setupHiddenInput();
+        private onChange(e);
+        private onDrag(e);
+        private onDrop(e);
+        private onClick();
         private stopEventPropagation(e);
         destroy(): void;
     }
@@ -102,7 +110,7 @@ declare module pu {
         uploaderOptions: IUploadQueueOptions;
         constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks);
         setOptions(options: IUploadQueueOptions): void;
-        registerArea(element: Element, options: IUploadAreaOptions): void;
+        registerArea(element: Element, options: IUploadAreaOptions): UploadArea;
         unregisterArea(area: UploadArea): void;
     }
     class UploadQueue {

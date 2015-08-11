@@ -13,9 +13,10 @@ class Uploader {
         this.uploaderOptions = options;
     }
 
-    registerArea(element: Element, options: IUploadAreaOptions) : void {
+    registerArea(element: Element, options: IUploadAreaOptions) : UploadArea {
         var uploadArea = new UploadArea(element, options, this);
         this.uploadAreas.push(uploadArea);
+        return uploadArea;
     }
 
     unregisterArea(area: UploadArea) : void {

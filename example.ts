@@ -1,9 +1,11 @@
 import express = require("express");
 import multer = require("multer");
+var cors = require('cors')
 
 var app: express.Application = express();
 var done = false;
 
+app.use(cors());
 app.use('/api/test', multer({
     dest: './uploads/',
     rename: (fieldname, filename) => filename + Date.now(),

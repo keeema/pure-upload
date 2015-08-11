@@ -132,10 +132,8 @@ gulp.task('compileSpecsTs', ['removeCompileSourcesSpecs'], function() {
     ])
     .pipe(ts(tsProject));
 
-  return merge([
-    tsResult.dts.pipe(gulp.dest(specs)),
-    tsResult.js.pipe(gulp.dest(specs))
-  ]);
+  return tsResult.js.pipe(gulp.dest(specs))
+
 });
 
 gulp.task('removeSpecsTs', ['compileSpecsTs'], function() {
@@ -228,11 +226,18 @@ gulp.task('package', ['removeOriginalDefinition'], function() {});
 
 /////////////////////////////
 
-gulp.task('dw', function() {
+gulp.task('dwd', function() {
   runSequence('default','test')
-  gulp.start('test');
   watch('./src/**/*.ts', function() {
     console.log('Build started', (new Date(Date.now())).toString());
     return runSequence('default','test');
+  });
+});
+
+gulp.task('dwe', function() {
+  runSequence('package','test')
+  watch('./src/**/*.ts', function() {
+    console.log('Build started', (new Date(Date.now())).toString());
+    return runSequence('package','test');
   });
 });
