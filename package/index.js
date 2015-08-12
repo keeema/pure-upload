@@ -327,11 +327,11 @@ var UploadQueue = (function () {
         this.queuedFiles = [];
     };
     UploadQueue.prototype.filesChanged = function () {
-        this.callbacks.onQueueChangedCallback(this.queuedFiles);
         if (this.options.autoRemove)
             this.removeFinishedFiles();
         if (this.options.autoStart)
             this.startWaitingFiles();
+        this.callbacks.onQueueChangedCallback(this.queuedFiles);
         this.checkAllFinished();
     };
     UploadQueue.prototype.checkAllFinished = function () {

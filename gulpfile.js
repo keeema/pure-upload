@@ -96,7 +96,9 @@ gulp.task('uglify', ['compileTs'], function() {
     .pipe(gulp.dest(dist));
 });
 
-gulp.task('default', ['uglify'], function() {});
+gulp.task('dist', ['uglify'], function() {});
+
+gulp.task('default', ['test', 'dist', 'package'], function() {});
 
 ///////////////////////////////
 gulp.task('cleanSpecs', function() {
@@ -227,14 +229,14 @@ gulp.task('package', ['removeOriginalDefinition'], function() {});
 /////////////////////////////
 
 gulp.task('dwd', function() {
-  runSequence('default','test')
+  runSequence('dist','test')
   watch('./src/**/*.ts', function() {
     console.log('Build started', (new Date(Date.now())).toString());
-    return runSequence('default','test');
+    return runSequence('dist','test');
   });
 });
 
-gulp.task('dwe', function() {
+gulp.task('dwp', function() {
   runSequence('package','test')
   watch('./src/**/*.ts', function() {
     console.log('Build started', (new Date(Date.now())).toString());

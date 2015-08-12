@@ -43,13 +43,13 @@ class UploadQueue {
     }
 
     private filesChanged(): void {
-        this.callbacks.onQueueChangedCallback(this.queuedFiles);
-
         if (this.options.autoRemove)
             this.removeFinishedFiles();
 
         if (this.options.autoStart)
             this.startWaitingFiles();
+
+        this.callbacks.onQueueChangedCallback(this.queuedFiles);
 
         this.checkAllFinished();
     }
