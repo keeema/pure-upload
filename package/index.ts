@@ -140,10 +140,10 @@ export class UploadArea {
 
     private setFullOptions(options: IUploadAreaOptions): void {
         this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = options.allowDragDrop || true;
-        this.options.clickable = options.clickable || true;
+        this.options.allowDragDrop = options.allowDragDrop == undefined ? true : options.allowDragDrop;
+        this.options.clickable = options.clickable == undefined ? true : options.clickable;
         this.options.accept = options.accept || '*';
-        this.options.multiple = options.multiple || true;
+        this.options.multiple = options.multiple == undefined ? true : options.multiple;
     }
 
     private putFilesToQueue(fileList: FileList): void {
