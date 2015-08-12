@@ -1,7 +1,7 @@
 class Uploader {
     uploadAreas: UploadArea[];
     queue: UploadQueue;
-    uploaderOptions: IUploadQueueOptions;
+    options: IUploadQueueOptions;
 
     constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) {
         this.setOptions(options);
@@ -10,7 +10,7 @@ class Uploader {
     }
 
     setOptions(options: IUploadQueueOptions) : void {
-        this.uploaderOptions = options;
+        this.options = options;
     }
 
     registerArea(element: Element, options: IUploadAreaOptions) : UploadArea {
