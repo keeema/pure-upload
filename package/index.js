@@ -363,7 +363,6 @@ var UploadQueue = (function () {
         this.queuedFiles
             .filter(function (file) { return [
             exports.uploadStatus.uploaded,
-            exports.uploadStatus.failed,
             exports.uploadStatus.canceled
         ].indexOf(file.uploadStatus) >= 0; })
             .forEach(function (file) { return _this.removeFile(file, true); });

@@ -365,7 +365,6 @@ var pu;
             this.queuedFiles
                 .filter(function (file) { return [
                 pu.uploadStatus.uploaded,
-                pu.uploadStatus.failed,
                 pu.uploadStatus.canceled
             ].indexOf(file.uploadStatus) >= 0; })
                 .forEach(function (file) { return _this.removeFile(file, true); });

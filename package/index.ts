@@ -498,7 +498,6 @@ export class UploadQueue {
         this.queuedFiles
             .filter(file=> [
                 uploadStatus.uploaded,
-                uploadStatus.failed,
                 uploadStatus.canceled
             ].indexOf(file.uploadStatus) >= 0)
             .forEach(file => this.removeFile(file, true));

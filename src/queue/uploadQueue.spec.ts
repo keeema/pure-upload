@@ -110,9 +110,10 @@ describe('uploadQueue', () => {
 
                 uploadQueue['filesChanged']()
 
-                expect(uploadQueue.queuedFiles.length).toEqual(2);
+                expect(uploadQueue.queuedFiles.length).toEqual(3);
                 expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.queued);
                 expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(uploadStatus.failed);
             })
         });
 
