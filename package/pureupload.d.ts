@@ -13,11 +13,11 @@ export interface FileExt extends File {
     isDirectory: boolean;
 }
 export interface IUploadAreaOptions extends IUploadOptions {
-    maxFileSize: number;
-    allowDragDrop: boolean;
-    clickable: boolean;
-    accept: string;
-    multiple: boolean;
+    maxFileSize?: number;
+    allowDragDrop?: boolean;
+    clickable?: boolean;
+    accept?: string;
+    multiple?: boolean;
 }
 export interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;

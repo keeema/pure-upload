@@ -9,12 +9,22 @@ class UploadArea {
 
     constructor(public targetElement: Element, public options: IUploadAreaOptions, public uploader: Uploader) {
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
+        this.setFullOptions(options);
         this.setupHiddenInput();
+    }
+
+    private setFullOptions(options: IUploadAreaOptions): void {
+        this.options.maxFileSize = options.maxFileSize || 1024;
+        this.options.allowDragDrop = options.allowDragDrop || true;
+        this.options.clickable = options.clickable || true;
+        this.options.accept = options.accept || '*';
+        this.options.multiple = options.multiple || true;
     }
 
     private putFilesToQueue(fileList: FileList): void {
         var uploadFiles = castFiles(fileList);
         uploadFiles.forEach((file: IUploadFile) => {
+            file.progress = 0;
             file.start = () => {
                 this.uploadCore.upload([file]);
                 file.start = () => { };
@@ -37,8 +47,8 @@ class UploadArea {
     private setupHiddenInput(): void {
         this.fileInput = document.createElement("input");
         this.fileInput.setAttribute("type", "file");
+        this.fileInput.setAttribute("accept", this.options.accept);
         this.fileInput.style.display = "none";
-        this.fileInput.accept = this.options.accept;
 
         var onChange = (e) => this.onChange(e);
         this.fileInput.addEventListener("change", onChange);

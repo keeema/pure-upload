@@ -57,6 +57,7 @@ var pu;
             var _this = this;
             var uploadFiles = castFiles(fileList);
             uploadFiles.forEach(function (file) {
+                file.progress = 0;
                 file.start = function () {
                     _this.uploadCore.upload([file]);
                     file.start = function () { };

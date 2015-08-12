@@ -57,11 +57,11 @@ export interface FileExt extends File {
 }
 
 export interface IUploadAreaOptions extends IUploadOptions {
-  maxFileSize: number;
-  allowDragDrop: boolean;
-  clickable: boolean;
-  accept: string;
-  multiple: boolean;
+  maxFileSize?: number;
+  allowDragDrop?: boolean;
+  clickable?: boolean;
+  accept?: string;
+  multiple?: boolean;
 }
 
 export interface IUploadCallbacks {
@@ -140,6 +140,7 @@ export class UploadArea {
     private putFilesToQueue(fileList: FileList): void {
         var uploadFiles = castFiles(fileList);
         uploadFiles.forEach((file: IUploadFile) => {
+            file.progress = 0;
             file.start = () => {
                 this.uploadCore.upload([file]);
                 file.start = () => { };
