@@ -4,12 +4,20 @@ export function decorateSimpleFunction(origFn: () => void, newFn: () => void, ne
 export var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
 export var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
 export function newGuid(): string;
+export interface FileExt extends File {
+    kind: string;
+    webkitGetAsEntry: () => File;
+    getAsFile: () => File;
+    file: (file: any) => void;
+    isFile: boolean;
+    isDirectory: boolean;
+}
 export interface IUploadAreaOptions extends IUploadOptions {
-    maxFileSize: number;
-    allowDragDrop: boolean;
-    clickable: boolean;
-    accept: string;
-    multiple: boolean;
+    maxFileSize?: number;
+    allowDragDrop?: boolean;
+    clickable?: boolean;
+    accept?: string;
+    multiple?: boolean;
 }
 export interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;
@@ -76,12 +84,17 @@ export class UploadArea {
     private unregisterOnDragOver;
     private unregisterOnChange;
     constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
+    private setFullOptions(options);
     private putFilesToQueue(fileList);
+    private putFileToQueue(file);
     private setupHiddenInput();
     private onChange(e);
     private onDrag(e);
     private onDrop(e);
     private onClick();
+    private addFilesFromItems(items);
+    private processDirectory(directory, path);
+    private handleFiles(files);
     private stopEventPropagation(e);
     destroy(): void;
 }
@@ -107,7 +120,7 @@ export class UploadCore {
 export class Uploader {
     uploadAreas: UploadArea[];
     queue: UploadQueue;
-    uploaderOptions: IUploadQueueOptions;
+    options: IUploadQueueOptions;
     constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks);
     setOptions(options: IUploadQueueOptions): void;
     registerArea(element: Element, options: IUploadAreaOptions): UploadArea;

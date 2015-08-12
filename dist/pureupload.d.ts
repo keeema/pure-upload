@@ -4,12 +4,20 @@ declare module pu {
     var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
     var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
     function newGuid(): string;
+    interface FileExt extends File {
+        kind: string;
+        webkitGetAsEntry: () => File;
+        getAsFile: () => File;
+        file: (file: any) => void;
+        isFile: boolean;
+        isDirectory: boolean;
+    }
     interface IUploadAreaOptions extends IUploadOptions {
-        maxFileSize: number;
-        allowDragDrop: boolean;
-        clickable: boolean;
-        accept: string;
-        multiple: boolean;
+        maxFileSize?: number;
+        allowDragDrop?: boolean;
+        clickable?: boolean;
+        accept?: string;
+        multiple?: boolean;
     }
     interface IUploadCallbacks {
         onProgressCallback?: (file: IUploadFile) => void;
@@ -76,12 +84,17 @@ declare module pu {
         private unregisterOnDragOver;
         private unregisterOnChange;
         constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
+        private setFullOptions(options);
         private putFilesToQueue(fileList);
+        private putFileToQueue(file);
         private setupHiddenInput();
         private onChange(e);
         private onDrag(e);
         private onDrop(e);
         private onClick();
+        private addFilesFromItems(items);
+        private processDirectory(directory, path);
+        private handleFiles(files);
         private stopEventPropagation(e);
         destroy(): void;
     }
@@ -107,7 +120,7 @@ declare module pu {
     class Uploader {
         uploadAreas: UploadArea[];
         queue: UploadQueue;
-        uploaderOptions: IUploadQueueOptions;
+        options: IUploadQueueOptions;
         constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks);
         setOptions(options: IUploadQueueOptions): void;
         registerArea(element: Element, options: IUploadAreaOptions): UploadArea;

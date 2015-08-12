@@ -51,12 +51,21 @@ var pu;
             this.options = options;
             this.uploader = uploader;
             this.uploadCore = pu.getUploadCore(this.options, this.uploader.queue.callbacks);
+            this.setFullOptions(options);
             this.setupHiddenInput();
         }
+        UploadArea.prototype.setFullOptions = function (options) {
+            this.options.maxFileSize = options.maxFileSize || 1024;
+            this.options.allowDragDrop = options.allowDragDrop || true;
+            this.options.clickable = options.clickable || true;
+            this.options.accept = options.accept || '*';
+            this.options.multiple = options.multiple || true;
+        };
         UploadArea.prototype.putFilesToQueue = function (fileList) {
             var _this = this;
             var uploadFiles = castFiles(fileList);
             uploadFiles.forEach(function (file) {
+                file.progress = 0;
                 file.start = function () {
                     _this.uploadCore.upload([file]);
                     file.start = function () { };
@@ -64,12 +73,23 @@ var pu;
             });
             this.uploader.queue.addFiles(uploadFiles);
         };
+        UploadArea.prototype.putFileToQueue = function (file) {
+            var _this = this;
+            var uploadFile;
+            uploadFile = file;
+            uploadFile.progress = 0;
+            uploadFile.start = function () {
+                _this.uploadCore.upload([file]);
+                uploadFile.start = function () { };
+            };
+            this.uploader.queue.addFiles([uploadFile]);
+        };
         UploadArea.prototype.setupHiddenInput = function () {
             var _this = this;
             this.fileInput = document.createElement("input");
             this.fileInput.setAttribute("type", "file");
+            this.fileInput.setAttribute("accept", this.options.accept);
             this.fileInput.style.display = "none";
-            this.fileInput.accept = this.options.accept;
             var onChange = function (e) { return _this.onChange(e); };
             this.fileInput.addEventListener("change", onChange);
             this.unregisterOnChange = function () { return _this.fileInput.removeEventListener("onChange", onchange); };
@@ -105,24 +125,80 @@ var pu;
             this.stopEventPropagation(e);
         };
         UploadArea.prototype.onDrop = function (e) {
+            this.stopEventPropagation(e);
             if (!e.dataTransfer) {
                 return;
             }
             var files = e.dataTransfer.files;
             if (files.length) {
-                var items = e.dataTransfer.files;
-                this.putFilesToQueue(items);
+                var items = e.dataTransfer.items;
+                if (items && items.length && (items[0].webkitGetAsEntry != null)) {
+                    this.addFilesFromItems(items);
+                }
+                else {
+                    this.handleFiles(files);
+                }
             }
-            this.stopEventPropagation(e);
         };
         UploadArea.prototype.onClick = function () {
             this.fileInput.value = '';
             this.fileInput.click();
         };
+        UploadArea.prototype.addFilesFromItems = function (items) {
+            var entry;
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if ((item.webkitGetAsEntry) && (entry = item.webkitGetAsEntry())) {
+                    if (entry.isFile) {
+                        this.putFileToQueue(item.getAsFile());
+                    }
+                    else if (entry.isDirectory) {
+                        this.processDirectory(entry, entry.name);
+                    }
+                }
+                else if (item.getAsFile) {
+                    if ((item.kind == null) || item.kind === "file") {
+                        this.putFileToQueue(item.getAsFile());
+                    }
+                }
+            }
+        };
+        UploadArea.prototype.processDirectory = function (directory, path) {
+            var dirReader = directory.createReader();
+            var _class = this;
+            var entryReader = function (entries) {
+                for (var i = 0; i < entries.length; i++) {
+                    var entry = entries[i];
+                    if (entry.isFile) {
+                        entry.file(function (file) {
+                            if (file.name.substring(0, 1) === '.') {
+                                return;
+                            }
+                            file.fullPath = "" + path + "/" + file.name;
+                            _class.putFileToQueue(file);
+                        });
+                    }
+                    else if (entry.isDirectory) {
+                        _class.processDirectory(entry, "" + path + "/" + entry.name);
+                    }
+                }
+            };
+            return dirReader.readEntries(entryReader, function (error) {
+                return typeof console !== "undefined" && console !== null ? typeof console.log === "function" ? console.log(error) : void 0 : void 0;
+            });
+        };
+        UploadArea.prototype.handleFiles = function (files) {
+            for (var i = 0; i < files.length; i++) {
+                this.putFileToQueue(files[i]);
+            }
+        };
         UploadArea.prototype.stopEventPropagation = function (e) {
             e.stopPropagation();
             if (e.preventDefault) {
                 e.preventDefault();
+            }
+            else {
+                return e.returnValue = false;
             }
         };
         UploadArea.prototype.destroy = function () {
@@ -274,7 +350,7 @@ var pu;
             this.queue = new UploadQueue(options, callbacks);
         }
         Uploader.prototype.setOptions = function (options) {
-            this.uploaderOptions = options;
+            this.options = options;
         };
         Uploader.prototype.registerArea = function (element, options) {
             var uploadArea = new UploadArea(element, options, this);
