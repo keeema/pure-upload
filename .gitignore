@@ -7,5 +7,6 @@
 
 !/package/*.*
 !/dist/*.*
+!/example/public/*.*
 !/gulpfile.js
 !/karma.conf.js

@@ -15,15 +15,20 @@ var gulp      = require('gulp'),
   replace     = require('gulp-replace');
   runSequence = require('run-sequence');
 
-var dist = './dist/'
-var build = './build/'
-var specs = './specs/'
-var pkg = './package/'
-var bundle = './bundle'
+var dist = './dist/';
+var build = './build/';
+var specs = './specs/';
+var pkg = './package/';
+var bundle = './bundle';
+var examplePublic = './example/public/';
 
 var tsProject = ts.createProject({
   module: 'commonjs',
   declarationFiles: true
+});
+
+var tsProjectExample = ts.createProject({
+  module: 'commonjs'
 });
 
 gulp.task('cleanBuild', function() {
@@ -98,7 +103,7 @@ gulp.task('uglify', ['compileTs'], function() {
 
 gulp.task('dist', ['uglify'], function() {});
 
-gulp.task('default', ['test', 'dist', 'package'], function() {});
+gulp.task('default', ['test', 'dist', 'package', 'example'], function() {});
 
 ///////////////////////////////
 gulp.task('cleanSpecs', function() {
@@ -227,6 +232,54 @@ gulp.task('removeOriginalDefinition', ['renamePkgDefinition'], function() {
 gulp.task('package', ['removeOriginalDefinition'], function() {});
 
 /////////////////////////////
+gulp.task('cleanExamplePublic', function() {
+  return gulp.src('./example/public/*.*', {
+      force: true
+    })
+    .pipe(clean());
+});
+
+gulp.task('cleanExampleBackend',['cleanExamplePublic'], function() {
+  return gulp.src('./example.js', {
+      force: true
+    })
+    .pipe(clean());
+});
+
+gulp.task('copyHtmlExample', ['cleanExampleBackend'], function() {
+  return gulp.src(['./example/src/*.html','./example/src/*.css'])
+    .pipe(flatten())
+    .pipe(gulp.dest(examplePublic));
+});
+
+gulp.task('copyDistLib', ['copyHtmlExample'], function() {
+  return gulp.src(['./dist/pureupload.js'])
+    .pipe(flatten())
+    .pipe(gulp.dest(examplePublic));
+});
+
+gulp.task('compileExampleTs', ['copyDistLib'], function() {
+  var tsResult = gulp.src([
+      "./dist/**/*.d.ts",
+      "./example/src/**/*.ts"
+      ])
+      .pipe(flatten())
+      .pipe(ts(tsProjectExample));
+
+  return tsResult.js.pipe(gulp.dest(examplePublic));
+});
+
+gulp.task('compileExampleBackendTs', ['compileExampleTs'], function() {
+  var tsResult =
+      gulp.src(['./example.ts','./decl/**/*.d.ts'])
+      .pipe(ts(tsProjectExample));
+
+  return tsResult.js.pipe(gulp.dest('./'));
+});
+
+gulp.task('example', ['compileExampleBackendTs'], function() {});
+
+/////
 
 gulp.task('dwd', function() {
   runSequence('dist','test')
@@ -241,5 +294,13 @@ gulp.task('dwp', function() {
   watch('./src/**/*.ts', function() {
     console.log('Build started', (new Date(Date.now())).toString());
     return runSequence('package','test');
+  });
+});
+
+gulp.task('dwe', function() {
+  runSequence('dist', 'test', 'example');
+  watch(['./src/**/*.ts', './example/src/**/*.ts', './example.ts'], function() {
+    console.log('Build started', (new Date(Date.now())).toString());
+    return runSequence('dist', 'test', 'example');
   });
 });

@@ -19,7 +19,8 @@
         "./decl/node/node.d.ts",
         "./decl/serve-static/serve-static.d.ts",
         "./example.ts",
-        "./example/index.ts",
-        "./example/queueRenderer.ts"
+        "./example/src/envResolver.ts",
+        "./example/src/index.ts",
+        "./example/src/queueRenderer.ts"
     ]
 }
