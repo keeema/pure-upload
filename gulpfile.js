@@ -103,7 +103,9 @@ gulp.task('uglify', ['compileTs'], function() {
 
 gulp.task('dist', ['uglify'], function() {});
 
-gulp.task('default', ['test', 'dist', 'package', 'example'], function() {});
+gulp.task('default', function() {
+  return runSequence('test', 'dist', 'package', 'example');
+});
 
 ///////////////////////////////
 gulp.task('cleanSpecs', function() {
@@ -282,7 +284,7 @@ gulp.task('example', ['compileExampleBackendTs'], function() {});
 /////
 
 gulp.task('dwd', function() {
-  runSequence('dist','test')
+  runSequence('dist','test');
   watch('./src/**/*.ts', function() {
     console.log('Build started', (new Date(Date.now())).toString());
     return runSequence('dist','test');

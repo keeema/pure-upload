@@ -290,14 +290,19 @@ var UploadCore = (function () {
     };
     UploadCore.prototype.updateProgress = function (file, e) {
         if (e != null) {
-            file.progress = Math.round(100 * (e.loaded / e.total));
-            file.sentBytes = e.loaded;
+            if (e.lengthComputable) {
+                file.progress = Math.round(100 * (e.loaded / e.total));
+                file.sentBytes = e.loaded;
+            }
+            else {
+                file.progress = 0;
+                file.sentBytes = 0;
+            }
         }
         else {
             file.progress = 100;
             file.sentBytes = file.size;
         }
-        file.uploadStatus = file.progress === 100 ? exports.uploadStatus.uploaded : exports.uploadStatus.uploading;
         this.callbacks.onProgressCallback(file);
     };
     UploadCore.prototype.onload = function (file, xhr) {
