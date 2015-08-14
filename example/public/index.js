@@ -29,4 +29,11 @@ window.onload = function () {
     uploaderExample1.queue.callbacks.onProgressCallback = function (file) {
         queueRenderer.renderItemProgress('example-queue', file);
     };
+    uploaderExample1.queue.callbacks.onFilesAddedErrorCallback = function (files) {
+        var errorMessage = "";
+        files.forEach(function (file) {
+            errorMessage += "File " + file.name + " validation failed.\n";
+        });
+        alert(errorMessage);
+    };
 };

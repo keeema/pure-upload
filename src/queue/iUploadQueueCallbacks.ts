@@ -3,4 +3,5 @@ interface IUploadQueueCallbacks extends IUploadCallbacks {
     onFileRemovedCallback?: (file: IUploadFile) => void;
     onAllFinishedCallback?: () => void;
     onQueueChangedCallback?: (queue: IUploadFile[]) => void;
+    onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
 }

@@ -57,6 +57,7 @@ declare module pu {
         onFileRemovedCallback?: (file: IUploadFile) => void;
         onAllFinishedCallback?: () => void;
         onQueueChangedCallback?: (queue: IUploadFile[]) => void;
+        onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
     }
     interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
     }
@@ -79,6 +80,7 @@ declare module pu {
         uploader: Uploader;
         private uploadCore;
         private fileInput;
+        private validationFailedInputFiles;
         private unregisterOnClick;
         private unregisterOnDrop;
         private unregisterOnDragOver;
@@ -86,6 +88,8 @@ declare module pu {
         constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
         private setFullOptions(options);
         private putFilesToQueue(fileList);
+        private callbackOnFilesErrors();
+        private validateFile(file);
         private putFileToQueue(file);
         private setupHiddenInput();
         private onChange(e);
@@ -95,6 +99,7 @@ declare module pu {
         private addFilesFromItems(items);
         private processDirectory(directory, path);
         private handleFiles(files);
+        private isFileSizeValid(file);
         private stopEventPropagation(e);
         destroy(): void;
     }

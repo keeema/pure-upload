@@ -1,5 +1,5 @@
 window.onload = () => {
-   resolveEnvironment();
+    resolveEnvironment();
     var queueRenderer = getQueueRenderer();
     var uploaderExample1 = pu.getUploader({ maxParallelUploads: 2, autoStart: false, autoRemove: false }, {});
 
@@ -32,5 +32,13 @@ window.onload = () => {
 
     uploaderExample1.queue.callbacks.onProgressCallback = (file: pu.IUploadFile) => {
         queueRenderer.renderItemProgress('example-queue', file);
+    };
+
+    uploaderExample1.queue.callbacks.onFilesAddedErrorCallback = (files: pu.IUploadFile[]) => {
+        var errorMessage = "";
+        files.forEach((file: pu.IUploadFile) => {
+            errorMessage += "File " + file.name + " validation failed.\n";
+        });
+        alert(errorMessage);
     };
 }

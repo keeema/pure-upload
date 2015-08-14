@@ -57,6 +57,7 @@ export interface IUploadQueueCallbacks extends IUploadCallbacks {
     onFileRemovedCallback?: (file: IUploadFile) => void;
     onAllFinishedCallback?: () => void;
     onQueueChangedCallback?: (queue: IUploadFile[]) => void;
+    onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
 }
 export interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
 }
@@ -79,6 +80,7 @@ export class UploadArea {
     uploader: Uploader;
     private uploadCore;
     private fileInput;
+    private validationFailedInputFiles;
     private unregisterOnClick;
     private unregisterOnDrop;
     private unregisterOnDragOver;
@@ -86,6 +88,8 @@ export class UploadArea {
     constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
     private setFullOptions(options);
     private putFilesToQueue(fileList);
+    private callbackOnFilesErrors();
+    private validateFile(file);
     private putFileToQueue(file);
     private setupHiddenInput();
     private onChange(e);
@@ -95,6 +99,7 @@ export class UploadArea {
     private addFilesFromItems(items);
     private processDirectory(directory, path);
     private handleFiles(files);
+    private isFileSizeValid(file);
     private stopEventPropagation(e);
     destroy(): void;
 }

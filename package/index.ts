@@ -103,6 +103,7 @@ export interface IUploadQueueCallbacks extends IUploadCallbacks {
     onFileRemovedCallback?: (file: IUploadFile) => void;
     onAllFinishedCallback?: () => void;
     onQueueChangedCallback?: (queue: IUploadFile[]) => void;
+    onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
 }
 
 export interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
@@ -126,7 +127,7 @@ export interface IUploadStatus {
 export class UploadArea {
     private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
-
+    private validationFailedInputFiles: IUploadFile[];
     private unregisterOnClick: () => void;
     private unregisterOnDrop: () => void;
     private unregisterOnDragOver: () => void;
@@ -136,37 +137,59 @@ export class UploadArea {
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
         this.setFullOptions(options);
         this.setupHiddenInput();
+
+        this.validationFailedInputFiles = [];
     }
 
     private setFullOptions(options: IUploadAreaOptions): void {
         this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = options.allowDragDrop == undefined ? true : options.allowDragDrop;
-        this.options.clickable = options.clickable == undefined ? true : options.clickable;
+        this.options.allowDragDrop = options.allowDragDrop || true;
+        this.options.clickable = options.clickable || true;
         this.options.accept = options.accept || '*';
-        this.options.multiple = options.multiple == undefined ? true : options.multiple;
+        this.options.multiple = options.multiple || true;
     }
 
     private putFilesToQueue(fileList: FileList): void {
         var uploadFiles = castFiles(fileList);
+        let queFiles: IUploadFile[] = [];
         uploadFiles.forEach((file: IUploadFile) => {
-            file.progress = 0;
-            file.start = () => {
-                this.uploadCore.upload([file]);
-                file.start = () => { };
-            };
+            if (this.validateFile(file)) {
+                file.start = () => {
+                    this.uploadCore.upload([file]);
+                    file.start = () => { };
+                };
+                queFiles.push(file);
+            }
         });
-        this.uploader.queue.addFiles(uploadFiles);
+        this.uploader.queue.addFiles(queFiles);
+    }
+
+    private callbackOnFilesErrors(): void {
+        if (this.validationFailedInputFiles.length > 0) {
+            this.uploader.queue.callbacks.onFilesAddedErrorCallback(this.validationFailedInputFiles);
+            this.validationFailedInputFiles = [];
+        }
+    }
+
+    private validateFile(file: IUploadFile): boolean {
+        if (!this.isFileSizeValid(file)) {
+            this.validationFailedInputFiles.push(file);
+            return false;
+        }
+        return true;
     }
 
     private putFileToQueue(file: File): void {
         let uploadFile: IUploadFile;
         uploadFile = <IUploadFile>file;
-        uploadFile.progress = 0;
-        uploadFile.start = () => {
-            this.uploadCore.upload([file]);
-            uploadFile.start = () => { };
-        };
-        this.uploader.queue.addFiles([uploadFile]);
+        if (this.validateFile(uploadFile)) {
+            uploadFile.progress = 0;
+            uploadFile.start = () => {
+                this.uploadCore.upload([file]);
+                uploadFile.start = () => { };
+            };
+            this.uploader.queue.addFiles([uploadFile]);
+        }
     }
 
     private setupHiddenInput(): void {
@@ -220,9 +243,11 @@ export class UploadArea {
         }
         var files = e.dataTransfer.files;
         if (files.length) {
+            let result: FileList;
             var items = e.dataTransfer.items;
             if (items && items.length && ((<any>items[0]).webkitGetAsEntry != null)) {
                 this.addFilesFromItems(items);
+                this.callbackOnFilesErrors();
             } else {
                 this.handleFiles(files);
             }
@@ -267,11 +292,11 @@ export class UploadArea {
                         _class.putFileToQueue(file);
                     });
                 } else if (entry.isDirectory) {
-                    _class.processDirectory(entry, "" + path + "/" + entry.name)
+                    _class.processDirectory(entry, "" + path + "/" + entry.name);
                 }
             }
         };
-        return dirReader.readEntries(entryReader, function(error) {
+        dirReader.readEntries(entryReader, function(error) {
             return typeof console !== "undefined" && console !== null ? typeof console.log === "function" ? console.log(error) : void 0 : void 0;
         });
     }
@@ -280,6 +305,12 @@ export class UploadArea {
         for (var i = 0; i < files.length; i++) {
             this.putFileToQueue(files[i]);
         }
+    }
+
+    private isFileSizeValid(file: File): boolean {
+        var maxFileSize = this.options.maxFileSize * 1024 * 1024; // max file size in bytes
+        if (file.size > maxFileSize) return false;
+        return true;
     }
 
     private stopEventPropagation(e) {
