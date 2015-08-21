@@ -32,7 +32,7 @@
     "api"
   ],
   "dependencies": {
-  	"cors": "^2.7.1",
+    "cors": "^2.7.1",
     "express": "~4.10.2",
     "multer": "~0.1.6"
   },
