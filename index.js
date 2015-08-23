@@ -8,7 +8,7 @@ window.onload = function () {
         maxFileSize: 2000,
         allowDragDrop: true,
         clickable: true,
-        accept: "*",
+        accept: "*.*",
         multiple: true
     };
     var queueUploadSettings = {
@@ -17,7 +17,7 @@ window.onload = function () {
         maxFileSize: 2000,
         allowDragDrop: true,
         clickable: false,
-        accept: "*",
+        accept: "*.*",
         multiple: true
     };
     uploaderExample1.registerArea(document.getElementById('example-dnd-area'), uploadSettings);
@@ -29,4 +29,12 @@ window.onload = function () {
     uploaderExample1.queue.callbacks.onProgressCallback = function (file) {
         queueRenderer.renderItemProgress('example-queue', file);
     };
+    uploaderExample1.queue.callbacks.onFilesAddedErrorCallback = function (files) {
+        var errorMessage = "";
+        files.forEach(function (file) {
+            errorMessage += "File " + file.name + " validation failed.\n";
+        });
+        alert(errorMessage);
+    };
+    document.getElementById("example-clear-button").addEventListener('click', function () { return uploaderExample1.queue.clearFiles(); });
 };
