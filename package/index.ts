@@ -143,8 +143,8 @@ export class UploadArea {
 
     private setFullOptions(options: IUploadAreaOptions): void {
         this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = options.allowDragDrop || true;
-        this.options.clickable = options.clickable || true;
+        this.options.allowDragDrop = options.allowDragDrop == undefined ? true : options.allowDragDrop;
+        this.options.clickable = options.clickable == undefined ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
         this.options.multiple = options.multiple || true;
     }
@@ -343,7 +343,7 @@ export class UploadArea {
 }
 
 export class UploadCore {
-    constructor(public options: IUploadOptions, public callbacks: IUploadCallbacksExt) {
+    constructor(public options: IUploadOptions, public callbacks: IUploadCallbacksExt = {}) {
         this.setFullOptions(options);
         this.setFullCallbacks(callbacks);
     }
@@ -523,9 +523,14 @@ export class UploadQueue {
             this.filesChanged();
     }
 
-    clearFiles() {
-        this.queuedFiles.forEach(file => this.deactivateFile(file));
-        this.queuedFiles = [];
+    clearFiles(excludeStatuses: IUploadStatus[] = [], cancelProcessing: boolean = false) {
+        if (!cancelProcessing)
+            excludeStatuses = excludeStatuses.concat([uploadStatus.queued, uploadStatus.uploading]);
+
+        this.queuedFiles.filter((file: IUploadFile) => excludeStatuses.indexOf(file.uploadStatus) < 0)
+            .forEach(file => this.removeFile(file, true));
+
+        this.callbacks.onQueueChangedCallback(this.queuedFiles);
     }
 
     private filesChanged(): void {
@@ -630,27 +635,27 @@ export class Uploader {
     queue: UploadQueue;
     options: IUploadQueueOptions;
 
-    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) {
+    constructor(options: IUploadQueueOptions = {}, callbacks: IUploadQueueCallbacks = {}) {
         this.setOptions(options);
         this.uploadAreas = [];
-        this.queue = new UploadQueue(options,callbacks);
+        this.queue = new UploadQueue(options, callbacks);
     }
 
-    setOptions(options: IUploadQueueOptions) : void {
+    setOptions(options: IUploadQueueOptions): void {
         this.options = options;
     }
 
-    registerArea(element: Element, options: IUploadAreaOptions) : UploadArea {
+    registerArea(element: Element, options: IUploadAreaOptions): UploadArea {
         var uploadArea = new UploadArea(element, options, this);
         this.uploadAreas.push(uploadArea);
         return uploadArea;
     }
 
-    unregisterArea(area: UploadArea) : void {
+    unregisterArea(area: UploadArea): void {
         var areaIndex = this.uploadAreas.indexOf(area)
         if (areaIndex >= 0) {
-          this.uploadAreas[areaIndex].destroy();
-          this.uploadAreas.splice(areaIndex, 1);
+            this.uploadAreas[areaIndex].destroy();
+            this.uploadAreas.splice(areaIndex, 1);
         }
     }
 }

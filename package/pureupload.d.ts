@@ -106,7 +106,7 @@ export class UploadArea {
 export class UploadCore {
     options: IUploadOptions;
     callbacks: IUploadCallbacksExt;
-    constructor(options: IUploadOptions, callbacks: IUploadCallbacksExt);
+    constructor(options: IUploadOptions, callbacks?: IUploadCallbacksExt);
     upload(fileList: File[] | Object): void;
     private processFile(file);
     private createRequest();
@@ -129,7 +129,7 @@ export class UploadQueue {
     constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacksExt);
     addFiles(files: IUploadFile[]): void;
     removeFile(file: IUploadFile, blockRecursive?: boolean): void;
-    clearFiles(): void;
+    clearFiles(excludeStatuses?: IUploadStatus[], cancelProcessing?: boolean): void;
     private filesChanged();
     private checkAllFinished();
     private setFullOptions();
@@ -152,7 +152,7 @@ export class Uploader {
     uploadAreas: UploadArea[];
     queue: UploadQueue;
     options: IUploadQueueOptions;
-    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks);
+    constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
     setOptions(options: IUploadQueueOptions): void;
     registerArea(element: Element, options: IUploadAreaOptions): UploadArea;
     unregisterArea(area: UploadArea): void;

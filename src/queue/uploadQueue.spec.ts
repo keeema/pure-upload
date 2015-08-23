@@ -84,6 +84,34 @@ describe('uploadQueue', () => {
             expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
             expect(queueChangedCallbackSpy.calls.count()).toEqual(3);
         })
+
+        it('clears file queue according to the specifed scale', () => {
+            let file1: IUploadFile = <IUploadFile>{ uploadStatus: uploadStatus.queued, cancel: () => { } };
+            let file2: IUploadFile = <IUploadFile>{ uploadStatus: uploadStatus.uploading, cancel: () => { } };
+            let file3: IUploadFile = <IUploadFile>{ uploadStatus: uploadStatus.uploaded, cancel: () => { } };
+
+            uploadQueue = new UploadQueue({}, {});
+            uploadQueue.queuedFiles = [file1, file2, file3];
+
+            uploadQueue.clearFiles();
+            expect(uploadQueue.queuedFiles).toEqual([file1, file2]);
+
+            uploadQueue.clearFiles([uploadStatus.queued], true);
+            expect(uploadQueue.queuedFiles).toEqual([file1]);
+
+            uploadQueue.clearFiles([], true);
+            expect(uploadQueue.queuedFiles).toEqual([]);
+        })
+
+        it('triggers and on clearFiles', () => {
+            callback = jasmine.createSpy('onFileRemovedCallback');
+            uploadQueue = new UploadQueue({}, { onFileRemovedCallback: callback, onQueueChangedCallback: queueChangedCallbackSpy });
+            uploadQueue.addFiles([file]);
+            uploadQueue.clearFiles([], true);
+
+            expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
+            expect(callback.calls.count()).toEqual(1);
+        });
     })
 
     describe('filesChanged', () => {

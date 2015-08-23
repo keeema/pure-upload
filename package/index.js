@@ -55,8 +55,8 @@ var UploadArea = (function () {
     }
     UploadArea.prototype.setFullOptions = function (options) {
         this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = options.allowDragDrop || true;
-        this.options.clickable = options.clickable || true;
+        this.options.allowDragDrop = options.allowDragDrop == undefined ? true : options.allowDragDrop;
+        this.options.clickable = options.clickable == undefined ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
         this.options.multiple = options.multiple || true;
     };
@@ -244,6 +244,7 @@ var UploadArea = (function () {
 exports.UploadArea = UploadArea;
 var UploadCore = (function () {
     function UploadCore(options, callbacks) {
+        if (callbacks === void 0) { callbacks = {}; }
         this.options = options;
         this.callbacks = callbacks;
         this.setFullOptions(options);
@@ -405,10 +406,15 @@ var UploadQueue = (function () {
         if (!blockRecursive)
             this.filesChanged();
     };
-    UploadQueue.prototype.clearFiles = function () {
+    UploadQueue.prototype.clearFiles = function (excludeStatuses, cancelProcessing) {
         var _this = this;
-        this.queuedFiles.forEach(function (file) { return _this.deactivateFile(file); });
-        this.queuedFiles = [];
+        if (excludeStatuses === void 0) { excludeStatuses = []; }
+        if (cancelProcessing === void 0) { cancelProcessing = false; }
+        if (!cancelProcessing)
+            excludeStatuses = excludeStatuses.concat([exports.uploadStatus.queued, exports.uploadStatus.uploading]);
+        this.queuedFiles.filter(function (file) { return excludeStatuses.indexOf(file.uploadStatus) < 0; })
+            .forEach(function (file) { return _this.removeFile(file, true); });
+        this.callbacks.onQueueChangedCallback(this.queuedFiles);
     };
     UploadQueue.prototype.filesChanged = function () {
         if (this.options.autoRemove)
@@ -494,6 +500,8 @@ exports.UploadStatusStatic = UploadStatusStatic;
 exports.uploadStatus = UploadStatusStatic;
 var Uploader = (function () {
     function Uploader(options, callbacks) {
+        if (options === void 0) { options = {}; }
+        if (callbacks === void 0) { callbacks = {}; }
         this.setOptions(options);
         this.uploadAreas = [];
         this.queue = new UploadQueue(options, callbacks);

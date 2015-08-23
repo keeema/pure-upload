@@ -53,8 +53,8 @@ class QueueRenderer {
         switch (file.uploadStatus.toString()) {
             case pu.UploadStatusStatic.queued:
                 if (!queueSettings.autoStart) {
-                  itemRow.appendChild(this.createButton("Start", () => file.start()));
-                  break;
+                    itemRow.appendChild(this.createButton("Start", () => file.start()));
+                    break;
                 }
             case pu.UploadStatusStatic.uploading:
                 itemRow.appendChild(this.createButton("Cancel", () => file.cancel()));
@@ -70,10 +70,10 @@ class QueueRenderer {
     renderItemProgress(queueId: string, file: pu.IUploadFile): void {
         var itemRow = document.getElementById(file.guid);
         for (var i = 0; i < itemRow.childNodes.length; i++) {
-          var node = itemRow.childNodes[i];
-          if (node.attributes.getNamedItem('class').value == 'table-row-item-progress') {
-              node.textContent = file.progress.toString() + "%";
-              break;
+            var node = itemRow.childNodes[i];
+            if (node.attributes.getNamedItem('class').value == 'table-row-item-progress') {
+                node.textContent = file.progress.toString() + "%";
+                break;
             }
         }
     }

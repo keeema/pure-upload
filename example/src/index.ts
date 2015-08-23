@@ -9,7 +9,7 @@ window.onload = () => {
         maxFileSize: 2000,
         allowDragDrop: true,
         clickable: true,
-        accept: "*",
+        accept: "*.*",
         multiple: true,
     };
     var queueUploadSettings = {
@@ -18,7 +18,7 @@ window.onload = () => {
         maxFileSize: 2000,
         allowDragDrop: true,
         clickable: false,
-        accept: "*",
+        accept: "*.*",
         multiple: true,
     };
 
@@ -41,4 +41,6 @@ window.onload = () => {
         });
         alert(errorMessage);
     };
+
+    document.getElementById("example-clear-button").addEventListener('click', () => uploaderExample1.queue.clearFiles());
 }

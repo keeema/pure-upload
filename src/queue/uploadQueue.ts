@@ -37,9 +37,14 @@ class UploadQueue {
             this.filesChanged();
     }
 
-    clearFiles() {
-        this.queuedFiles.forEach(file => this.deactivateFile(file));
-        this.queuedFiles = [];
+    clearFiles(excludeStatuses: IUploadStatus[] = [], cancelProcessing: boolean = false) {
+        if (!cancelProcessing)
+            excludeStatuses = excludeStatuses.concat([uploadStatus.queued, uploadStatus.uploading]);
+
+        this.queuedFiles.filter((file: IUploadFile) => excludeStatuses.indexOf(file.uploadStatus) < 0)
+            .forEach(file => this.removeFile(file, true));
+
+        this.callbacks.onQueueChangedCallback(this.queuedFiles);
     }
 
     private filesChanged(): void {

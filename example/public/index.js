@@ -8,7 +8,7 @@ window.onload = function () {
         maxFileSize: 2000,
         allowDragDrop: true,
         clickable: true,
-        accept: "*",
+        accept: "*.*",
         multiple: true
     };
     var queueUploadSettings = {
@@ -17,7 +17,7 @@ window.onload = function () {
         maxFileSize: 2000,
         allowDragDrop: true,
         clickable: false,
-        accept: "*",
+        accept: "*.*",
         multiple: true
     };
     uploaderExample1.registerArea(document.getElementById('example-dnd-area'), uploadSettings);
@@ -36,4 +36,5 @@ window.onload = function () {
         });
         alert(errorMessage);
     };
+    document.getElementById("example-clear-button").addEventListener('click', function () { return uploaderExample1.queue.clearFiles(); });
 };
