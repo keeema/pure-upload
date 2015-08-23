@@ -57,7 +57,7 @@ var UploadArea = (function () {
         this.options.maxFileSize = options.maxFileSize || 1024;
         this.options.allowDragDrop = options.allowDragDrop || true;
         this.options.clickable = options.clickable || true;
-        this.options.accept = options.accept || '*';
+        this.options.accept = options.accept || '*.*';
         this.options.multiple = options.multiple || true;
     };
     UploadArea.prototype.putFilesToQueue = function (fileList) {
@@ -373,30 +373,6 @@ var UploadCore = (function () {
     return UploadCore;
 })();
 exports.UploadCore = UploadCore;
-var Uploader = (function () {
-    function Uploader(options, callbacks) {
-        this.setOptions(options);
-        this.uploadAreas = [];
-        this.queue = new UploadQueue(options, callbacks);
-    }
-    Uploader.prototype.setOptions = function (options) {
-        this.options = options;
-    };
-    Uploader.prototype.registerArea = function (element, options) {
-        var uploadArea = new UploadArea(element, options, this);
-        this.uploadAreas.push(uploadArea);
-        return uploadArea;
-    };
-    Uploader.prototype.unregisterArea = function (area) {
-        var areaIndex = this.uploadAreas.indexOf(area);
-        if (areaIndex >= 0) {
-            this.uploadAreas[areaIndex].destroy();
-            this.uploadAreas.splice(areaIndex, 1);
-        }
-    };
-    return Uploader;
-})();
-exports.Uploader = Uploader;
 var UploadQueue = (function () {
     function UploadQueue(options, callbacks) {
         this.options = options;
@@ -516,3 +492,27 @@ var UploadStatusStatic = (function () {
 })();
 exports.UploadStatusStatic = UploadStatusStatic;
 exports.uploadStatus = UploadStatusStatic;
+var Uploader = (function () {
+    function Uploader(options, callbacks) {
+        this.setOptions(options);
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options, callbacks);
+    }
+    Uploader.prototype.setOptions = function (options) {
+        this.options = options;
+    };
+    Uploader.prototype.registerArea = function (element, options) {
+        var uploadArea = new UploadArea(element, options, this);
+        this.uploadAreas.push(uploadArea);
+        return uploadArea;
+    };
+    Uploader.prototype.unregisterArea = function (area) {
+        var areaIndex = this.uploadAreas.indexOf(area);
+        if (areaIndex >= 0) {
+            this.uploadAreas[areaIndex].destroy();
+            this.uploadAreas.splice(areaIndex, 1);
+        }
+    };
+    return Uploader;
+})();
+exports.Uploader = Uploader;

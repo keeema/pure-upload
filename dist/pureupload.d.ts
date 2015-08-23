@@ -122,15 +122,6 @@ declare module pu {
         private setFullOptions(options);
         private setFullCallbacks(callbacks);
     }
-    class Uploader {
-        uploadAreas: UploadArea[];
-        queue: UploadQueue;
-        options: IUploadQueueOptions;
-        constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks);
-        setOptions(options: IUploadQueueOptions): void;
-        registerArea(element: Element, options: IUploadAreaOptions): UploadArea;
-        unregisterArea(area: UploadArea): void;
-    }
     class UploadQueue {
         options: IUploadQueueOptions;
         callbacks: IUploadQueueCallbacksExt;
@@ -157,4 +148,13 @@ declare module pu {
         static removed: string;
     }
     var uploadStatus: IUploadStatus;
+    class Uploader {
+        uploadAreas: UploadArea[];
+        queue: UploadQueue;
+        options: IUploadQueueOptions;
+        constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks);
+        setOptions(options: IUploadQueueOptions): void;
+        registerArea(element: Element, options: IUploadAreaOptions): UploadArea;
+        unregisterArea(area: UploadArea): void;
+    }
 }

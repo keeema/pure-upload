@@ -145,7 +145,7 @@ export class UploadArea {
         this.options.maxFileSize = options.maxFileSize || 1024;
         this.options.allowDragDrop = options.allowDragDrop || true;
         this.options.clickable = options.clickable || true;
-        this.options.accept = options.accept || '*';
+        this.options.accept = options.accept || '*.*';
         this.options.multiple = options.multiple || true;
     }
 
@@ -484,36 +484,6 @@ export class UploadCore {
     }
 }
 
-export class Uploader {
-    uploadAreas: UploadArea[];
-    queue: UploadQueue;
-    options: IUploadQueueOptions;
-
-    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) {
-        this.setOptions(options);
-        this.uploadAreas = [];
-        this.queue = new UploadQueue(options,callbacks);
-    }
-
-    setOptions(options: IUploadQueueOptions) : void {
-        this.options = options;
-    }
-
-    registerArea(element: Element, options: IUploadAreaOptions) : UploadArea {
-        var uploadArea = new UploadArea(element, options, this);
-        this.uploadAreas.push(uploadArea);
-        return uploadArea;
-    }
-
-    unregisterArea(area: UploadArea) : void {
-        var areaIndex = this.uploadAreas.indexOf(area)
-        if (areaIndex >= 0) {
-          this.uploadAreas[areaIndex].destroy();
-          this.uploadAreas.splice(areaIndex, 1);
-        }
-    }
-}
-
 export class UploadQueue {
     queuedFiles: IUploadFile[] = [];
 
@@ -654,3 +624,33 @@ export class UploadStatusStatic {
 }
 
 export var uploadStatus: IUploadStatus = <any>UploadStatusStatic;
+
+export class Uploader {
+    uploadAreas: UploadArea[];
+    queue: UploadQueue;
+    options: IUploadQueueOptions;
+
+    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) {
+        this.setOptions(options);
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options,callbacks);
+    }
+
+    setOptions(options: IUploadQueueOptions) : void {
+        this.options = options;
+    }
+
+    registerArea(element: Element, options: IUploadAreaOptions) : UploadArea {
+        var uploadArea = new UploadArea(element, options, this);
+        this.uploadAreas.push(uploadArea);
+        return uploadArea;
+    }
+
+    unregisterArea(area: UploadArea) : void {
+        var areaIndex = this.uploadAreas.indexOf(area)
+        if (areaIndex >= 0) {
+          this.uploadAreas[areaIndex].destroy();
+          this.uploadAreas.splice(areaIndex, 1);
+        }
+    }
+}
