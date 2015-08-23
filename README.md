@@ -17,15 +17,13 @@ Initialization:
 ```typescript
 var uploader = pu.getUploader(uploadQueueOptions, uploadQueueCallbacks)
 ```
-
-
-### UploadQueue options
+### Upload queue options
 ```typescript
 maxParallelUploads?: number;
 autoStart?: boolean;
 autoRemove?: boolean;
 ```
-### UploadQueue callbacks
+### Upload queue callbacks
 ```typescript
 onProgressCallback?: (file: IUploadFile) => void;
 onCancelledCallback?: (file: IUploadFile) => void;
@@ -40,7 +38,7 @@ onQueueChangedCallback?: (queue: IUploadFile[]) => void;
 onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
 ```
 
-### UploadArea
+### Upload area
 Upload area defines element registred in Uploader.
 
 Registration:
@@ -51,7 +49,7 @@ Unregistration:
 ```typescript
 uploader.unregisterArea(uploadArea);
 ```
-### UploadArea options
+### Upload area options
 ```typescript
 url: string;
 method: string;
@@ -64,3 +62,20 @@ clickable?: boolean;
 accept?: string;
 multiple?: boolean;
 ```
+
+### Upload file
+Standard *File* object extended with additional informations and methods to manage a file in queue.
+```typescript
+guid: string;
+uploadStatus: IUploadStatus;
+responseCode: number;
+responseText: string;
+progress: number;
+sentBytes: number;
+cancel: () => void;
+remove: () => void;
+start: () => void;
+```
+
+### Upload status
+File statuses accesible by `pu.uploadStatus`.
