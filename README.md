@@ -51,7 +51,7 @@ Unregistration:
 ```typescript
 uploader.unregisterArea(uploadArea);
 ```
-### UploadAreaOptions
+### UploadArea options
 ```typescript
 url: string;
 method: string;
