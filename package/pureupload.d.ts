@@ -11,6 +11,7 @@ export interface FileExt extends File {
     file: (file: any) => void;
     isFile: boolean;
     isDirectory: boolean;
+    fullPath: string;
 }
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
@@ -57,7 +58,6 @@ export interface IUploadQueueCallbacks extends IUploadCallbacks {
     onFileRemovedCallback?: (file: IUploadFile) => void;
     onAllFinishedCallback?: () => void;
     onQueueChangedCallback?: (queue: IUploadFile[]) => void;
-    onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
 }
 export interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
 }
@@ -80,7 +80,6 @@ export class UploadArea {
     uploader: Uploader;
     private uploadCore;
     private fileInput;
-    private validationFailedInputFiles;
     private unregisterOnClick;
     private unregisterOnDrop;
     private unregisterOnDragOver;
@@ -88,9 +87,7 @@ export class UploadArea {
     constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
     private setFullOptions(options);
     private putFilesToQueue(fileList);
-    private callbackOnFilesErrors();
     private validateFile(file);
-    private putFileToQueue(file);
     private setupHiddenInput();
     private onChange(e);
     private onDrag(e);
@@ -120,7 +117,7 @@ export class UploadCore {
     private finished(file, xhr);
     private setResponse(file, xhr);
     private setFullOptions(options);
-    private setFullCallbacks(callbacks);
+    setFullCallbacks(callbacks: IUploadCallbacksExt): void;
 }
 export class Uploader {
     uploadAreas: UploadArea[];

@@ -14,6 +14,12 @@ describe('uploadQueue', () => {
             expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.queued);
         })
 
+        it('sets the \'queued\' state only for non-failed files', () => {
+            uploadQueue.addFiles([<IUploadFile>{}, <IUploadFile>{ uploadStatus: uploadStatus.failed }]);
+            expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.queued);
+            expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.failed);
+        })
+
         it('assigns the remove function to the newly added files', () => {
             let file = <IUploadFile>{};
             uploadQueue.addFiles([file]);

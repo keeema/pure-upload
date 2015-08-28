@@ -10,13 +10,20 @@ class UploadQueue {
         files.forEach(file => {
             this.queuedFiles.push(file);
             file.guid = newGuid();
-            file.uploadStatus = uploadStatus.queued;
 
             file.remove = decorateSimpleFunction(file.remove, () => {
                 this.removeFile(file);
             });
 
             this.callbacks.onFileAddedCallback(file);
+
+            if (file.uploadStatus === uploadStatus.failed) {
+                if (this.callbacks.onErrorCallback) {
+                    this.callbacks.onErrorCallback(file);
+                }
+            } else {
+                file.uploadStatus = uploadStatus.queued;
+            }
         });
 
         this.filesChanged()

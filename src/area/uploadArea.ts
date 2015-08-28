@@ -1,7 +1,6 @@
 class UploadArea {
     private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
-    private validationFailedInputFiles: IUploadFile[];
     private unregisterOnClick: () => void;
     private unregisterOnDrop: () => void;
     private unregisterOnDragOver: () => void;
@@ -11,8 +10,6 @@ class UploadArea {
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
         this.setFullOptions(options);
         this.setupHiddenInput();
-
-        this.validationFailedInputFiles = [];
     }
 
     private setFullOptions(options: IUploadAreaOptions): void {
@@ -23,47 +20,25 @@ class UploadArea {
         this.options.multiple = options.multiple || true;
     }
 
-    private putFilesToQueue(fileList: FileList): void {
+    private putFilesToQueue(fileList: FileList | File[]): void {
         var uploadFiles = castFiles(fileList);
-        let queFiles: IUploadFile[] = [];
         uploadFiles.forEach((file: IUploadFile) => {
             if (this.validateFile(file)) {
                 file.start = () => {
                     this.uploadCore.upload([file]);
                     file.start = () => { };
                 };
-                queFiles.push(file);
             }
         });
-        this.uploader.queue.addFiles(queFiles);
-    }
-
-    private callbackOnFilesErrors(): void {
-        if (this.validationFailedInputFiles.length > 0) {
-            this.uploader.queue.callbacks.onFilesAddedErrorCallback(this.validationFailedInputFiles);
-            this.validationFailedInputFiles = [];
-        }
+        this.uploader.queue.addFiles(uploadFiles);
     }
 
     private validateFile(file: IUploadFile): boolean {
         if (!this.isFileSizeValid(file)) {
-            this.validationFailedInputFiles.push(file);
+          file.uploadStatus = uploadStatus.failed;
             return false;
         }
         return true;
-    }
-
-    private putFileToQueue(file: File): void {
-        let uploadFile: IUploadFile;
-        uploadFile = <IUploadFile>file;
-        if (this.validateFile(uploadFile)) {
-            uploadFile.progress = 0;
-            uploadFile.start = () => {
-                this.uploadCore.upload([file]);
-                uploadFile.start = () => { };
-            };
-            this.uploader.queue.addFiles([uploadFile]);
-        }
     }
 
     private setupHiddenInput(): void {
@@ -121,7 +96,6 @@ class UploadArea {
             var items = e.dataTransfer.items;
             if (items && items.length && ((<any>items[0]).webkitGetAsEntry != null)) {
                 this.addFilesFromItems(items);
-                this.callbackOnFilesErrors();
             } else {
                 this.handleFiles(files);
             }
@@ -139,13 +113,13 @@ class UploadArea {
             let item: FileExt = <FileExt>items[i];
             if ((item.webkitGetAsEntry) && (entry = item.webkitGetAsEntry())) {
                 if (entry.isFile) {
-                    this.putFileToQueue(item.getAsFile());
+                    this.putFilesToQueue([item.getAsFile()]);
                 } else if (entry.isDirectory) {
                     this.processDirectory(entry, entry.name);
                 }
             } else if (item.getAsFile) {
                 if ((item.kind == null) || item.kind === "file") {
-                    this.putFileToQueue(item.getAsFile());
+                    this.putFilesToQueue([item.getAsFile()]);
                 }
             }
         }
@@ -158,12 +132,12 @@ class UploadArea {
             for (var i = 0; i < entries.length; i++) {
                 var entry = entries[i];
                 if (entry.isFile) {
-                    entry.file((file) => {
+                    entry.file((file:FileExt) => {
                         if (file.name.substring(0, 1) === '.') {
                             return;
                         }
                         file.fullPath = "" + path + "/" + file.name;
-                        _class.putFileToQueue(file);
+                        _class.putFilesToQueue([file]);
                     });
                 } else if (entry.isDirectory) {
                     _class.processDirectory(entry, "" + path + "/" + entry.name);
@@ -177,7 +151,7 @@ class UploadArea {
 
     private handleFiles(files: FileList): void {
         for (var i = 0; i < files.length; i++) {
-            this.putFileToQueue(files[i]);
+            this.putFilesToQueue([files[i]]);
         }
     }
 

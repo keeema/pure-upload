@@ -11,6 +11,7 @@ declare module pu {
         file: (file: any) => void;
         isFile: boolean;
         isDirectory: boolean;
+        fullPath: string;
     }
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
@@ -57,7 +58,6 @@ declare module pu {
         onFileRemovedCallback?: (file: IUploadFile) => void;
         onAllFinishedCallback?: () => void;
         onQueueChangedCallback?: (queue: IUploadFile[]) => void;
-        onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
     }
     interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
     }
@@ -80,7 +80,6 @@ declare module pu {
         uploader: Uploader;
         private uploadCore;
         private fileInput;
-        private validationFailedInputFiles;
         private unregisterOnClick;
         private unregisterOnDrop;
         private unregisterOnDragOver;
@@ -88,9 +87,7 @@ declare module pu {
         constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
         private setFullOptions(options);
         private putFilesToQueue(fileList);
-        private callbackOnFilesErrors();
         private validateFile(file);
-        private putFileToQueue(file);
         private setupHiddenInput();
         private onChange(e);
         private onDrag(e);
@@ -120,7 +117,7 @@ declare module pu {
         private finished(file, xhr);
         private setResponse(file, xhr);
         private setFullOptions(options);
-        private setFullCallbacks(callbacks);
+        setFullCallbacks(callbacks: IUploadCallbacksExt): void;
     }
     class Uploader {
         uploadAreas: UploadArea[];

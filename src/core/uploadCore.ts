@@ -130,7 +130,7 @@ class UploadCore {
         this.options.withCredentials = options.withCredentials || false
     }
 
-    private setFullCallbacks(callbacks: IUploadCallbacksExt) {
+    setFullCallbacks(callbacks: IUploadCallbacksExt) {
         this.callbacks.onProgressCallback = callbacks.onProgressCallback || (() => { }),
         this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (() => { }),
         this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (() => { }),

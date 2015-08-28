@@ -6,4 +6,5 @@ interface FileExt extends File {
 
     isFile: boolean;
     isDirectory: boolean;
+    fullPath: string;
 }

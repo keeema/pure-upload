@@ -51,7 +51,6 @@ var UploadArea = (function () {
         this.uploadCore = exports.getUploadCore(this.options, this.uploader.queue.callbacks);
         this.setFullOptions(options);
         this.setupHiddenInput();
-        this.validationFailedInputFiles = [];
     }
     UploadArea.prototype.setFullOptions = function (options) {
         this.options.maxFileSize = options.maxFileSize || 1024;
@@ -63,43 +62,22 @@ var UploadArea = (function () {
     UploadArea.prototype.putFilesToQueue = function (fileList) {
         var _this = this;
         var uploadFiles = castFiles(fileList);
-        var queFiles = [];
         uploadFiles.forEach(function (file) {
             if (_this.validateFile(file)) {
                 file.start = function () {
                     _this.uploadCore.upload([file]);
                     file.start = function () { };
                 };
-                queFiles.push(file);
             }
         });
-        this.uploader.queue.addFiles(queFiles);
-    };
-    UploadArea.prototype.callbackOnFilesErrors = function () {
-        if (this.validationFailedInputFiles.length > 0) {
-            this.uploader.queue.callbacks.onFilesAddedErrorCallback(this.validationFailedInputFiles);
-            this.validationFailedInputFiles = [];
-        }
+        this.uploader.queue.addFiles(uploadFiles);
     };
     UploadArea.prototype.validateFile = function (file) {
         if (!this.isFileSizeValid(file)) {
-            this.validationFailedInputFiles.push(file);
+            file.uploadStatus = exports.uploadStatus.failed;
             return false;
         }
         return true;
-    };
-    UploadArea.prototype.putFileToQueue = function (file) {
-        var _this = this;
-        var uploadFile;
-        uploadFile = file;
-        if (this.validateFile(uploadFile)) {
-            uploadFile.progress = 0;
-            uploadFile.start = function () {
-                _this.uploadCore.upload([file]);
-                uploadFile.start = function () { };
-            };
-            this.uploader.queue.addFiles([uploadFile]);
-        }
     };
     UploadArea.prototype.setupHiddenInput = function () {
         var _this = this;
@@ -152,7 +130,6 @@ var UploadArea = (function () {
             var items = e.dataTransfer.items;
             if (items && items.length && (items[0].webkitGetAsEntry != null)) {
                 this.addFilesFromItems(items);
-                this.callbackOnFilesErrors();
             }
             else {
                 this.handleFiles(files);
@@ -169,7 +146,7 @@ var UploadArea = (function () {
             var item = items[i];
             if ((item.webkitGetAsEntry) && (entry = item.webkitGetAsEntry())) {
                 if (entry.isFile) {
-                    this.putFileToQueue(item.getAsFile());
+                    this.putFilesToQueue([item.getAsFile()]);
                 }
                 else if (entry.isDirectory) {
                     this.processDirectory(entry, entry.name);
@@ -177,7 +154,7 @@ var UploadArea = (function () {
             }
             else if (item.getAsFile) {
                 if ((item.kind == null) || item.kind === "file") {
-                    this.putFileToQueue(item.getAsFile());
+                    this.putFilesToQueue([item.getAsFile()]);
                 }
             }
         }
@@ -194,7 +171,7 @@ var UploadArea = (function () {
                             return;
                         }
                         file.fullPath = "" + path + "/" + file.name;
-                        _class.putFileToQueue(file);
+                        _class.putFilesToQueue([file]);
                     });
                 }
                 else if (entry.isDirectory) {
@@ -208,7 +185,7 @@ var UploadArea = (function () {
     };
     UploadArea.prototype.handleFiles = function (files) {
         for (var i = 0; i < files.length; i++) {
-            this.putFileToQueue(files[i]);
+            this.putFilesToQueue([files[i]]);
         }
     };
     UploadArea.prototype.isFileSizeValid = function (file) {
@@ -414,11 +391,18 @@ var UploadQueue = (function () {
         files.forEach(function (file) {
             _this.queuedFiles.push(file);
             file.guid = newGuid();
-            file.uploadStatus = exports.uploadStatus.queued;
             file.remove = decorateSimpleFunction(file.remove, function () {
                 _this.removeFile(file);
             });
             _this.callbacks.onFileAddedCallback(file);
+            if (file.uploadStatus === exports.uploadStatus.failed) {
+                if (_this.callbacks.onErrorCallback) {
+                    _this.callbacks.onErrorCallback(file);
+                }
+            }
+            else {
+                file.uploadStatus = exports.uploadStatus.queued;
+            }
         });
         this.filesChanged();
     };
