@@ -1,5 +1,5 @@
 # Pure-upload
-[![npm version](https://badge.fury.io/js/pure-upload.svg)](http://badge.fury.io/js/pure-upload)
+[![npm version](https://badge.fury.io/js/pure-upload.svg)](http://badge.fury.io/js/pure-upload)  [![Bower version](https://badge.fury.io/bo/pure-upload.svg)](http://badge.fury.io/bo/pure-upload)
 
 ## Installation
 1. Dowload as a ZIP file directly from [GitHub](https://github.com/keeema/pure-upload/archive/master.zip) pages and include to your project.
