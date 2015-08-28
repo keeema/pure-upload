@@ -109,8 +109,8 @@ export class UploadCore {
     constructor(options: IUploadOptions, callbacks?: IUploadCallbacksExt);
     upload(fileList: File[] | Object): void;
     private processFile(file);
-    private createRequest();
-    private setHeaders(xhr);
+    private createRequest(file);
+    private setHeaders(xhr, fileName);
     private setCallbacks(xhr, file);
     private send(xhr, file);
     private createFormData(file);
@@ -121,6 +121,15 @@ export class UploadCore {
     private setResponse(file, xhr);
     private setFullOptions(options);
     private setFullCallbacks(callbacks);
+}
+export class Uploader {
+    uploadAreas: UploadArea[];
+    queue: UploadQueue;
+    options: IUploadQueueOptions;
+    constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
+    setOptions(options: IUploadQueueOptions): void;
+    registerArea(element: Element, options: IUploadAreaOptions): UploadArea;
+    unregisterArea(area: UploadArea): void;
 }
 export class UploadQueue {
     options: IUploadQueueOptions;
@@ -148,13 +157,4 @@ export class UploadStatusStatic {
     static removed: string;
 }
 export var uploadStatus: IUploadStatus;
-export class Uploader {
-    uploadAreas: UploadArea[];
-    queue: UploadQueue;
-    options: IUploadQueueOptions;
-    constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
-    setOptions(options: IUploadQueueOptions): void;
-    registerArea(element: Element, options: IUploadAreaOptions): UploadArea;
-    unregisterArea(area: UploadArea): void;
-}
 }

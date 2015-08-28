@@ -256,22 +256,23 @@ var UploadCore = (function () {
         files.forEach(function (file) { return _this.processFile(file); });
     };
     UploadCore.prototype.processFile = function (file) {
-        var xhr = this.createRequest();
+        var xhr = this.createRequest(file);
         this.setCallbacks(xhr, file);
         this.send(xhr, file);
     };
-    UploadCore.prototype.createRequest = function () {
+    UploadCore.prototype.createRequest = function (file) {
         var xhr = new XMLHttpRequest();
         xhr.open(this.options.method, this.options.url, true);
         xhr.withCredentials = !!this.options.withCredentials;
-        this.setHeaders(xhr);
+        this.setHeaders(xhr, file.name);
         return xhr;
     };
-    UploadCore.prototype.setHeaders = function (xhr) {
+    UploadCore.prototype.setHeaders = function (xhr, fileName) {
         var _this = this;
         this.options.headers['Accept'] = this.options.headers['Accept'] || 'application/json';
         this.options.headers['Cache-Control'] = this.options.headers['Cache-Control'] || 'no-cache';
         this.options.headers['X-Requested-With'] = this.options.headers['X-Requested-With'] || 'XMLHttpRequest';
+        this.options.headers['Content-Disposition'] = this.options.headers['Content-Disposition'] || 'filename="' + fileName + '"';
         Object.keys(this.options.headers).forEach(function (headerName) {
             var headerValue = _this.options.headers[headerName];
             if (headerValue != undefined)
@@ -374,6 +375,32 @@ var UploadCore = (function () {
     return UploadCore;
 })();
 exports.UploadCore = UploadCore;
+var Uploader = (function () {
+    function Uploader(options, callbacks) {
+        if (options === void 0) { options = {}; }
+        if (callbacks === void 0) { callbacks = {}; }
+        this.setOptions(options);
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options, callbacks);
+    }
+    Uploader.prototype.setOptions = function (options) {
+        this.options = options;
+    };
+    Uploader.prototype.registerArea = function (element, options) {
+        var uploadArea = new UploadArea(element, options, this);
+        this.uploadAreas.push(uploadArea);
+        return uploadArea;
+    };
+    Uploader.prototype.unregisterArea = function (area) {
+        var areaIndex = this.uploadAreas.indexOf(area);
+        if (areaIndex >= 0) {
+            this.uploadAreas[areaIndex].destroy();
+            this.uploadAreas.splice(areaIndex, 1);
+        }
+    };
+    return Uploader;
+})();
+exports.Uploader = Uploader;
 var UploadQueue = (function () {
     function UploadQueue(options, callbacks) {
         this.options = options;
@@ -498,29 +525,3 @@ var UploadStatusStatic = (function () {
 })();
 exports.UploadStatusStatic = UploadStatusStatic;
 exports.uploadStatus = UploadStatusStatic;
-var Uploader = (function () {
-    function Uploader(options, callbacks) {
-        if (options === void 0) { options = {}; }
-        if (callbacks === void 0) { callbacks = {}; }
-        this.setOptions(options);
-        this.uploadAreas = [];
-        this.queue = new UploadQueue(options, callbacks);
-    }
-    Uploader.prototype.setOptions = function (options) {
-        this.options = options;
-    };
-    Uploader.prototype.registerArea = function (element, options) {
-        var uploadArea = new UploadArea(element, options, this);
-        this.uploadAreas.push(uploadArea);
-        return uploadArea;
-    };
-    Uploader.prototype.unregisterArea = function (area) {
-        var areaIndex = this.uploadAreas.indexOf(area);
-        if (areaIndex >= 0) {
-            this.uploadAreas[areaIndex].destroy();
-            this.uploadAreas.splice(areaIndex, 1);
-        }
-    };
-    return Uploader;
-})();
-exports.Uploader = Uploader;

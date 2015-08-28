@@ -109,8 +109,8 @@ declare module pu {
         constructor(options: IUploadOptions, callbacks?: IUploadCallbacksExt);
         upload(fileList: File[] | Object): void;
         private processFile(file);
-        private createRequest();
-        private setHeaders(xhr);
+        private createRequest(file);
+        private setHeaders(xhr, fileName);
         private setCallbacks(xhr, file);
         private send(xhr, file);
         private createFormData(file);
@@ -121,6 +121,15 @@ declare module pu {
         private setResponse(file, xhr);
         private setFullOptions(options);
         private setFullCallbacks(callbacks);
+    }
+    class Uploader {
+        uploadAreas: UploadArea[];
+        queue: UploadQueue;
+        options: IUploadQueueOptions;
+        constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
+        setOptions(options: IUploadQueueOptions): void;
+        registerArea(element: Element, options: IUploadAreaOptions): UploadArea;
+        unregisterArea(area: UploadArea): void;
     }
     class UploadQueue {
         options: IUploadQueueOptions;
@@ -148,13 +157,4 @@ declare module pu {
         static removed: string;
     }
     var uploadStatus: IUploadStatus;
-    class Uploader {
-        uploadAreas: UploadArea[];
-        queue: UploadQueue;
-        options: IUploadQueueOptions;
-        constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
-        setOptions(options: IUploadQueueOptions): void;
-        registerArea(element: Element, options: IUploadAreaOptions): UploadArea;
-        unregisterArea(area: UploadArea): void;
-    }
 }

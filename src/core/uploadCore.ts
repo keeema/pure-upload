@@ -10,23 +10,24 @@ class UploadCore {
     }
 
     private processFile(file: IUploadFile): void {
-        var xhr = this.createRequest();
+        var xhr = this.createRequest(file);
         this.setCallbacks(xhr, file);
         this.send(xhr, file);
     }
 
-    private createRequest(): XMLHttpRequest {
+    private createRequest(file: IUploadFile): XMLHttpRequest {
         var xhr = new XMLHttpRequest();
         xhr.open(this.options.method, this.options.url, true);
         xhr.withCredentials = !!this.options.withCredentials;
-        this.setHeaders(xhr);
+        this.setHeaders(xhr, file.name);
         return xhr;
     }
 
-    private setHeaders(xhr: XMLHttpRequest) {
+    private setHeaders(xhr: XMLHttpRequest, fileName: string) {
         this.options.headers['Accept'] = this.options.headers['Accept'] || 'application/json';
         this.options.headers['Cache-Control'] = this.options.headers['Cache-Control'] || 'no-cache';
         this.options.headers['X-Requested-With'] = this.options.headers['X-Requested-With'] || 'XMLHttpRequest';
+        this.options.headers['Content-Disposition'] = this.options.headers['Content-Disposition'] || 'filename="' + fileName + '"';
 
         Object.keys(this.options.headers).forEach((headerName: string) => {
             var headerValue = this.options.headers[headerName];

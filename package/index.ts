@@ -354,23 +354,24 @@ export class UploadCore {
     }
 
     private processFile(file: IUploadFile): void {
-        var xhr = this.createRequest();
+        var xhr = this.createRequest(file);
         this.setCallbacks(xhr, file);
         this.send(xhr, file);
     }
 
-    private createRequest(): XMLHttpRequest {
+    private createRequest(file: IUploadFile): XMLHttpRequest {
         var xhr = new XMLHttpRequest();
         xhr.open(this.options.method, this.options.url, true);
         xhr.withCredentials = !!this.options.withCredentials;
-        this.setHeaders(xhr);
+        this.setHeaders(xhr, file.name);
         return xhr;
     }
 
-    private setHeaders(xhr: XMLHttpRequest) {
+    private setHeaders(xhr: XMLHttpRequest, fileName: string) {
         this.options.headers['Accept'] = this.options.headers['Accept'] || 'application/json';
         this.options.headers['Cache-Control'] = this.options.headers['Cache-Control'] || 'no-cache';
         this.options.headers['X-Requested-With'] = this.options.headers['X-Requested-With'] || 'XMLHttpRequest';
+        this.options.headers['Content-Disposition'] = this.options.headers['Content-Disposition'] || 'filename="' + fileName + '"';
 
         Object.keys(this.options.headers).forEach((headerName: string) => {
             var headerValue = this.options.headers[headerName];
@@ -481,6 +482,36 @@ export class UploadCore {
         this.callbacks.onErrorCallback = callbacks.onErrorCallback || (() => { }),
         this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (() => { })
         this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (() => { })
+    }
+}
+
+export class Uploader {
+    uploadAreas: UploadArea[];
+    queue: UploadQueue;
+    options: IUploadQueueOptions;
+
+    constructor(options: IUploadQueueOptions = {}, callbacks: IUploadQueueCallbacks = {}) {
+        this.setOptions(options);
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options, callbacks);
+    }
+
+    setOptions(options: IUploadQueueOptions): void {
+        this.options = options;
+    }
+
+    registerArea(element: Element, options: IUploadAreaOptions): UploadArea {
+        var uploadArea = new UploadArea(element, options, this);
+        this.uploadAreas.push(uploadArea);
+        return uploadArea;
+    }
+
+    unregisterArea(area: UploadArea): void {
+        var areaIndex = this.uploadAreas.indexOf(area)
+        if (areaIndex >= 0) {
+            this.uploadAreas[areaIndex].destroy();
+            this.uploadAreas.splice(areaIndex, 1);
+        }
     }
 }
 
@@ -629,33 +660,3 @@ export class UploadStatusStatic {
 }
 
 export var uploadStatus: IUploadStatus = <any>UploadStatusStatic;
-
-export class Uploader {
-    uploadAreas: UploadArea[];
-    queue: UploadQueue;
-    options: IUploadQueueOptions;
-
-    constructor(options: IUploadQueueOptions = {}, callbacks: IUploadQueueCallbacks = {}) {
-        this.setOptions(options);
-        this.uploadAreas = [];
-        this.queue = new UploadQueue(options, callbacks);
-    }
-
-    setOptions(options: IUploadQueueOptions): void {
-        this.options = options;
-    }
-
-    registerArea(element: Element, options: IUploadAreaOptions): UploadArea {
-        var uploadArea = new UploadArea(element, options, this);
-        this.uploadAreas.push(uploadArea);
-        return uploadArea;
-    }
-
-    unregisterArea(area: UploadArea): void {
-        var areaIndex = this.uploadAreas.indexOf(area)
-        if (areaIndex >= 0) {
-            this.uploadAreas[areaIndex].destroy();
-            this.uploadAreas.splice(areaIndex, 1);
-        }
-    }
-}
