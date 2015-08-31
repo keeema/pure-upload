@@ -1,6 +1,6 @@
 {
   "name": "pure-upload",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "The pure upload library without dependencies",
   "author": {
     "name": "t.rut, m.horyna"

@@ -132,7 +132,6 @@ class UploadCore {
     }
 
     private setFullOptions(options: IUploadOptions): void {
-
         this.options.url = options.url,
         this.options.method = options.method,
         this.options.headers = options.headers || {},
@@ -141,12 +140,12 @@ class UploadCore {
     }
 
     setFullCallbacks(callbacks: IUploadCallbacksExt) {
-        this.callbacks.onProgressCallback = callbacks.onProgressCallback || (() => { }),
-        this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (() => { }),
-        this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (() => { }),
-        this.callbacks.onUploadedCallback = callbacks.onUploadedCallback || (() => { }),
-        this.callbacks.onErrorCallback = callbacks.onErrorCallback || (() => { }),
-        this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (() => { })
-        this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (() => { })
+        this.callbacks.onProgressCallback = callbacks.onProgressCallback || (() => { return; }),
+        this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (() => { return; }),
+        this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (() => { return; }),
+        this.callbacks.onUploadedCallback = callbacks.onUploadedCallback || (() => { return; }),
+        this.callbacks.onErrorCallback = callbacks.onErrorCallback || (() => { return; }),
+        this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (() => { return; })
+        this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (() => { return; })
     }
 }

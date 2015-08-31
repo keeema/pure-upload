@@ -56,10 +56,10 @@ var pu;
         }
         UploadArea.prototype.setFullOptions = function (options) {
             this.options.maxFileSize = options.maxFileSize || 1024;
-            this.options.allowDragDrop = options.allowDragDrop == undefined ? true : options.allowDragDrop;
-            this.options.clickable = options.clickable == undefined ? true : options.clickable;
+            this.options.allowDragDrop = options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop;
+            this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
             this.options.accept = options.accept || '*.*';
-            this.options.multiple = options.multiple || true;
+            this.options.multiple = options.multiple === undefined || options.multiple === null ? true : options.multiple;
         };
         UploadArea.prototype.putFilesToQueue = function (fileList) {
             var _this = this;
@@ -155,7 +155,7 @@ var pu;
                     }
                 }
                 else if (item.getAsFile) {
-                    if ((item.kind == null) || item.kind === "file") {
+                    if (!item.kind || item.kind === "file") {
                         this.putFilesToQueue([item.getAsFile()]);
                     }
                 }
@@ -350,13 +350,13 @@ var pu;
                 this.options.withCredentials = options.withCredentials || false;
         };
         UploadCore.prototype.setFullCallbacks = function (callbacks) {
-            this.callbacks.onProgressCallback = callbacks.onProgressCallback || (function () { }),
-                this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (function () { }),
-                this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (function () { }),
-                this.callbacks.onUploadedCallback = callbacks.onUploadedCallback || (function () { }),
-                this.callbacks.onErrorCallback = callbacks.onErrorCallback || (function () { }),
-                this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (function () { });
-            this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (function () { });
+            this.callbacks.onProgressCallback = callbacks.onProgressCallback || (function () { return; }),
+                this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (function () { return; }),
+                this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (function () { return; }),
+                this.callbacks.onUploadedCallback = callbacks.onUploadedCallback || (function () { return; }),
+                this.callbacks.onErrorCallback = callbacks.onErrorCallback || (function () { return; }),
+                this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (function () { return; });
+            this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (function () { return; });
         };
         return UploadCore;
     })();
@@ -448,7 +448,7 @@ var pu;
             var unfinishedFiles = this.queuedFiles
                 .filter(function (file) { return [pu.uploadStatus.queued, pu.uploadStatus.uploading]
                 .indexOf(file.uploadStatus) >= 0; });
-            if (unfinishedFiles.length == 0) {
+            if (unfinishedFiles.length === 0) {
                 this.callbacks.onAllFinishedCallback();
             }
         };
@@ -459,10 +459,10 @@ var pu;
         };
         UploadQueue.prototype.setFullCallbacks = function () {
             var _this = this;
-            this.callbacks.onFileAddedCallback = this.callbacks.onFileAddedCallback || (function () { });
-            this.callbacks.onFileRemovedCallback = this.callbacks.onFileRemovedCallback || (function () { });
-            this.callbacks.onAllFinishedCallback = this.callbacks.onAllFinishedCallback || (function () { });
-            this.callbacks.onQueueChangedCallback = this.callbacks.onQueueChangedCallback || (function () { });
+            this.callbacks.onFileAddedCallback = this.callbacks.onFileAddedCallback || (function () { return; });
+            this.callbacks.onFileRemovedCallback = this.callbacks.onFileRemovedCallback || (function () { return; });
+            this.callbacks.onAllFinishedCallback = this.callbacks.onAllFinishedCallback || (function () { return; });
+            this.callbacks.onQueueChangedCallback = this.callbacks.onQueueChangedCallback || (function () { return; });
             this.callbacks.onFileStateChangedCallback = function () { return _this.filesChanged(); };
         };
         UploadQueue.prototype.startWaitingFiles = function () {
@@ -481,18 +481,18 @@ var pu;
             if (file.uploadStatus == pu.uploadStatus.uploading)
                 file.cancel();
             file.uploadStatus = pu.uploadStatus.removed;
-            file.cancel = function () { };
-            file.remove = function () { };
-            file.start = function () { };
+            file.cancel = function () { return; };
+            file.remove = function () { return; };
+            file.start = function () { return; };
         };
         UploadQueue.prototype.getWaitingFiles = function () {
             if (!this.options.autoStart)
                 return [];
             var result = this.queuedFiles
-                .filter(function (file) { return file.uploadStatus == pu.uploadStatus.queued; });
+                .filter(function (file) { return file.uploadStatus === pu.uploadStatus.queued; });
             if (this.options.maxParallelUploads > 0) {
                 var uploadingFilesCount = this.queuedFiles
-                    .filter(function (file) { return file.uploadStatus == pu.uploadStatus.uploading; })
+                    .filter(function (file) { return file.uploadStatus === pu.uploadStatus.uploading; })
                     .length;
                 var count = this.options.maxParallelUploads - uploadingFilesCount;
                 if (count <= 0) {

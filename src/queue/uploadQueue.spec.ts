@@ -30,9 +30,9 @@ describe('uploadQueue', () => {
             let file = <IUploadFile>{};
             uploadQueue.addFiles([file]);
             file.remove();
-            expect(file.cancel.toString()).toEqual((() => { }).toString());
-            expect(file.start.toString()).toEqual((() => { }).toString());
-            expect(file.remove.toString()).toEqual((() => { }).toString());
+            expect(file.cancel.toString()).toEqual((() => { return; }).toString());
+            expect(file.start.toString()).toEqual((() => { return; }).toString());
+            expect(file.remove.toString()).toEqual((() => { return; }).toString());
         })
 
         it('cancels uploading file on remove', () => {

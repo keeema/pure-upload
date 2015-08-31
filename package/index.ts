@@ -1,3 +1,14 @@
+export interface FileExt extends File {
+    kind: string;
+    webkitGetAsEntry: () => File;
+    getAsFile: () => File;
+    file: (file: any) => void;
+
+    isFile: boolean;
+    isDirectory: boolean;
+    fullPath: string;
+}
+
 export function castFiles(fileList: File[]| Object, status?:IUploadStatus): IUploadFile[] {
     let files: IUploadFile[];
 
@@ -45,17 +56,6 @@ export function newGuid() : string {
     });
     return uuid;
 };
-
-export interface FileExt extends File {
-    kind: string;
-    webkitGetAsEntry: () => File;
-    getAsFile: () => File;
-    file: (file: any) => void;
-
-    isFile: boolean;
-    isDirectory: boolean;
-    fullPath: string;
-}
 
 export interface IUploadAreaOptions extends IUploadOptions {
   maxFileSize?: number;
@@ -140,10 +140,10 @@ export class UploadArea {
 
     private setFullOptions(options: IUploadAreaOptions): void {
         this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = options.allowDragDrop == undefined ? true : options.allowDragDrop;
-        this.options.clickable = options.clickable == undefined ? true : options.clickable;
+        this.options.allowDragDrop = options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop;
+        this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
-        this.options.multiple = options.multiple || true;
+        this.options.multiple =  options.multiple === undefined || options.multiple === null ? true : options.multiple;
     }
 
     private putFilesToQueue(fileList: FileList | File[]): void {
@@ -244,7 +244,7 @@ export class UploadArea {
                     this.processDirectory(entry, entry.name);
                 }
             } else if (item.getAsFile) {
-                if ((item.kind == null) || item.kind === "file") {
+                if (!item.kind || item.kind === "file") {
                     this.putFilesToQueue([item.getAsFile()]);
                 }
             }
@@ -450,7 +450,6 @@ export class UploadCore {
     }
 
     private setFullOptions(options: IUploadOptions): void {
-
         this.options.url = options.url,
         this.options.method = options.method,
         this.options.headers = options.headers || {},
@@ -459,13 +458,13 @@ export class UploadCore {
     }
 
     setFullCallbacks(callbacks: IUploadCallbacksExt) {
-        this.callbacks.onProgressCallback = callbacks.onProgressCallback || (() => { }),
-        this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (() => { }),
-        this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (() => { }),
-        this.callbacks.onUploadedCallback = callbacks.onUploadedCallback || (() => { }),
-        this.callbacks.onErrorCallback = callbacks.onErrorCallback || (() => { }),
-        this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (() => { })
-        this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (() => { })
+        this.callbacks.onProgressCallback = callbacks.onProgressCallback || (() => { return; }),
+        this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (() => { return; }),
+        this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (() => { return; }),
+        this.callbacks.onUploadedCallback = callbacks.onUploadedCallback || (() => { return; }),
+        this.callbacks.onErrorCallback = callbacks.onErrorCallback || (() => { return; }),
+        this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (() => { return; })
+        this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (() => { return; })
     }
 }
 
@@ -572,7 +571,7 @@ export class UploadQueue {
             .filter(file=> [uploadStatus.queued, uploadStatus.uploading]
                 .indexOf(file.uploadStatus) >= 0)
 
-        if (unfinishedFiles.length == 0) {
+        if (unfinishedFiles.length === 0) {
             this.callbacks.onAllFinishedCallback();
         }
     }
@@ -585,10 +584,10 @@ export class UploadQueue {
     }
 
     private setFullCallbacks(): void {
-        this.callbacks.onFileAddedCallback = this.callbacks.onFileAddedCallback || (() => { });
-        this.callbacks.onFileRemovedCallback = this.callbacks.onFileRemovedCallback || (() => { });
-        this.callbacks.onAllFinishedCallback = this.callbacks.onAllFinishedCallback || (() => { });
-        this.callbacks.onQueueChangedCallback = this.callbacks.onQueueChangedCallback || (() => { });
+        this.callbacks.onFileAddedCallback = this.callbacks.onFileAddedCallback || (() => { return; });
+        this.callbacks.onFileRemovedCallback = this.callbacks.onFileRemovedCallback || (() => { return; });
+        this.callbacks.onAllFinishedCallback = this.callbacks.onAllFinishedCallback || (() => { return; });
+        this.callbacks.onQueueChangedCallback = this.callbacks.onQueueChangedCallback || (() => { return; });
 
         this.callbacks.onFileStateChangedCallback = () => this.filesChanged();
     }
@@ -611,9 +610,9 @@ export class UploadQueue {
             file.cancel();
 
         file.uploadStatus = uploadStatus.removed;
-        file.cancel = () => { };
-        file.remove = () => { };
-        file.start = () => { };
+        file.cancel = () => { return; };
+        file.remove = () => { return; };
+        file.start = () => { return; };
     }
 
     private getWaitingFiles() {
@@ -621,11 +620,11 @@ export class UploadQueue {
             return [];
 
         var result = this.queuedFiles
-            .filter(file=> file.uploadStatus == uploadStatus.queued)
+            .filter(file=> file.uploadStatus === uploadStatus.queued)
 
         if (this.options.maxParallelUploads > 0) {
             var uploadingFilesCount = this.queuedFiles
-                .filter(file=> file.uploadStatus == uploadStatus.uploading)
+                .filter(file=> file.uploadStatus === uploadStatus.uploading)
                 .length;
 
             var count = this.options.maxParallelUploads - uploadingFilesCount;

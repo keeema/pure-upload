@@ -40,7 +40,7 @@ if (listenUpload) {
 app.use(express.static('./example/public'));
 
 app.post('/api/test', (req, res: express.Response) => {
-    if (done == true) {
+    if (done === true) {
         res.send("File uploaded.");
         done = false;
     }

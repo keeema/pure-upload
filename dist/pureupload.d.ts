@@ -1,9 +1,4 @@
 declare module pu {
-    function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
-    function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-    var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
-    var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
-    function newGuid(): string;
     interface FileExt extends File {
         kind: string;
         webkitGetAsEntry: () => File;
@@ -13,6 +8,11 @@ declare module pu {
         isDirectory: boolean;
         fullPath: string;
     }
+    function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+    function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+    var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
+    var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
+    function newGuid(): string;
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
         allowDragDrop?: boolean;

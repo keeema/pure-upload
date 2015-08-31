@@ -14,10 +14,10 @@ class UploadArea {
 
     private setFullOptions(options: IUploadAreaOptions): void {
         this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = options.allowDragDrop == undefined ? true : options.allowDragDrop;
-        this.options.clickable = options.clickable == undefined ? true : options.clickable;
+        this.options.allowDragDrop = options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop;
+        this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
-        this.options.multiple = options.multiple || true;
+        this.options.multiple =  options.multiple === undefined || options.multiple === null ? true : options.multiple;
     }
 
     private putFilesToQueue(fileList: FileList | File[]): void {
@@ -118,7 +118,7 @@ class UploadArea {
                     this.processDirectory(entry, entry.name);
                 }
             } else if (item.getAsFile) {
-                if ((item.kind == null) || item.kind === "file") {
+                if (!item.kind || item.kind === "file") {
                     this.putFilesToQueue([item.getAsFile()]);
                 }
             }

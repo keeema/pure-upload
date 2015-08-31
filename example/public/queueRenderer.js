@@ -65,7 +65,7 @@ var QueueRenderer = (function () {
         var itemRow = document.getElementById(file.guid);
         for (var i = 0; i < itemRow.childNodes.length; i++) {
             var node = itemRow.childNodes[i];
-            if (node.attributes.getNamedItem('class').value == 'table-row-item-progress') {
+            if (node.attributes.getNamedItem('class').value === 'table-row-item-progress') {
                 node.textContent = file.progress.toString() + "%";
                 break;
             }

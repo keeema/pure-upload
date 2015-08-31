@@ -1,9 +1,4 @@
 declare module "pure-upload" {
-export function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
-export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-export var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
-export var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
-export function newGuid(): string;
 export interface FileExt extends File {
     kind: string;
     webkitGetAsEntry: () => File;
@@ -13,6 +8,11 @@ export interface FileExt extends File {
     isDirectory: boolean;
     fullPath: string;
 }
+export function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+export var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
+export var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
+export function newGuid(): string;
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
     allowDragDrop?: boolean;
