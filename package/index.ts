@@ -92,11 +92,11 @@ export interface IUploadFile extends File {
 }
 
 export interface IUploadOptions {
-    url: string;
+    url: string | ((file: IUploadFile) => string);
     method: string;
     withCredentials?: boolean;
-    headers?: {[key:string]:any}
-    params?: {[key:string]:any}
+    headers?: { [key: string]: any }
+    params?: { [key: string]: any }
 }
 
 export interface IUploadQueueCallbacks extends IUploadCallbacks {
@@ -335,17 +335,27 @@ export class UploadCore {
 
     private createRequest(file: IUploadFile): XMLHttpRequest {
         var xhr = new XMLHttpRequest();
-        xhr.open(this.options.method, this.options.url, true);
+        var url = typeof this.options.url === 'function'
+            ? (<(file: IUploadFile) => string>this.options.url)(file)
+            : <string>this.options.url;
+
+        xhr.open(this.options.method, url, true);
+
         xhr.withCredentials = !!this.options.withCredentials;
         this.setHeaders(xhr, file.name);
         return xhr;
     }
 
     private setHeaders(xhr: XMLHttpRequest, fileName: string) {
-        this.options.headers['Accept'] = this.options.headers['Accept'] || 'application/json';
-        this.options.headers['Cache-Control'] = this.options.headers['Cache-Control'] || 'no-cache';
-        this.options.headers['X-Requested-With'] = this.options.headers['X-Requested-With'] || 'XMLHttpRequest';
-        this.options.headers['Content-Disposition'] = this.options.headers['Content-Disposition'] || 'filename="' + fileName + '"';
+        if (!this.options.headers['Accept'])
+            xhr.setRequestHeader('Accept', 'application/json');
+        if (!this.options.headers['Cache-Control'])
+            xhr.setRequestHeader('Cache-Control', 'no-cache');
+        if (!this.options.headers['X-Requested-With'])
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        if (!this.options.headers['Content-Disposition'])
+            xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + fileName + '"');
+
 
         Object.keys(this.options.headers).forEach((headerName: string) => {
             var headerValue = this.options.headers[headerName];

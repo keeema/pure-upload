@@ -43,7 +43,7 @@ declare module pu {
         start: () => void;
     }
     interface IUploadOptions {
-        url: string;
+        url: string | ((file: IUploadFile) => string);
         method: string;
         withCredentials?: boolean;
         headers?: {

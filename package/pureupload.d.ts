@@ -43,7 +43,7 @@ export interface IUploadFile extends File {
     start: () => void;
 }
 export interface IUploadOptions {
-    url: string;
+    url: string | ((file: IUploadFile) => string);
     method: string;
     withCredentials?: boolean;
     headers?: {
