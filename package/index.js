@@ -75,6 +75,7 @@ var UploadArea = (function () {
     UploadArea.prototype.validateFile = function (file) {
         if (!this.isFileSizeValid(file)) {
             file.uploadStatus = exports.uploadStatus.failed;
+            file.responseText = 'The size of this file exceeds the ' + this.options.maxFileSize + ' MB limit.';
             return false;
         }
         return true;
@@ -338,7 +339,7 @@ var UploadCore = (function () {
     ;
     UploadCore.prototype.setResponse = function (file, xhr) {
         file.responseCode = xhr.status;
-        file.responseText = (xhr.statusText || xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
+        file.responseText = xhr.responseText || xhr.statusText || (xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
     };
     UploadCore.prototype.setFullOptions = function (options) {
         this.options.url = options.url,

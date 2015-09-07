@@ -128,7 +128,8 @@ class UploadCore {
 
     private setResponse(file: IUploadFile, xhr: XMLHttpRequest) {
         file.responseCode = xhr.status;
-        file.responseText = (xhr.statusText || xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
+        file.responseText = xhr.responseText || xhr.statusText || (xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
+
     }
 
     private setFullOptions(options: IUploadOptions): void {

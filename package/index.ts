@@ -48,11 +48,11 @@ export var getUploader = function (options: IUploadQueueOptions, callbacks: IUpl
 }
 
 export function newGuid() : string {
-    var d = new Date().getTime();
+        var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (d + Math.random()*16)%16 | 0;
-        d = Math.floor(d/16);
-        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+        var r = (d + Math.random() * 16) % 16 | 0;
+        d = Math.floor(d / 16);
+        return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
     return uuid;
 };
@@ -143,7 +143,7 @@ export class UploadArea {
         this.options.allowDragDrop = options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop;
         this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
-        this.options.multiple =  options.multiple === undefined || options.multiple === null ? true : options.multiple;
+        this.options.multiple = options.multiple === undefined || options.multiple === null ? true : options.multiple;
     }
 
     private putFilesToQueue(fileList: FileList | File[]): void {
@@ -161,7 +161,9 @@ export class UploadArea {
 
     private validateFile(file: IUploadFile): boolean {
         if (!this.isFileSizeValid(file)) {
-          file.uploadStatus = uploadStatus.failed;
+            file.uploadStatus = uploadStatus.failed;
+            file.responseText = 'The size of this file exceeds the ' + this.options.maxFileSize + ' MB limit.'
+
             return false;
         }
         return true;
@@ -258,7 +260,7 @@ export class UploadArea {
             for (var i = 0; i < entries.length; i++) {
                 var entry = entries[i];
                 if (entry.isFile) {
-                    entry.file((file:FileExt) => {
+                    entry.file((file: FileExt) => {
                         if (file.name.substring(0, 1) === '.') {
                             return;
                         }
@@ -446,7 +448,8 @@ export class UploadCore {
 
     private setResponse(file: IUploadFile, xhr: XMLHttpRequest) {
         file.responseCode = xhr.status;
-        file.responseText = (xhr.statusText || xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
+        file.responseText = xhr.responseText || xhr.statusText || (xhr.status ? xhr.status.toString() : '' || 'Invalid response from server');
+
     }
 
     private setFullOptions(options: IUploadOptions): void {

@@ -17,7 +17,7 @@ class UploadArea {
         this.options.allowDragDrop = options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop;
         this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
-        this.options.multiple =  options.multiple === undefined || options.multiple === null ? true : options.multiple;
+        this.options.multiple = options.multiple === undefined || options.multiple === null ? true : options.multiple;
     }
 
     private putFilesToQueue(fileList: FileList | File[]): void {
@@ -35,7 +35,9 @@ class UploadArea {
 
     private validateFile(file: IUploadFile): boolean {
         if (!this.isFileSizeValid(file)) {
-          file.uploadStatus = uploadStatus.failed;
+            file.uploadStatus = uploadStatus.failed;
+            file.responseText = 'The size of this file exceeds the ' + this.options.maxFileSize + ' MB limit.'
+
             return false;
         }
         return true;
@@ -132,7 +134,7 @@ class UploadArea {
             for (var i = 0; i < entries.length; i++) {
                 var entry = entries[i];
                 if (entry.isFile) {
-                    entry.file((file:FileExt) => {
+                    entry.file((file: FileExt) => {
                         if (file.name.substring(0, 1) === '.') {
                             return;
                         }
