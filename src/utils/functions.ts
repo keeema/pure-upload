@@ -4,5 +4,5 @@ function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst:
 
     return newFirst
         ? () => { newFn(); origFn(); }
-        : () => { origFn(); newFn(); }
+        : () => { origFn(); newFn(); };
 }

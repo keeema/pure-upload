@@ -1,4 +1,7 @@
 class UploadArea {
+    public targetElement: Element;
+    public options: IUploadAreaOptions;
+    public uploader: Uploader;
     private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
     private unregisterOnClick: () => void;
@@ -6,10 +9,32 @@ class UploadArea {
     private unregisterOnDragOver: () => void;
     private unregisterOnChange: () => void;
 
-    constructor(public targetElement: Element, public options: IUploadAreaOptions, public uploader: Uploader) {
+    constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader) {
+        this.targetElement = targetElement;
+        this.options = options;
+        this.uploader = uploader;
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
         this.setFullOptions(options);
         this.setupHiddenInput();
+    }
+
+    destroy(): void {
+        if (this.unregisterOnClick)
+            this.unregisterOnClick();
+
+        if (this.unregisterOnDrop)
+            this.unregisterOnDrop();
+
+        if (this.unregisterOnChange)
+            this.unregisterOnChange();
+
+        if (this.unregisterOnDragOver)
+            this.unregisterOnDragOver();
+
+        this.targetElement.removeEventListener('dragover', this.onDrag);
+        this.targetElement.removeEventListener('drop', this.onDrop);
+
+        document.body.removeChild(this.fileInput);
     }
 
     private setFullOptions(options: IUploadAreaOptions): void {
@@ -26,7 +51,7 @@ class UploadArea {
             if (this.validateFile(file)) {
                 file.start = () => {
                     this.uploadCore.upload([file]);
-                    file.start = () => { };
+                    file.start = () => { return; };
                 };
             }
         });
@@ -36,7 +61,7 @@ class UploadArea {
     private validateFile(file: IUploadFile): boolean {
         if (!this.isFileSizeValid(file)) {
             file.uploadStatus = uploadStatus.failed;
-            file.responseText = 'The size of this file exceeds the ' + this.options.maxFileSize + ' MB limit.'
+            file.responseText = 'The size of this file exceeds the ' + this.options.maxFileSize + ' MB limit.';
 
             return false;
         }
@@ -44,31 +69,31 @@ class UploadArea {
     }
 
     private setupHiddenInput(): void {
-        this.fileInput = document.createElement("input");
-        this.fileInput.setAttribute("type", "file");
-        this.fileInput.setAttribute("accept", this.options.accept);
-        this.fileInput.style.display = "none";
+        this.fileInput = document.createElement('input');
+        this.fileInput.setAttribute('type', 'file');
+        this.fileInput.setAttribute('accept', this.options.accept);
+        this.fileInput.style.display = 'none';
 
         var onChange = (e) => this.onChange(e);
-        this.fileInput.addEventListener("change", onChange);
-        this.unregisterOnChange = () => this.fileInput.removeEventListener("onChange", onchange)
+        this.fileInput.addEventListener('change', onChange);
+        this.unregisterOnChange = () => this.fileInput.removeEventListener('onChange', onchange);
 
         if (this.options.multiple) {
-            this.fileInput.setAttribute("multiple", "");
+            this.fileInput.setAttribute('multiple', '');
         }
         if (this.options.clickable) {
             var onClick = () => this.onClick();
-            this.targetElement.addEventListener("click", onClick);
-            this.unregisterOnClick = () => this.targetElement.removeEventListener("click", onClick)
+            this.targetElement.addEventListener('click', onClick);
+            this.unregisterOnClick = () => this.targetElement.removeEventListener('click', onClick);
         }
         if (this.options.allowDragDrop) {
             var onDrag = (e) => this.onDrag(e);
-            this.targetElement.addEventListener("dragover", onDrag);
-            this.unregisterOnDragOver = () => this.targetElement.removeEventListener("dragover", onDrag);
+            this.targetElement.addEventListener('dragover', onDrag);
+            this.unregisterOnDragOver = () => this.targetElement.removeEventListener('dragover', onDrag);
 
             var onDrop = (e) => this.onDrop(e);
-            this.targetElement.addEventListener("drop", onDrop);
-            this.unregisterOnDrop = () => this.targetElement.removeEventListener("drop", onDrop);
+            this.targetElement.addEventListener('drop', onDrop);
+            this.unregisterOnDrop = () => this.targetElement.removeEventListener('drop', onDrop);
         }
         // attach to body
         document.body.appendChild(this.fileInput);
@@ -82,7 +107,7 @@ class UploadArea {
         var efct;
         try {
             efct = e.dataTransfer.effectAllowed;
-        } catch (_error) { }
+        } catch (err) { ; }
         e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
         this.stopEventPropagation(e);
     }
@@ -92,11 +117,17 @@ class UploadArea {
         if (!e.dataTransfer) {
             return;
         }
-        var files = e.dataTransfer.files;
+        var files: FileList | File[] = e.dataTransfer.files;
         if (files.length) {
+            if (!this.options.multiple)
+                files = [files[0]];
+
             let result: FileList;
-            var items = e.dataTransfer.items;
-            if (items && items.length && ((<any>items[0]).webkitGetAsEntry != null)) {
+            var items: FileList | File[] = e.dataTransfer.items;
+            if (items && items.length && ((<any>items[0]).webkitGetAsEntry !== null)) {
+                if (!this.options.multiple)
+                    items = [items[0]];
+
                 this.addFilesFromItems(items);
             } else {
                 this.handleFiles(files);
@@ -109,10 +140,10 @@ class UploadArea {
         this.fileInput.click();
     }
 
-    private addFilesFromItems(items: FileList): void {
+    private addFilesFromItems(items: FileList | File[]): void {
         var entry;
         for (var i = 0; i < items.length; i++) {
-            let item: FileExt = <FileExt>items[i];
+            let item: IFileExt = <IFileExt>items[i];
             if ((item.webkitGetAsEntry) && (entry = item.webkitGetAsEntry())) {
                 if (entry.isFile) {
                     this.putFilesToQueue([item.getAsFile()]);
@@ -120,7 +151,7 @@ class UploadArea {
                     this.processDirectory(entry, entry.name);
                 }
             } else if (item.getAsFile) {
-                if (!item.kind || item.kind === "file") {
+                if (!item.kind || item.kind === 'file') {
                     this.putFilesToQueue([item.getAsFile()]);
                 }
             }
@@ -129,29 +160,31 @@ class UploadArea {
 
     private processDirectory(directory: any, path: string): void {
         var dirReader = directory.createReader();
-        var _class = this;
-        var entryReader = (entries: FileExt[]) => {
+        var self = this;
+        var entryReader = (entries: IFileExt[]) => {
             for (var i = 0; i < entries.length; i++) {
                 var entry = entries[i];
                 if (entry.isFile) {
-                    entry.file((file: FileExt) => {
+                    entry.file((file: IFileExt) => {
                         if (file.name.substring(0, 1) === '.') {
                             return;
                         }
-                        file.fullPath = "" + path + "/" + file.name;
-                        _class.putFilesToQueue([file]);
+                        file.fullPath = '' + path + '/' + file.name;
+                        self.putFilesToQueue([file]);
                     });
                 } else if (entry.isDirectory) {
-                    _class.processDirectory(entry, "" + path + "/" + entry.name);
+                    self.processDirectory(entry, '' + path + '/' + entry.name);
                 }
             }
         };
         dirReader.readEntries(entryReader, function(error) {
-            return typeof console !== "undefined" && console !== null ? typeof console.log === "function" ? console.log(error) : void 0 : void 0;
+            return typeof console !== 'undefined' && console !== null
+                ? typeof console.log === 'function' ? console.log(error) : void 0
+                : void 0;
         });
     }
 
-    private handleFiles(files: FileList): void {
+    private handleFiles(files: FileList | File[]): void {
         for (var i = 0; i < files.length; i++) {
             this.putFilesToQueue([files[i]]);
         }
@@ -170,24 +203,5 @@ class UploadArea {
         } else {
             return e.returnValue = false;
         }
-    }
-
-    destroy(): void {
-        if (this.unregisterOnClick)
-            this.unregisterOnClick();
-
-        if (this.unregisterOnDrop)
-            this.unregisterOnDrop();
-
-        if (this.unregisterOnChange)
-            this.unregisterOnChange();
-
-        if (this.unregisterOnDragOver)
-            this.unregisterOnDragOver();
-
-        this.targetElement.removeEventListener("dragover", this.onDrag);
-        this.targetElement.removeEventListener("drop", this.onDrop);
-
-        document.body.removeChild(this.fileInput);
     }
 }

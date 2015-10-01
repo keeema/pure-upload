@@ -1,7 +1,11 @@
 class UploadQueue {
+    options: IUploadQueueOptions;
+    callbacks: IUploadQueueCallbacksExt;
     queuedFiles: IUploadFile[] = [];
 
-    constructor(public options: IUploadQueueOptions, public callbacks: IUploadQueueCallbacksExt) {
+    constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacksExt) {
+        this.options = options;
+        this.callbacks = callbacks;
         this.setFullOptions();
         this.setFullCallbacks();
     }
@@ -26,7 +30,7 @@ class UploadQueue {
             }
         });
 
-        this.filesChanged()
+        this.filesChanged();
     }
 
     removeFile(file: IUploadFile, blockRecursive: boolean = false) {
@@ -68,8 +72,8 @@ class UploadQueue {
 
     private checkAllFinished(): void {
         var unfinishedFiles = this.queuedFiles
-            .filter(file=> [uploadStatus.queued, uploadStatus.uploading]
-                .indexOf(file.uploadStatus) >= 0)
+            .filter(file => [uploadStatus.queued, uploadStatus.uploading]
+                .indexOf(file.uploadStatus) >= 0);
 
         if (unfinishedFiles.length === 0) {
             this.callbacks.onAllFinishedCallback();
@@ -93,12 +97,12 @@ class UploadQueue {
     }
 
     private startWaitingFiles(): void {
-        var files = this.getWaitingFiles().forEach(file=> file.start())
+        var files = this.getWaitingFiles().forEach(file => file.start());
     }
 
     private removeFinishedFiles(): void {
         this.queuedFiles
-            .filter(file=> [
+            .filter(file => [
                 uploadStatus.uploaded,
                 uploadStatus.canceled
             ].indexOf(file.uploadStatus) >= 0)
@@ -106,7 +110,7 @@ class UploadQueue {
     }
 
     private deactivateFile(file: IUploadFile) {
-        if (file.uploadStatus == uploadStatus.uploading)
+        if (file.uploadStatus === uploadStatus.uploading)
             file.cancel();
 
         file.uploadStatus = uploadStatus.removed;
@@ -120,11 +124,11 @@ class UploadQueue {
             return [];
 
         var result = this.queuedFiles
-            .filter(file=> file.uploadStatus === uploadStatus.queued)
+            .filter(file => file.uploadStatus === uploadStatus.queued);
 
         if (this.options.maxParallelUploads > 0) {
             var uploadingFilesCount = this.queuedFiles
-                .filter(file=> file.uploadStatus === uploadStatus.uploading)
+                .filter(file => file.uploadStatus === uploadStatus.uploading)
                 .length;
 
             var count = this.options.maxParallelUploads - uploadingFilesCount;

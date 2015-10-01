@@ -10,7 +10,7 @@
         "../decl/jasmine/**/*.d.ts"
     ],
     "files": [
-        "./area/FileExt.ts",
+        "./area/IFileExt.ts",
         "./area/iUploadAreaOptions.ts",
         "./area/uploadArea.ts",
         "./core/getUploadCore.ts",

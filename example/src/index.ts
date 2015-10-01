@@ -4,22 +4,22 @@ window.onload = () => {
     var uploaderExample1 = pu.getUploader({ maxParallelUploads: 2, autoStart: false, autoRemove: false }, {});
 
     var uploadSettings = {
-        url: "/api/test",
-        method: "POST",
+        url: '/api/test',
+        method: 'POST',
         maxFileSize: 1024,
         allowDragDrop: true,
         clickable: true,
-        accept: "*.*",
-        multiple: true,
+        accept: '*.*',
+        multiple: true
     };
     var queueUploadSettings = {
-        url: "/api/test",
-        method: "POST",
+        url: '/api/test',
+        method: 'POST',
         maxFileSize: 1024,
         allowDragDrop: true,
         clickable: false,
-        accept: "*.*",
-        multiple: true,
+        accept: '*.*',
+        multiple: true
     };
 
     uploaderExample1.registerArea(document.getElementById('example-dnd-area'), uploadSettings);
@@ -34,5 +34,5 @@ window.onload = () => {
         queueRenderer.renderItemProgress('example-queue', file);
     };
 
-    document.getElementById("example-clear-button").addEventListener('click', () => uploaderExample1.queue.clearFiles());
-}
+    document.getElementById('example-clear-button').addEventListener('click', () => uploaderExample1.queue.clearFiles());
+};

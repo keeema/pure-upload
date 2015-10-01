@@ -1,28 +1,28 @@
 var getQueueRenderer = function(): QueueRenderer {
     return new QueueRenderer();
-}
+};
 
 class QueueRenderer {
 
     createTextDiv(className: string, value: string): HTMLElement {
-        var element = document.createElement("div");
+        var element = document.createElement('div');
         element.className = className;
         element.innerHTML = value;
         return element;
     }
 
     createButton(value: string, callback: () => void): HTMLElement {
-        var element = document.createElement("button");
-        element.className = "table-row-button";
+        var element = document.createElement('button');
+        element.className = 'table-row-button';
         element.innerHTML = value;
-        element.addEventListener("click", callback);
+        element.addEventListener('click', callback);
         return element;
     }
 
     createQueueRow(file: pu.IUploadFile, queueSettings: pu.IUploadQueueOptions): HTMLElement {
-        var itemRow = document.createElement("div");
+        var itemRow = document.createElement('div');
         itemRow.id = file.guid;
-        itemRow.className = "table-row-item";
+        itemRow.className = 'table-row-item';
         this.renderQueueRowContent(itemRow, file, queueSettings);
         return itemRow;
     }
@@ -30,17 +30,17 @@ class QueueRenderer {
     translateFileStatus(file: pu.IUploadFile): string {
         switch (file.uploadStatus.toString()) {
             case pu.UploadStatusStatic.queued:
-                return "Queued";
+                return 'Queued';
             case pu.UploadStatusStatic.uploading:
-                return "Uploading";
+                return 'Uploading';
             case pu.UploadStatusStatic.uploaded:
-                return "Uploaded";
+                return 'Uploaded';
             case pu.UploadStatusStatic.failed:
-                return "Failed";
+                return 'Failed';
             case pu.UploadStatusStatic.canceled:
-                return "Canceled";
+                return 'Canceled';
         }
-        return "Unknown";
+        return 'Unknown';
     }
 
     renderQueueRowContent(itemRow: Element, file: pu.IUploadFile, queueSettings: pu.IUploadQueueOptions): void {
@@ -48,21 +48,23 @@ class QueueRenderer {
 
         itemRow.appendChild(this.createTextDiv('table-row-item-status', this.translateFileStatus(file)));
         itemRow.appendChild(this.createTextDiv('table-row-item-name', file.name));
-        itemRow.appendChild(this.createTextDiv('table-row-item-progress', file.progress.toString() + "%"));
+        itemRow.appendChild(this.createTextDiv('table-row-item-progress', file.progress.toString() + '%'));
 
         switch (file.uploadStatus.toString()) {
             case pu.UploadStatusStatic.queued:
                 if (!queueSettings.autoStart) {
-                    itemRow.appendChild(this.createButton("Start", () => file.start()));
+                    itemRow.appendChild(this.createButton('Start', () => file.start()));
                     break;
                 }
+                itemRow.appendChild(this.createButton('Cancel', () => file.cancel()));
+                break;
             case pu.UploadStatusStatic.uploading:
-                itemRow.appendChild(this.createButton("Cancel", () => file.cancel()));
+                itemRow.appendChild(this.createButton('Cancel', () => file.cancel()));
                 break;
             case pu.UploadStatusStatic.uploaded:
             case pu.UploadStatusStatic.failed:
             case pu.UploadStatusStatic.canceled:
-                itemRow.appendChild(this.createButton("Delete", () => file.remove()));
+                itemRow.appendChild(this.createButton('Delete', () => file.remove()));
                 break;
         }
     }
@@ -72,7 +74,7 @@ class QueueRenderer {
         for (var i = 0; i < itemRow.childNodes.length; i++) {
             var node = itemRow.childNodes[i];
             if (node.attributes.getNamedItem('class').value === 'table-row-item-progress') {
-                node.textContent = file.progress.toString() + "%";
+                node.textContent = file.progress.toString() + '%';
                 break;
             }
         }
@@ -82,7 +84,7 @@ class QueueRenderer {
         var queue = document.getElementById(queueId);
         while (queue.firstChild) queue.removeChild(queue.firstChild);
 
-        queue.appendChild(this.createTextDiv("table-header-title", queueTitle));
+        queue.appendChild(this.createTextDiv('table-header-title', queueTitle));
         files.forEach((file: pu.IUploadFile) => {
             queue.appendChild(this.createQueueRow(file, queueSettings));
         });

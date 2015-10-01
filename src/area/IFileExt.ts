@@ -1,4 +1,4 @@
-interface FileExt extends File {
+interface IFileExt extends File {
     kind: string;
     webkitGetAsEntry: () => File;
     getAsFile: () => File;

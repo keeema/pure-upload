@@ -1,5 +1,10 @@
 declare module pu {
-    interface FileExt extends File {
+    function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+    function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+    var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
+    var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
+    function newGuid(): string;
+    interface IFileExt extends File {
         kind: string;
         webkitGetAsEntry: () => File;
         getAsFile: () => File;
@@ -8,11 +13,6 @@ declare module pu {
         isDirectory: boolean;
         fullPath: string;
     }
-    function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
-    function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-    var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
-    var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
-    function newGuid(): string;
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
         allowDragDrop?: boolean;
@@ -85,6 +85,7 @@ declare module pu {
         private unregisterOnDragOver;
         private unregisterOnChange;
         constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
+        destroy(): void;
         private setFullOptions(options);
         private putFilesToQueue(fileList);
         private validateFile(file);
@@ -98,7 +99,6 @@ declare module pu {
         private handleFiles(files);
         private isFileSizeValid(file);
         private stopEventPropagation(e);
-        destroy(): void;
     }
     class UploadCore {
         options: IUploadOptions;
@@ -117,7 +117,7 @@ declare module pu {
         private finished(file, xhr);
         private setResponse(file, xhr);
         private setFullOptions(options);
-        setFullCallbacks(callbacks: IUploadCallbacksExt): void;
+        private setFullCallbacks(callbacks);
     }
     class Uploader {
         uploadAreas: UploadArea[];

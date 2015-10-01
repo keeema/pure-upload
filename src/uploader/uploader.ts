@@ -20,7 +20,7 @@ class Uploader {
     }
 
     unregisterArea(area: UploadArea): void {
-        var areaIndex = this.uploadAreas.indexOf(area)
+        var areaIndex = this.uploadAreas.indexOf(area);
         if (areaIndex >= 0) {
             this.uploadAreas[areaIndex].destroy();
             this.uploadAreas.splice(areaIndex, 1);

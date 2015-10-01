@@ -6,25 +6,25 @@ describe('uploadQueue', () => {
 
         beforeEach(() => {
             uploadQueue = new UploadQueue({}, {});
-        })
+        });
 
         it('sets the \'queued\' state for newly added files', () => {
             uploadQueue.addFiles([<IUploadFile>{}, <IUploadFile>{}]);
             expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.queued);
             expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.queued);
-        })
+        });
 
         it('sets the \'queued\' state only for non-failed files', () => {
             uploadQueue.addFiles([<IUploadFile>{}, <IUploadFile>{ uploadStatus: uploadStatus.failed }]);
             expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.queued);
             expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.failed);
-        })
+        });
 
         it('assigns the remove function to the newly added files', () => {
             let file = <IUploadFile>{};
             uploadQueue.addFiles([file]);
             expect(uploadQueue.queuedFiles[0].remove).toBeDefined();
-        })
+        });
 
         it('removes file callbacks on remove', () => {
             let file = <IUploadFile>{};
@@ -33,7 +33,7 @@ describe('uploadQueue', () => {
             expect(file.cancel.toString()).toEqual((() => { return; }).toString());
             expect(file.start.toString()).toEqual((() => { return; }).toString());
             expect(file.remove.toString()).toEqual((() => { return; }).toString());
-        })
+        });
 
         it('cancels uploading file on remove', () => {
             var cancelSpy = jasmine.createSpy('cancelSpy');
@@ -42,19 +42,18 @@ describe('uploadQueue', () => {
             file.uploadStatus = uploadStatus.uploading,
             file.remove();
             expect(cancelSpy).toHaveBeenCalled();
-        })
+        });
     });
 
     describe('callbacks', () => {
         let file: IUploadFile;
         let callback: jasmine.Spy;
         let queueChangedCallbackSpy: jasmine.Spy;
-        let uploadQueue: UploadQueue;
 
         beforeEach(() => {
             file = <IUploadFile>{};
             queueChangedCallbackSpy = jasmine.createSpy('queueChangedCallback');
-        })
+        });
 
         it('triggers onFileAddedCallback and queueChangedCallback on add', () => {
             callback = jasmine.createSpy('onFileAddedCallback');
@@ -64,7 +63,7 @@ describe('uploadQueue', () => {
             expect(callback).toHaveBeenCalledWith(file);
             expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
             expect(queueChangedCallbackSpy.calls.count()).toEqual(1);
-        })
+        });
 
         it('triggers onFileRemovedCallback and queueChangedCallback', () => {
             callback = jasmine.createSpy('onFileRemovedCallback');
@@ -75,7 +74,7 @@ describe('uploadQueue', () => {
             expect(callback).toHaveBeenCalledWith(file);
             expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
             expect(queueChangedCallbackSpy.calls.count()).toEqual(1);
-        })
+        });
 
         it('triggers onAllFinishedCallback and queueChangedCallback in correct count after all files removed', () => {
             let file2: IUploadFile = <IUploadFile>{};
@@ -89,12 +88,12 @@ describe('uploadQueue', () => {
             expect(callback.calls.count()).toEqual(1);
             expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
             expect(queueChangedCallbackSpy.calls.count()).toEqual(3);
-        })
+        });
 
         it('clears file queue according to the specifed scale', () => {
-            let file1: IUploadFile = <IUploadFile>{ uploadStatus: uploadStatus.queued, cancel: () => { } };
-            let file2: IUploadFile = <IUploadFile>{ uploadStatus: uploadStatus.uploading, cancel: () => { } };
-            let file3: IUploadFile = <IUploadFile>{ uploadStatus: uploadStatus.uploaded, cancel: () => { } };
+            let file1: IUploadFile = <IUploadFile>{ uploadStatus: uploadStatus.queued, cancel: () => { return; } };
+            let file2: IUploadFile = <IUploadFile>{ uploadStatus: uploadStatus.uploading, cancel: () => { return; } };
+            let file3: IUploadFile = <IUploadFile>{ uploadStatus: uploadStatus.uploaded, cancel: () => { return; } };
 
             uploadQueue = new UploadQueue({}, {});
             uploadQueue.queuedFiles = [file1, file2, file3];
@@ -107,7 +106,7 @@ describe('uploadQueue', () => {
 
             uploadQueue.clearFiles([], true);
             expect(uploadQueue.queuedFiles).toEqual([]);
-        })
+        });
 
         it('triggers and on clearFiles', () => {
             callback = jasmine.createSpy('onFileRemovedCallback');
@@ -118,7 +117,7 @@ describe('uploadQueue', () => {
             expect(queueChangedCallbackSpy).toHaveBeenCalledWith(uploadQueue.queuedFiles);
             expect(callback.calls.count()).toEqual(1);
         });
-    })
+    });
 
     describe('filesChanged', () => {
         describe('autoRemove', () => {
@@ -132,27 +131,27 @@ describe('uploadQueue', () => {
 
             it('does note removes finished files when autoRemove is turned off', () => {
                 uploadQueue = new UploadQueue({ autoRemove: false }, {});
-                files.forEach(file=> uploadQueue.queuedFiles.push(file));
+                files.forEach(file => uploadQueue.queuedFiles.push(file));
 
-                uploadQueue['filesChanged']()
+                uploadQueue['filesChanged']();
                 expect(uploadQueue.queuedFiles).toEqual(files);
-            })
+            });
 
             it('removes finished files when autoRemove is turned on', () => {
                 uploadQueue = new UploadQueue({ autoRemove: true }, {});
-                files.forEach(file=> uploadQueue.queuedFiles.push(file));
+                files.forEach(file => uploadQueue.queuedFiles.push(file));
 
-                uploadQueue['filesChanged']()
+                uploadQueue['filesChanged']();
 
                 expect(uploadQueue.queuedFiles.length).toEqual(3);
                 expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.queued);
                 expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.uploading);
                 expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(uploadStatus.failed);
-            })
+            });
         });
 
         describe('autoStart', () => {
-            let startFunction = function() { this.uploadStatus = uploadStatus.uploading };
+            let startFunction = function() { this.uploadStatus = uploadStatus.uploading; };
             let files: IUploadFile[];
 
             beforeEach(() => {
@@ -166,20 +165,20 @@ describe('uploadQueue', () => {
                     <IUploadFile>{ uploadStatus: uploadStatus.failed, start: startFunction },
                     <IUploadFile>{ uploadStatus: uploadStatus.canceled, start: startFunction },
                 ];
-            })
+            });
 
             it('does not start any file when there is no limit and autoStart is turned off', () => {
                 uploadQueue = new UploadQueue({ autoStart: false }, {});
-                files.forEach(file=> uploadQueue.queuedFiles.push(file));
+                files.forEach(file => uploadQueue.queuedFiles.push(file));
 
                 uploadQueue['filesChanged']();
                 expect(uploadQueue.queuedFiles).toEqual(files);
-            })
+            });
 
             it('starts all queued files when there is no limit and autoStart is turned on', () => {
                 uploadQueue = new UploadQueue({ autoStart: true }, {});
-                files.forEach(file=> uploadQueue.queuedFiles.push(file));
-                uploadQueue['filesChanged']()
+                files.forEach(file => uploadQueue.queuedFiles.push(file));
+                uploadQueue['filesChanged']();
 
                 expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.uploading);
                 expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.uploading);
@@ -189,12 +188,12 @@ describe('uploadQueue', () => {
                 expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(uploadStatus.uploaded);
                 expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(uploadStatus.failed);
                 expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(uploadStatus.canceled);
-            })
+            });
 
             it('starts only limited count of files when set limit and autoStart is turned on', () => {
                 uploadQueue = new UploadQueue({ autoStart: true, maxParallelUploads: 2 }, {});
-                files.forEach(file=> uploadQueue.queuedFiles.push(file));
-                uploadQueue['filesChanged']()
+                files.forEach(file => uploadQueue.queuedFiles.push(file));
+                uploadQueue['filesChanged']();
 
                 expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(uploadStatus.queued);
                 expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(uploadStatus.queued);
@@ -229,7 +228,7 @@ describe('uploadQueue', () => {
                 expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(uploadStatus.uploaded);
                 expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(uploadStatus.failed);
                 expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(uploadStatus.canceled);
-            })
+            });
         });
-    })
+    });
 });

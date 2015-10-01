@@ -1,5 +1,10 @@
 declare module "pure-upload" {
-export interface FileExt extends File {
+export function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+export var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
+export var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
+export function newGuid(): string;
+export interface IFileExt extends File {
     kind: string;
     webkitGetAsEntry: () => File;
     getAsFile: () => File;
@@ -8,11 +13,6 @@ export interface FileExt extends File {
     isDirectory: boolean;
     fullPath: string;
 }
-export function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
-export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-export var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
-export var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
-export function newGuid(): string;
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
     allowDragDrop?: boolean;
@@ -85,6 +85,7 @@ export class UploadArea {
     private unregisterOnDragOver;
     private unregisterOnChange;
     constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
+    destroy(): void;
     private setFullOptions(options);
     private putFilesToQueue(fileList);
     private validateFile(file);
@@ -98,7 +99,6 @@ export class UploadArea {
     private handleFiles(files);
     private isFileSizeValid(file);
     private stopEventPropagation(e);
-    destroy(): void;
 }
 export class UploadCore {
     options: IUploadOptions;
@@ -117,7 +117,7 @@ export class UploadCore {
     private finished(file, xhr);
     private setResponse(file, xhr);
     private setFullOptions(options);
-    setFullCallbacks(callbacks: IUploadCallbacksExt): void;
+    private setFullCallbacks(callbacks);
 }
 export class Uploader {
     uploadAreas: UploadArea[];
