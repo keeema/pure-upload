@@ -11,7 +11,7 @@ class UploadCore {
 
     upload(fileList: File[] | Object): void {
         var files = castFiles(fileList, uploadStatus.uploading);
-        files.forEach((file: IUploadFile) => this.processFile(file));
+        forEach(files, (file: IUploadFile) => this.processFile(file));
     }
 
     private processFile(file: IUploadFile): void {
@@ -41,7 +41,7 @@ class UploadCore {
         if (!this.options.headers['X-Requested-With'])
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-        Object.keys(this.options.headers).forEach((headerName: string) => {
+        forEach(keys(this.options.headers), (headerName: string) => {
             var headerValue = this.options.headers[headerName];
             if (headerValue !== undefined && headerValue !== null)
                 xhr.setRequestHeader(headerName, headerValue);
@@ -74,7 +74,7 @@ class UploadCore {
 
     private createFormData(file: IUploadFile): FormData {
         var formData = new FormData();
-        Object.keys(this.options.params).forEach((paramName: string) => {
+        forEach(keys(this.options.params), (paramName: string) => {
             var paramValue = this.options.params[paramName];
             if (paramValue !== undefined && paramValue !== null)
                 formData.append(paramName, paramValue);

@@ -1,5 +1,8 @@
 declare module "pure-upload" {
+export function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void, isFileApi: boolean): void;
 export function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+export function filter<T>(input: T[], filterFn: (item: T) => boolean): T[];
+export function forEach<T>(input: T[], callback: (item: T, index?: number) => void): void;
 export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
 export var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
 export var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
@@ -74,6 +77,9 @@ export interface IUploadStatus {
     canceled: IUploadStatus;
     removed: IUploadStatus;
 }
+export function keys(obj: Object): any[];
+export function map<T, K>(input: T[], mapper: (item: T) => K): K[];
+export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void, isFileApi: boolean): void;
 export class UploadArea {
     targetElement: Element;
     options: IUploadAreaOptions;
@@ -123,6 +129,7 @@ export class Uploader {
     uploadAreas: UploadArea[];
     queue: UploadQueue;
     options: IUploadQueueOptions;
+    isFileApi: boolean;
     constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
     setOptions(options: IUploadQueueOptions): void;
     registerArea(element: Element, options: IUploadAreaOptions): UploadArea;

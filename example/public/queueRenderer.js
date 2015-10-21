@@ -14,7 +14,7 @@ var QueueRenderer = (function () {
         var element = document.createElement('button');
         element.className = 'table-row-button';
         element.innerHTML = value;
-        element.addEventListener('click', callback);
+        pu.addEventHandler(element, 'click', callback, !!(window.File && window.FormData));
         return element;
     };
     QueueRenderer.prototype.createQueueRow = function (file, queueSettings) {
@@ -79,7 +79,7 @@ var QueueRenderer = (function () {
         while (queue.firstChild)
             queue.removeChild(queue.firstChild);
         queue.appendChild(this.createTextDiv('table-header-title', queueTitle));
-        files.forEach(function (file) {
+        pu.forEach(files, function (file) {
             queue.appendChild(_this.createQueueRow(file, queueSettings));
         });
     };

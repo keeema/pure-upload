@@ -2,12 +2,12 @@ function castFiles(fileList: File[]| Object, status?: IUploadStatus): IUploadFil
     let files: IUploadFile[];
 
     if (typeof fileList === 'object') {
-        files = Object.keys(fileList).map((key) => fileList[key]);
+        files = map(keys(fileList), (key) => fileList[key]);
     } else {
         files = <IUploadFile[]>fileList;
     }
 
-    files.forEach((file: IUploadFile) => {
+    forEach(files, (file: IUploadFile) => {
       file.uploadStatus = status || file.uploadStatus;
       file.responseCode = file.responseCode || 0;
       file.responseText = file.responseText || '';

@@ -1,5 +1,8 @@
 declare module pu {
+    function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void, isFileApi: boolean): void;
     function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+    function filter<T>(input: T[], filterFn: (item: T) => boolean): T[];
+    function forEach<T>(input: T[], callback: (item: T, index?: number) => void): void;
     function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
     var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
     var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
@@ -74,6 +77,9 @@ declare module pu {
         canceled: IUploadStatus;
         removed: IUploadStatus;
     }
+    function keys(obj: Object): any[];
+    function map<T, K>(input: T[], mapper: (item: T) => K): K[];
+    function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void, isFileApi: boolean): void;
     class UploadArea {
         targetElement: Element;
         options: IUploadAreaOptions;
@@ -123,6 +129,7 @@ declare module pu {
         uploadAreas: UploadArea[];
         queue: UploadQueue;
         options: IUploadQueueOptions;
+        isFileApi: boolean;
         constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
         setOptions(options: IUploadQueueOptions): void;
         registerArea(element: Element, options: IUploadAreaOptions): UploadArea;

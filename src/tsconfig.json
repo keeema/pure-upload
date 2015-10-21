@@ -29,9 +29,15 @@
         "./queue/uploadQueue.ts",
         "./uploader/getUploader.ts",
         "./uploader/uploader.ts",
+        "./utils/addEventHandler.ts",
         "./utils/files.ts",
+        "./utils/filter.ts",
+        "./utils/forEach.ts",
         "./utils/functions.ts",
         "./utils/guidGenerator.ts",
+        "./utils/keys.ts",
+        "./utils/map.ts",
+        "./utils/removeEventHandler.ts",
         "../decl/jasmine/jasmine.d.ts"
     ]
 }

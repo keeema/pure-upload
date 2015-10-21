@@ -11,7 +11,7 @@ class UploadQueue {
     }
 
     addFiles(files: IUploadFile[]): void {
-        files.forEach(file => {
+        forEach(files, file => {
             this.queuedFiles.push(file);
             file.guid = newGuid();
 
@@ -52,8 +52,10 @@ class UploadQueue {
         if (!cancelProcessing)
             excludeStatuses = excludeStatuses.concat([uploadStatus.queued, uploadStatus.uploading]);
 
-        this.queuedFiles.filter((file: IUploadFile) => excludeStatuses.indexOf(file.uploadStatus) < 0)
-            .forEach(file => this.removeFile(file, true));
+        forEach(
+            filter(this.queuedFiles, (file: IUploadFile) => excludeStatuses.indexOf(file.uploadStatus) < 0),
+            file => this.removeFile(file, true)
+        );
 
         this.callbacks.onQueueChangedCallback(this.queuedFiles);
     }
@@ -71,9 +73,11 @@ class UploadQueue {
     }
 
     private checkAllFinished(): void {
-        var unfinishedFiles = this.queuedFiles
-            .filter(file => [uploadStatus.queued, uploadStatus.uploading]
-                .indexOf(file.uploadStatus) >= 0);
+        var unfinishedFiles = filter(
+            this.queuedFiles,
+            file => [uploadStatus.queued, uploadStatus.uploading]
+                .indexOf(file.uploadStatus) >= 0
+        );
 
         if (unfinishedFiles.length === 0) {
             this.callbacks.onAllFinishedCallback();
@@ -97,16 +101,20 @@ class UploadQueue {
     }
 
     private startWaitingFiles(): void {
-        var files = this.getWaitingFiles().forEach(file => file.start());
+        forEach(this.getWaitingFiles(), file => file.start());
     }
 
     private removeFinishedFiles(): void {
-        this.queuedFiles
-            .filter(file => [
-                uploadStatus.uploaded,
-                uploadStatus.canceled
-            ].indexOf(file.uploadStatus) >= 0)
-            .forEach(file => this.removeFile(file, true));
+        forEach(
+            filter(
+                this.queuedFiles,
+                file => [
+                    uploadStatus.uploaded,
+                    uploadStatus.canceled
+                ].indexOf(file.uploadStatus) >= 0
+            ),
+            file => this.removeFile(file, true)
+        );
     }
 
     private deactivateFile(file: IUploadFile) {
@@ -123,13 +131,16 @@ class UploadQueue {
         if (!this.options.autoStart)
             return [];
 
-        var result = this.queuedFiles
-            .filter(file => file.uploadStatus === uploadStatus.queued);
+        var result = filter(
+            this.queuedFiles,
+            file => file.uploadStatus === uploadStatus.queued
+        );
 
         if (this.options.maxParallelUploads > 0) {
-            var uploadingFilesCount = this.queuedFiles
-                .filter(file => file.uploadStatus === uploadStatus.uploading)
-                .length;
+            var uploadingFilesCount = filter(
+                this.queuedFiles,
+                file => file.uploadStatus === uploadStatus.uploading
+            ).length;
 
             var count = this.options.maxParallelUploads - uploadingFilesCount;
 

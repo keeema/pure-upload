@@ -29,5 +29,5 @@ window.onload = function () {
     uploaderExample1.queue.callbacks.onProgressCallback = function (file) {
         queueRenderer.renderItemProgress('example-queue', file);
     };
-    document.getElementById('example-clear-button').addEventListener('click', function () { return uploaderExample1.queue.clearFiles(); });
+    pu.addEventHandler(document.getElementById('example-clear-button'), 'click', function () { return uploaderExample1.queue.clearFiles(); }, !!(window.File && window.FormData));
 };

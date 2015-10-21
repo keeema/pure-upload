@@ -34,5 +34,9 @@ window.onload = () => {
         queueRenderer.renderItemProgress('example-queue', file);
     };
 
-    document.getElementById('example-clear-button').addEventListener('click', () => uploaderExample1.queue.clearFiles());
+    pu.addEventHandler(
+        document.getElementById('example-clear-button'),
+        'click',
+        () => uploaderExample1.queue.clearFiles(),
+        !!((<any>window).File && (<any>window).FormData));
 };

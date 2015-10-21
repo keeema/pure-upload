@@ -39,15 +39,17 @@ class UploadArea {
 
     private setFullOptions(options: IUploadAreaOptions): void {
         this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop;
+        this.options.allowDragDrop = this.uploader.isFileApi &&
+        (options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop);
         this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
-        this.options.multiple = options.multiple === undefined || options.multiple === null ? true : options.multiple;
+        this.options.multiple = this.uploader.isFileApi &&
+        (options.multiple === undefined || options.multiple === null ? true : options.multiple);
     }
 
     private putFilesToQueue(fileList: FileList | File[]): void {
         var uploadFiles = castFiles(fileList);
-        uploadFiles.forEach((file: IUploadFile) => {
+        forEach(uploadFiles, (file: IUploadFile) => {
             if (this.validateFile(file)) {
                 file.start = () => {
                     this.uploadCore.upload([file]);
@@ -75,32 +77,43 @@ class UploadArea {
         this.fileInput.style.display = 'none';
 
         var onChange = (e) => this.onChange(e);
-        this.fileInput.addEventListener('change', onChange);
-        this.unregisterOnChange = () => this.fileInput.removeEventListener('onChange', onchange);
+        addEventHandler(this.fileInput, 'change', onChange, this.uploader.isFileApi);
+        this.unregisterOnChange = () => removeEventHandler(this.fileInput, 'change', onchange, this.uploader.isFileApi);
 
         if (this.options.multiple) {
             this.fileInput.setAttribute('multiple', '');
         }
         if (this.options.clickable) {
             var onClick = () => this.onClick();
-            this.targetElement.addEventListener('click', onClick);
-            this.unregisterOnClick = () => this.targetElement.removeEventListener('click', onClick);
+            addEventHandler(this.targetElement, 'click', onClick, this.uploader.isFileApi);
+            this.unregisterOnClick = () => removeEventHandler(this.targetElement, 'click', onClick, this.uploader.isFileApi);
         }
         if (this.options.allowDragDrop) {
             var onDrag = (e) => this.onDrag(e);
-            this.targetElement.addEventListener('dragover', onDrag);
-            this.unregisterOnDragOver = () => this.targetElement.removeEventListener('dragover', onDrag);
+            addEventHandler(this.targetElement, 'dragover', onDrag, this.uploader.isFileApi);
+            this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, 'dragover', onDrag, this.uploader.isFileApi);
 
             var onDrop = (e) => this.onDrop(e);
-            this.targetElement.addEventListener('drop', onDrop);
-            this.unregisterOnDrop = () => this.targetElement.removeEventListener('drop', onDrop);
+            addEventHandler(this.targetElement, 'drop', onDrop, this.uploader.isFileApi);
+            this.unregisterOnDrop = () => removeEventHandler(this.targetElement, 'drop', onDrop, this.uploader.isFileApi);
         }
         // attach to body
         document.body.appendChild(this.fileInput);
     }
 
     private onChange(e): void {
-        this.putFilesToQueue(e.target.files);
+        let files = e.target
+            ? e.target.files
+                ? e.target.files
+                : e.target.value
+                    ? [{ name: e.target.value.replace(/^.+\\/, '') }]
+                    : []
+            : this.fileInput.value
+                ? [{ name: this.fileInput.value.replace(/^.+\\/, '') }]
+                : [];
+
+        if (files.length)
+            this.putFilesToQueue(files);
     }
 
     private onDrag(e: DragEvent): void {

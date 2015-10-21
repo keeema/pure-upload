@@ -1,6 +1,6 @@
-import express = require("express");
-import multer = require("multer");
-var cors = require('cors')
+import express = require('express');
+import multer = require('multer');
+var cors = require('cors');
 
 var app: express.Application = express();
 var done = false;
@@ -10,22 +10,21 @@ app.use(cors());
 var args = process.argv.slice(2);
 var listenUpload = true;
 
-if (args.length && args.filter(arg=> arg === 'fake' || arg === 'f').length)
+if (args.length && args.filter(arg => arg === 'fake' || arg === 'f').length)
     listenUpload = false;
 
-
 if (listenUpload) {
-    console.log('Running in file-accepting mode.')
+    console.log('Running in file-accepting mode.');
     app.use('/api/test', multer({
         dest: './uploads/',
         rename: (fieldname, filename) => filename + Date.now(),
 
         onFileUploadStart: (file: Express.Multer.File) => {
-            console.log(file.originalname + ' is starting ...')
+            console.log(file.originalname + ' is starting ...');
         },
 
         onFileUploadComplete: (file) => {
-            console.log(file.fieldname + ' uploaded to  ' + file.path)
+            console.log(file.fieldname + ' uploaded to  ' + file.path);
             done = true;
         }
     }));
@@ -34,18 +33,18 @@ if (listenUpload) {
         response.send('API OK');
     });
 } else {
-  console.log('Running in fake mode.')
+    console.log('Running in fake mode.');
 }
 
 app.use(express.static('./example/public'));
 
 app.post('/api/test', (req, res: express.Response) => {
     if (done === true) {
-        res.send("File uploaded.");
+        res.send('File uploaded.');
         done = false;
     }
 });
 
 app.listen(3000, () => {
-    console.log("Listening on port 3000");
+    console.log('Listening on port 3000');
 });

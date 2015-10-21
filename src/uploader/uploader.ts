@@ -2,8 +2,10 @@ class Uploader {
     uploadAreas: UploadArea[];
     queue: UploadQueue;
     options: IUploadQueueOptions;
+    isFileApi: boolean;
 
     constructor(options: IUploadQueueOptions = {}, callbacks: IUploadQueueCallbacks = {}) {
+        this.isFileApi = !!((<any>window).File && (<any>window).FormData);
         this.setOptions(options);
         this.uploadAreas = [];
         this.queue = new UploadQueue(options, callbacks);

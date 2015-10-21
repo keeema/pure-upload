@@ -15,7 +15,7 @@ class QueueRenderer {
         var element = document.createElement('button');
         element.className = 'table-row-button';
         element.innerHTML = value;
-        element.addEventListener('click', callback);
+        pu.addEventHandler(element, 'click', callback, !!((<any>window).File && (<any>window).FormData));
         return element;
     }
 
@@ -85,7 +85,7 @@ class QueueRenderer {
         while (queue.firstChild) queue.removeChild(queue.firstChild);
 
         queue.appendChild(this.createTextDiv('table-header-title', queueTitle));
-        files.forEach((file: pu.IUploadFile) => {
+        pu.forEach(files, (file: pu.IUploadFile) => {
             queue.appendChild(this.createQueueRow(file, queueSettings));
         });
     }
