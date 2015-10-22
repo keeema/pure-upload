@@ -77,6 +77,16 @@ function newGuid() {
 }
 exports.newGuid = newGuid;
 ;
+function indexOf(input, item) {
+    if (!input)
+        return -1;
+    for (var i = 0; i < input.length; i++) {
+        if (input[i] === item)
+            return i;
+    }
+    return -1;
+}
+exports.indexOf = indexOf;
 function keys(obj) {
     var keys = [];
     for (var i in obj) {
@@ -469,7 +479,7 @@ var Uploader = (function () {
         return uploadArea;
     };
     Uploader.prototype.unregisterArea = function (area) {
-        var areaIndex = this.uploadAreas.indexOf(area);
+        var areaIndex = indexOf(this.uploadAreas, area);
         if (areaIndex >= 0) {
             this.uploadAreas[areaIndex].destroy();
             this.uploadAreas.splice(areaIndex, 1);
@@ -508,7 +518,7 @@ var UploadQueue = (function () {
     };
     UploadQueue.prototype.removeFile = function (file, blockRecursive) {
         if (blockRecursive === void 0) { blockRecursive = false; }
-        var index = this.queuedFiles.indexOf(file);
+        var index = indexOf(this.queuedFiles, file);
         if (index < 0)
             return;
         this.deactivateFile(file);
@@ -523,7 +533,7 @@ var UploadQueue = (function () {
         if (cancelProcessing === void 0) { cancelProcessing = false; }
         if (!cancelProcessing)
             excludeStatuses = excludeStatuses.concat([exports.uploadStatus.queued, exports.uploadStatus.uploading]);
-        forEach(filter(this.queuedFiles, function (file) { return excludeStatuses.indexOf(file.uploadStatus) < 0; }), function (file) { return _this.removeFile(file, true); });
+        forEach(filter(this.queuedFiles, function (file) { return indexOf(excludeStatuses, file.uploadStatus) < 0; }), function (file) { return _this.removeFile(file, true); });
         this.callbacks.onQueueChangedCallback(this.queuedFiles);
     };
     UploadQueue.prototype.filesChanged = function () {
@@ -535,8 +545,7 @@ var UploadQueue = (function () {
         this.checkAllFinished();
     };
     UploadQueue.prototype.checkAllFinished = function () {
-        var unfinishedFiles = filter(this.queuedFiles, function (file) { return [exports.uploadStatus.queued, exports.uploadStatus.uploading]
-            .indexOf(file.uploadStatus) >= 0; });
+        var unfinishedFiles = filter(this.queuedFiles, function (file) { return indexOf([exports.uploadStatus.queued, exports.uploadStatus.uploading], file.uploadStatus) >= 0; });
         if (unfinishedFiles.length === 0) {
             this.callbacks.onAllFinishedCallback();
         }
@@ -559,10 +568,10 @@ var UploadQueue = (function () {
     };
     UploadQueue.prototype.removeFinishedFiles = function () {
         var _this = this;
-        forEach(filter(this.queuedFiles, function (file) { return [
+        forEach(filter(this.queuedFiles, function (file) { return indexOf([
             exports.uploadStatus.uploaded,
             exports.uploadStatus.canceled
-        ].indexOf(file.uploadStatus) >= 0; }), function (file) { return _this.removeFile(file, true); });
+        ], file.uploadStatus) >= 0; }), function (file) { return _this.removeFile(file, true); });
     };
     UploadQueue.prototype.deactivateFile = function (file) {
         if (file.uploadStatus === exports.uploadStatus.uploading)

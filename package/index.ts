@@ -91,6 +91,18 @@ export interface IFileExt extends File {
     fullPath: string;
 }
 
+export function indexOf<T>(input: T[], item: T): number {
+    if (!input)
+        return -1;
+
+    for (var i = 0; i < input.length; i++) {
+        if (input[i] === item)
+            return i;
+    }
+
+    return -1;
+}
+
 export interface IUploadAreaOptions extends IUploadOptions {
   maxFileSize?: number;
   allowDragDrop?: boolean;
@@ -600,7 +612,7 @@ export class Uploader {
     }
 
     unregisterArea(area: UploadArea): void {
-        var areaIndex = this.uploadAreas.indexOf(area);
+        var areaIndex = indexOf(this.uploadAreas, area);
         if (areaIndex >= 0) {
             this.uploadAreas[areaIndex].destroy();
             this.uploadAreas.splice(areaIndex, 1);
@@ -644,7 +656,7 @@ export class UploadQueue {
     }
 
     removeFile(file: IUploadFile, blockRecursive: boolean = false) {
-        var index = this.queuedFiles.indexOf(file);
+        var index = indexOf(this.queuedFiles, file);
 
         if (index < 0)
             return;
@@ -663,7 +675,7 @@ export class UploadQueue {
             excludeStatuses = excludeStatuses.concat([uploadStatus.queued, uploadStatus.uploading]);
 
         forEach(
-            filter(this.queuedFiles, (file: IUploadFile) => excludeStatuses.indexOf(file.uploadStatus) < 0),
+            filter(this.queuedFiles, (file: IUploadFile) => indexOf(excludeStatuses, file.uploadStatus) < 0),
             file => this.removeFile(file, true)
         );
 
@@ -685,8 +697,7 @@ export class UploadQueue {
     private checkAllFinished(): void {
         var unfinishedFiles = filter(
             this.queuedFiles,
-            file => [uploadStatus.queued, uploadStatus.uploading]
-                .indexOf(file.uploadStatus) >= 0
+            file => indexOf([uploadStatus.queued, uploadStatus.uploading], file.uploadStatus) >= 0
         );
 
         if (unfinishedFiles.length === 0) {
@@ -718,10 +729,13 @@ export class UploadQueue {
         forEach(
             filter(
                 this.queuedFiles,
-                file => [
-                    uploadStatus.uploaded,
-                    uploadStatus.canceled
-                ].indexOf(file.uploadStatus) >= 0
+                file => indexOf(
+                    [
+                        uploadStatus.uploaded,
+                        uploadStatus.canceled
+                    ],
+                    file.uploadStatus
+                ) >= 0
             ),
             file => this.removeFile(file, true)
         );

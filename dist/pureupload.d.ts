@@ -16,6 +16,7 @@ declare module pu {
         isDirectory: boolean;
         fullPath: string;
     }
+    function indexOf<T>(input: T[], item: T): number;
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
         allowDragDrop?: boolean;

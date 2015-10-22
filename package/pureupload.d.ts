@@ -16,6 +16,7 @@ export interface IFileExt extends File {
     isDirectory: boolean;
     fullPath: string;
 }
+export function indexOf<T>(input: T[], item: T): number;
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
     allowDragDrop?: boolean;

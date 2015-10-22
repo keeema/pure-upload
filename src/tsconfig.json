@@ -35,6 +35,7 @@
         "./utils/forEach.ts",
         "./utils/functions.ts",
         "./utils/guidGenerator.ts",
+        "./utils/indexOf.ts",
         "./utils/keys.ts",
         "./utils/map.ts",
         "./utils/removeEventHandler.ts",
