@@ -172,8 +172,8 @@ class UploadArea {
         this.formForNoFileApi.style.position = 'relative';
         this.formForNoFileApi.style.display = 'inline-block';
         this.formForNoFileApi.style.overflow = 'hidden';
-        this.formForNoFileApi.style.width = this.targetElement.offsetWidth.toString();
-        this.formForNoFileApi.style.height = this.targetElement.offsetHeight.toString();
+        this.formForNoFileApi.style.width = this.targetElement.offsetWidth.toString() + 'px';
+        this.formForNoFileApi.style.height = this.targetElement.offsetHeight.toString() + 'px';
 
         if (this.targetElement.clientHeight === 0 || this.targetElement.clientWidth === 0) {
             console.warn('upload element height and width has to be set to be able catch upload');
