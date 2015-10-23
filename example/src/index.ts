@@ -22,7 +22,7 @@ window.onload = () => {
         multiple: true
     };
 
-    let compatibilityForm = document.getElementById('example-compatibility-form');
+    let compatibilityForm = document.getElementById('example-compatibility-form'); 
     uploaderExample1.registerArea(document.getElementById('example-button'), uploadSettings, compatibilityForm);
     uploaderExample1.registerArea(document.getElementById('example-dnd-area'), uploadSettings);
     uploaderExample1.registerArea(document.getElementById('example-queue'), queueUploadSettings);

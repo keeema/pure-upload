@@ -1,7 +1,7 @@
 # Pure-upload
 [![npm version](https://badge.fury.io/js/pure-upload.svg)](http://badge.fury.io/js/pure-upload)  [![Bower version](https://badge.fury.io/bo/pure-upload.svg)](http://badge.fury.io/bo/pure-upload)
 
-The pure JS (TS) upload library with no dependencies.
+The pure JS (TS) upload library with no dependencies compatible with Google Chrome, Firefox, IE10+ (IE9- with auto-start by default, manual-start optionally) and mobile browsers.
 
 ## Installation
 1. Dowload as a ZIP file directly from [GitHub](https://github.com/keeema/pure-upload/archive/master.zip) pages and include to your project.
@@ -47,6 +47,13 @@ Registration:
 ```typescript
 var uploadArea = uploader.registerArea(element, uploadAreaOptions);
 ```
+
+Registration for IE9- with manual-start:
+```typescript
+var uploadArea = uploader.registerArea(element, uploadAreaOptions, compatibilityForm);
+```
+The *compatibilityForm* objects has to be *form* element containing one *input* element for *file* and one *input* element for *submit*.
+
 Unregistration:
 ```typescript
 uploader.unregisterArea(uploadArea);

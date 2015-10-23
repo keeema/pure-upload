@@ -127,7 +127,11 @@ var pu;
     pu.removeEventHandler = removeEventHandler;
     var UploadArea = (function () {
         function UploadArea(targetElement, options, uploader, formForNoFileApi) {
-            this.formForNoFileApi = !!formForNoFileApi && formForNoFileApi.getElementsByTagName('form')[0];
+            if (formForNoFileApi) {
+                this.formForNoFileApi = formForNoFileApi.tagName.toLowerCase() === 'form'
+                    ? formForNoFileApi
+                    : formForNoFileApi.getElementsByTagName('form')[0];
+            }
             this.targetElement = targetElement;
             this.options = options;
             this.uploader = uploader;
@@ -159,6 +163,10 @@ var pu;
                     this.unregisterFormOnChange();
                 if (this.lastIframe)
                     this.formForNoFileApi.parentNode.removeChild(this.lastIframe);
+                if (!this.formForNoFileApiProvided) {
+                    this.formForNoFileApi.parentNode.insertBefore(this.targetElement, this.formForNoFileApi.nextSibling || null);
+                    this.targetElement.parentNode.removeChild(this.formForNoFileApi);
+                }
             }
         };
         UploadArea.prototype.setFullOptions = function (options) {
@@ -195,13 +203,12 @@ var pu;
         };
         UploadArea.prototype.setupFileApiElements = function () {
             var _this = this;
-            if (this.formForNoFileApi) {
-                this.formForNoFileApi.style.display = 'none';
-            }
             this.fileInput = document.createElement('input');
             this.fileInput.setAttribute('type', 'file');
             this.fileInput.setAttribute('accept', this.options.accept);
             this.fileInput.style.display = 'none';
+            if (this.formForNoFileApi)
+                this.formForNoFileApi.style.display = 'none';
             var onChange = function (e) { return _this.onChange(e); };
             addEventHandler(this.fileInput, 'change', onChange);
             this.unregisterOnChange = function () { return removeEventHandler(_this.fileInput, 'change', onchange); };
@@ -226,27 +233,75 @@ var pu;
         };
         UploadArea.prototype.setupOldSchoolElements = function () {
             var _this = this;
-            if (!this.formForNoFileApi)
+            if (!this.options.clickable)
                 return;
+            if (this.formForNoFileApi) {
+                this.decorateInputForm();
+            }
+            else {
+                this.createFormWrapper();
+            }
+            var submitInput = this.findInnerSubmit();
+            var handler = function (e) { return _this.onFormChange(e, _this.fileInput, submitInput); };
+            addEventHandler(this.fileInput, 'change', handler);
+            this.unregisterFormOnChange = function () { return removeEventHandler(_this.fileInput, 'change', handler); };
+        };
+        UploadArea.prototype.createFormWrapper = function () {
+            this.fileInput = document.createElement('input');
+            this.fileInput.setAttribute('type', 'file');
+            this.fileInput.setAttribute('accept', this.options.accept);
+            this.fileInput.setAttribute('name', 'file');
+            this.fileInput.style.position = 'absolute';
+            this.fileInput.style.left = '0';
+            this.fileInput.style.right = '0';
+            this.fileInput.style.top = '0';
+            this.fileInput.style.bottom = '0';
+            this.fileInput.style.width = '100%';
+            this.fileInput.style.height = '100%';
+            this.fileInput.style.fontSize = '10000%'; //IE one click
+            this.fileInput.style.opacity = '0';
+            this.fileInput.style.filter = 'alpha(opacity=0)';
+            this.fileInput.style.cursor = 'pointer';
+            this.formForNoFileApi = document.createElement('form');
+            this.formForNoFileApi.setAttribute('method', this.uploadCore.options.method);
+            this.formForNoFileApi.setAttribute('enctype', 'multipart/form-data');
+            this.formForNoFileApi.setAttribute('encoding', 'multipart/form-data');
+            this.formForNoFileApi.style.position = 'relative';
+            this.formForNoFileApi.style.display = 'inline-block';
+            this.formForNoFileApi.style.overflow = 'hidden';
+            this.formForNoFileApi.style.width = this.targetElement.offsetWidth.toString();
+            this.formForNoFileApi.style.height = this.targetElement.offsetHeight.toString();
+            if (this.targetElement.clientHeight === 0 || this.targetElement.clientWidth === 0) {
+                console.warn('upload element height and width has to be set to be able catch upload');
+            }
+            this.targetElement.parentNode.insertBefore(this.formForNoFileApi, this.targetElement.nextSibling || null);
+            this.formForNoFileApi.appendChild(this.targetElement);
+            this.formForNoFileApi.appendChild(this.fileInput);
+        };
+        UploadArea.prototype.decorateInputForm = function () {
+            this.formForNoFileApiProvided = true;
             this.targetElement.style.display = 'none';
             this.formForNoFileApi.setAttribute('method', this.uploadCore.options.method);
             this.formForNoFileApi.setAttribute('enctype', 'multipart/form-data');
             this.formForNoFileApi.setAttribute('encoding', 'multipart/form-data');
-            var fileInput;
             var submitInput;
             var inputs = this.formForNoFileApi.getElementsByTagName('input');
             for (var i = 0; i < inputs.length; i++) {
                 var el = inputs[i];
                 if (el.type === 'file') {
-                    fileInput = el;
-                }
-                else if (el.type === 'submit') {
-                    submitInput = el;
+                    this.fileInput = el;
                 }
             }
-            var handler = function (e) { return _this.onFormChange(e, fileInput, submitInput); };
-            addEventHandler(fileInput, 'change', handler);
-            this.unregisterFormOnChange = function () { return removeEventHandler(fileInput, 'change', handler); };
+        };
+        UploadArea.prototype.findInnerSubmit = function () {
+            var inputs = this.formForNoFileApi.getElementsByTagName('input');
+            for (var i = 0; i < inputs.length; i++) {
+                var el = inputs[i];
+                if (el.type === 'submit') {
+                    return el;
+                }
+            }
+            return undefined;
         };
         UploadArea.prototype.onFormChange = function (e, fileInput, submitInput) {
             var files = e.target
@@ -277,10 +332,10 @@ var pu;
             var iframe = this.lastIframe = document.createElement('iframe');
             iframe.setAttribute('id', iframeName);
             iframe.setAttribute('name', iframeName);
-            iframe.setAttribute('width', '0');
-            iframe.setAttribute('height', '0');
-            iframe.setAttribute('border', '0');
-            iframe.setAttribute('style', 'width: 0; height: 0; border: none;');
+            iframe.style.border = 'none';
+            iframe.style.display = 'none';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
             this.formForNoFileApi.setAttribute('target', iframeName);
             this.formForNoFileApi.parentNode.insertBefore(iframe, this.formForNoFileApi.nextSibling || null);
             window.frames[iframeName].name = iframeName;

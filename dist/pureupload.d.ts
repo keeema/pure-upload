@@ -90,6 +90,7 @@ declare module pu {
         private uploadCore;
         private fileInput;
         private formForNoFileApi;
+        private formForNoFileApiProvided;
         private lastIframe;
         private unregisterOnClick;
         private unregisterOnDrop;
@@ -103,6 +104,9 @@ declare module pu {
         private validateFile(file);
         private setupFileApiElements();
         private setupOldSchoolElements();
+        private createFormWrapper();
+        private decorateInputForm();
+        private findInnerSubmit();
         private onFormChange(e, fileInput, submitInput);
         private addTargetIframe();
         private onChange(e);

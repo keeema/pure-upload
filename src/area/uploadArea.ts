@@ -5,6 +5,7 @@ class UploadArea {
     private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
     private formForNoFileApi: HTMLFormElement;
+    private formForNoFileApiProvided: boolean;
     private lastIframe: HTMLElement;
     private unregisterOnClick: () => void;
     private unregisterOnDrop: () => void;
@@ -13,7 +14,11 @@ class UploadArea {
     private unregisterFormOnChange: () => void;
 
     constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader, formForNoFileApi?: HTMLFormElement) {
-        this.formForNoFileApi = !!formForNoFileApi && formForNoFileApi.getElementsByTagName('form')[0];
+        if (formForNoFileApi) {
+            this.formForNoFileApi = formForNoFileApi.tagName.toLowerCase() === 'form'
+                ? formForNoFileApi
+                : formForNoFileApi.getElementsByTagName('form')[0];
+        }
 
         this.targetElement = targetElement;
         this.options = options;
@@ -51,6 +56,11 @@ class UploadArea {
 
             if (this.lastIframe)
                 this.formForNoFileApi.parentNode.removeChild(this.lastIframe);
+
+            if (!this.formForNoFileApiProvided) {
+                this.formForNoFileApi.parentNode.insertBefore(this.targetElement, this.formForNoFileApi.nextSibling || null);
+                this.targetElement.parentNode.removeChild(this.formForNoFileApi);
+            }
         }
     }
 
@@ -79,7 +89,7 @@ class UploadArea {
 
     private validateFile(file: IUploadFile): boolean {
         if (!this.isFileSizeValid(file)) {
-            file.uploadStatus = uploadStatus.failed;            
+            file.uploadStatus = uploadStatus.failed;
             file.responseText = !!this.options.localizer
                 ? this.options.localizer('The size of this file exceeds the { maxFileSize } MB limit.', this.options)
                 : 'The size of this file exceeds the ' + this.options.maxFileSize + ' MB limit.';
@@ -89,13 +99,13 @@ class UploadArea {
     }
 
     private setupFileApiElements(): void {
-        if (this.formForNoFileApi) {
-            this.formForNoFileApi.style.display = 'none';
-        }
         this.fileInput = document.createElement('input');
         this.fileInput.setAttribute('type', 'file');
         this.fileInput.setAttribute('accept', this.options.accept);
         this.fileInput.style.display = 'none';
+
+        if (this.formForNoFileApi)
+            this.formForNoFileApi.style.display = 'none';
 
         var onChange = (e) => this.onChange(e);
         addEventHandler(this.fileInput, 'change', onChange);
@@ -123,29 +133,85 @@ class UploadArea {
     }
 
     private setupOldSchoolElements(): void {
-        if (!this.formForNoFileApi)
+        if (!this.options.clickable)
             return;
 
+        if (this.formForNoFileApi) {
+            this.decorateInputForm();
+        } else {
+            this.createFormWrapper();
+        }
+
+        let submitInput = this.findInnerSubmit();
+        let handler = (e) => this.onFormChange(e, this.fileInput, submitInput);
+        addEventHandler(this.fileInput, 'change', handler);
+        this.unregisterFormOnChange = () => removeEventHandler(this.fileInput, 'change', handler);
+    }
+
+    private createFormWrapper() {
+        this.fileInput = document.createElement('input');
+        this.fileInput.setAttribute('type', 'file');
+        this.fileInput.setAttribute('accept', this.options.accept);
+        this.fileInput.setAttribute('name', 'file');
+        this.fileInput.style.position = 'absolute';
+        this.fileInput.style.left = '0';
+        this.fileInput.style.right = '0';
+        this.fileInput.style.top = '0';
+        this.fileInput.style.bottom = '0';
+        this.fileInput.style.width = '100%';
+        this.fileInput.style.height = '100%';
+        this.fileInput.style.fontSize = '10000%'; //IE one click
+        this.fileInput.style.opacity = '0';
+        this.fileInput.style.filter = 'alpha(opacity=0)';
+        this.fileInput.style.cursor = 'pointer';
+
+        this.formForNoFileApi = document.createElement('form');
+        this.formForNoFileApi.setAttribute('method', this.uploadCore.options.method);
+        this.formForNoFileApi.setAttribute('enctype', 'multipart/form-data');
+        this.formForNoFileApi.setAttribute('encoding', 'multipart/form-data');
+        this.formForNoFileApi.style.position = 'relative';
+        this.formForNoFileApi.style.display = 'inline-block';
+        this.formForNoFileApi.style.overflow = 'hidden';
+        this.formForNoFileApi.style.width = this.targetElement.offsetWidth.toString();
+        this.formForNoFileApi.style.height = this.targetElement.offsetHeight.toString();
+
+        if (this.targetElement.clientHeight === 0 || this.targetElement.clientWidth === 0) {
+            console.warn('upload element height and width has to be set to be able catch upload');
+        }
+
+        this.targetElement.parentNode.insertBefore(this.formForNoFileApi, this.targetElement.nextSibling || null);
+        this.formForNoFileApi.appendChild(this.targetElement);
+        this.formForNoFileApi.appendChild(this.fileInput);
+    }
+
+    private decorateInputForm() {
+        this.formForNoFileApiProvided = true;
         this.targetElement.style.display = 'none';
+
         this.formForNoFileApi.setAttribute('method', this.uploadCore.options.method);
         this.formForNoFileApi.setAttribute('enctype', 'multipart/form-data');
         this.formForNoFileApi.setAttribute('encoding', 'multipart/form-data');
 
-        let fileInput: HTMLInputElement;
         let submitInput: HTMLInputElement;
         let inputs = this.formForNoFileApi.getElementsByTagName('input');
         for (var i = 0; i < inputs.length; i++) {
             var el = inputs[i];
             if (el.type === 'file') {
-                fileInput = el;
-            } else if (el.type === 'submit') {
-                submitInput = el;
+                this.fileInput = el;
+            }
+        }
+    }
+
+    private findInnerSubmit(): HTMLInputElement {
+        let inputs = this.formForNoFileApi.getElementsByTagName('input');
+        for (var i = 0; i < inputs.length; i++) {
+            var el = inputs[i];
+            if (el.type === 'submit') {
+                return el;
             }
         }
 
-        let handler = (e) => this.onFormChange(e, fileInput, submitInput);
-        addEventHandler(fileInput, 'change', handler);
-        this.unregisterFormOnChange = () => removeEventHandler(fileInput, 'change', handler);
+        return undefined;
     }
 
     private onFormChange(e, fileInput: HTMLInputElement, submitInput: HTMLInputElement) {
@@ -183,10 +249,10 @@ class UploadArea {
         var iframe = this.lastIframe = document.createElement('iframe');
         iframe.setAttribute('id', iframeName);
         iframe.setAttribute('name', iframeName);
-        iframe.setAttribute('width', '0');
-        iframe.setAttribute('height', '0');
-        iframe.setAttribute('border', '0');
-        iframe.setAttribute('style', 'width: 0; height: 0; border: none;');
+        iframe.style.border = 'none';
+        iframe.style.display = 'none';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
         this.formForNoFileApi.setAttribute('target', iframeName);
         this.formForNoFileApi.parentNode.insertBefore(iframe, this.formForNoFileApi.nextSibling || null);
         window.frames[iframeName].name = iframeName;
