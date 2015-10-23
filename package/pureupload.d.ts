@@ -1,5 +1,6 @@
 declare module "pure-upload" {
-export function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void, isFileApi: boolean): void;
+export function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
+export let isFileApi: boolean;
 export function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
 export function filter<T>(input: T[], filterFn: (item: T) => boolean): T[];
 export function forEach<T>(input: T[], callback: (item: T, index?: number) => void): void;
@@ -56,6 +57,7 @@ export interface IUploadOptions {
     params?: {
         [key: string]: any;
     };
+    localizer?: (message: string, params?: Object) => string;
 }
 export interface IUploadQueueCallbacks extends IUploadCallbacks {
     onFileAddedCallback?: (file: IUploadFile) => void;
@@ -80,23 +82,29 @@ export interface IUploadStatus {
 }
 export function keys(obj: Object): any[];
 export function map<T, K>(input: T[], mapper: (item: T) => K): K[];
-export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void, isFileApi: boolean): void;
+export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
 export class UploadArea {
-    targetElement: Element;
+    targetElement: HTMLElement;
     options: IUploadAreaOptions;
     uploader: Uploader;
     private uploadCore;
     private fileInput;
+    private formForNoFileApi;
+    private lastIframe;
     private unregisterOnClick;
     private unregisterOnDrop;
     private unregisterOnDragOver;
     private unregisterOnChange;
-    constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader);
+    private unregisterFormOnChange;
+    constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader, formForNoFileApi?: HTMLFormElement);
     destroy(): void;
     private setFullOptions(options);
-    private putFilesToQueue(fileList);
+    private putFilesToQueue(fileList, form);
     private validateFile(file);
-    private setupHiddenInput();
+    private setupFileApiElements();
+    private setupOldSchoolElements();
+    private onFormChange(e, fileInput, submitInput);
+    private addTargetIframe();
     private onChange(e);
     private onDrag(e);
     private onDrop(e);
@@ -112,6 +120,7 @@ export class UploadCore {
     callbacks: IUploadCallbacksExt;
     constructor(options: IUploadOptions, callbacks?: IUploadCallbacksExt);
     upload(fileList: File[] | Object): void;
+    getUrl(file: IUploadFile): string;
     private processFile(file);
     private createRequest(file);
     private setHeaders(xhr, fileName);
@@ -130,10 +139,9 @@ export class Uploader {
     uploadAreas: UploadArea[];
     queue: UploadQueue;
     options: IUploadQueueOptions;
-    isFileApi: boolean;
     constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
     setOptions(options: IUploadQueueOptions): void;
-    registerArea(element: Element, options: IUploadAreaOptions): UploadArea;
+    registerArea(element: HTMLElement, options: IUploadAreaOptions, compatibilityForm?: Element): UploadArea;
     unregisterArea(area: UploadArea): void;
 }
 export class UploadQueue {

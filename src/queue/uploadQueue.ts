@@ -85,7 +85,7 @@ class UploadQueue {
 
     private setFullOptions(): void {
         this.options.maxParallelUploads = this.options.maxParallelUploads || 0;
-        this.options.autoStart = this.options.autoStart || false;
+        this.options.autoStart = isFileApi && (this.options.autoStart || false);
         this.options.autoRemove = this.options.autoRemove || false;
 
     }

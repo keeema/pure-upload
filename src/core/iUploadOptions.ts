@@ -3,5 +3,6 @@ interface IUploadOptions {
     method: string;
     withCredentials?: boolean;
     headers?: { [key: string]: any };
-    params?: { [key: string]: any };
+    params?: { [key: string]: any };    
+    localizer?: (message: string, params?: Object) => string;
 }

@@ -1,5 +1,5 @@
-export function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void, isFileApi: boolean) {
-    if (isFileApi) {
+export function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void) {
+    if (el.addEventListener) {
         el.addEventListener(event, handler);
     } else {
         var elem = <any>el;
@@ -10,6 +10,8 @@ export function addEventHandler(el: HTMLInputElement | Element, event: string, h
         }
     }
 }
+
+export let isFileApi: boolean = !!((<any>window).File && (<any>window).FormData);
 
 export function castFiles(fileList: File[]| Object, status?: IUploadStatus): IUploadFile[] {
     let files: IUploadFile[];
@@ -104,11 +106,11 @@ export function indexOf<T>(input: T[], item: T): number {
 }
 
 export interface IUploadAreaOptions extends IUploadOptions {
-  maxFileSize?: number;
-  allowDragDrop?: boolean;
-  clickable?: boolean;
-  accept?: string;
-  multiple?: boolean;
+    maxFileSize?: number;
+    allowDragDrop?: boolean;
+    clickable?: boolean;
+    accept?: string;
+    multiple?: boolean;
 }
 
 export interface IUploadCallbacks {
@@ -142,7 +144,8 @@ export interface IUploadOptions {
     method: string;
     withCredentials?: boolean;
     headers?: { [key: string]: any };
-    params?: { [key: string]: any };
+    params?: { [key: string]: any };    
+    localizer?: (message: string, params?: Object) => string;
 }
 
 export interface IUploadQueueCallbacks extends IUploadCallbacks {
@@ -194,8 +197,8 @@ export function map<T, K>(input: T[], mapper: (item: T) => K): K[] {
     return result;
 }
 
-export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void, isFileApi: boolean) {
-    if (isFileApi) {
+export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void) {
+    if (el.removeEventListener) {
         el.removeEventListener(event, handler);
     } else {
         var elem = <any>el;
@@ -208,55 +211,72 @@ export function removeEventHandler(el: HTMLInputElement | Element, event: string
 }
 
 export class UploadArea {
-    public targetElement: Element;
+    public targetElement: HTMLElement;
     public options: IUploadAreaOptions;
     public uploader: Uploader;
     private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
+    private formForNoFileApi: HTMLFormElement;
+    private lastIframe: HTMLElement;
     private unregisterOnClick: () => void;
     private unregisterOnDrop: () => void;
     private unregisterOnDragOver: () => void;
     private unregisterOnChange: () => void;
+    private unregisterFormOnChange: () => void;
 
-    constructor(targetElement: Element, options: IUploadAreaOptions, uploader: Uploader) {
+    constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader, formForNoFileApi?: HTMLFormElement) {
+        this.formForNoFileApi = !!formForNoFileApi && formForNoFileApi.getElementsByTagName('form')[0];
+
         this.targetElement = targetElement;
         this.options = options;
         this.uploader = uploader;
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
         this.setFullOptions(options);
-        this.setupHiddenInput();
+        if (isFileApi) {
+            this.setupFileApiElements();
+        } else {
+            this.setupOldSchoolElements();
+        }
     }
 
     destroy(): void {
-        if (this.unregisterOnClick)
-            this.unregisterOnClick();
+        if (isFileApi) {
+            if (this.unregisterOnClick)
+                this.unregisterOnClick();
 
-        if (this.unregisterOnDrop)
-            this.unregisterOnDrop();
+            if (this.unregisterOnDrop)
+                this.unregisterOnDrop();
 
-        if (this.unregisterOnChange)
-            this.unregisterOnChange();
+            if (this.unregisterOnChange)
+                this.unregisterOnChange();
 
-        if (this.unregisterOnDragOver)
-            this.unregisterOnDragOver();
+            if (this.unregisterOnDragOver)
+                this.unregisterOnDragOver();
 
-        this.targetElement.removeEventListener('dragover', this.onDrag);
-        this.targetElement.removeEventListener('drop', this.onDrop);
+            this.targetElement.removeEventListener('dragover', this.onDrag);
+            this.targetElement.removeEventListener('drop', this.onDrop);
 
-        document.body.removeChild(this.fileInput);
+            document.body.removeChild(this.fileInput);
+        } else {
+            if (this.unregisterFormOnChange)
+                this.unregisterFormOnChange();
+
+            if (this.lastIframe)
+                this.formForNoFileApi.parentNode.removeChild(this.lastIframe);
+        }
     }
 
     private setFullOptions(options: IUploadAreaOptions): void {
         this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = this.uploader.isFileApi &&
+        this.options.allowDragDrop = isFileApi &&
         (options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop);
         this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
-        this.options.multiple = this.uploader.isFileApi &&
+        this.options.multiple = isFileApi &&
         (options.multiple === undefined || options.multiple === null ? true : options.multiple);
     }
 
-    private putFilesToQueue(fileList: FileList | File[]): void {
+    private putFilesToQueue(fileList: FileList | File[], form: HTMLInputElement): void {
         var uploadFiles = castFiles(fileList);
         forEach(uploadFiles, (file: IUploadFile) => {
             if (this.validateFile(file)) {
@@ -271,58 +291,121 @@ export class UploadArea {
 
     private validateFile(file: IUploadFile): boolean {
         if (!this.isFileSizeValid(file)) {
-            file.uploadStatus = uploadStatus.failed;
-            file.responseText = 'The size of this file exceeds the ' + this.options.maxFileSize + ' MB limit.';
-
+            file.uploadStatus = uploadStatus.failed;            
+            file.responseText = !!this.options.localizer
+                ? this.options.localizer('The size of this file exceeds the { maxFileSize } MB limit.', this.options)
+                : 'The size of this file exceeds the ' + this.options.maxFileSize + ' MB limit.';
             return false;
         }
         return true;
     }
 
-    private setupHiddenInput(): void {
+    private setupFileApiElements(): void {
+        if (this.formForNoFileApi) {
+            this.formForNoFileApi.style.display = 'none';
+        }
         this.fileInput = document.createElement('input');
         this.fileInput.setAttribute('type', 'file');
         this.fileInput.setAttribute('accept', this.options.accept);
         this.fileInput.style.display = 'none';
 
         var onChange = (e) => this.onChange(e);
-        addEventHandler(this.fileInput, 'change', onChange, this.uploader.isFileApi);
-        this.unregisterOnChange = () => removeEventHandler(this.fileInput, 'change', onchange, this.uploader.isFileApi);
+        addEventHandler(this.fileInput, 'change', onChange);
+        this.unregisterOnChange = () => removeEventHandler(this.fileInput, 'change', onchange);
 
         if (this.options.multiple) {
             this.fileInput.setAttribute('multiple', '');
         }
         if (this.options.clickable) {
             var onClick = () => this.onClick();
-            addEventHandler(this.targetElement, 'click', onClick, this.uploader.isFileApi);
-            this.unregisterOnClick = () => removeEventHandler(this.targetElement, 'click', onClick, this.uploader.isFileApi);
+            addEventHandler(this.targetElement, 'click', onClick);
+            this.unregisterOnClick = () => removeEventHandler(this.targetElement, 'click', onClick);
         }
         if (this.options.allowDragDrop) {
             var onDrag = (e) => this.onDrag(e);
-            addEventHandler(this.targetElement, 'dragover', onDrag, this.uploader.isFileApi);
-            this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, 'dragover', onDrag, this.uploader.isFileApi);
+            addEventHandler(this.targetElement, 'dragover', onDrag);
+            this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, 'dragover', onDrag);
 
             var onDrop = (e) => this.onDrop(e);
-            addEventHandler(this.targetElement, 'drop', onDrop, this.uploader.isFileApi);
-            this.unregisterOnDrop = () => removeEventHandler(this.targetElement, 'drop', onDrop, this.uploader.isFileApi);
+            addEventHandler(this.targetElement, 'drop', onDrop);
+            this.unregisterOnDrop = () => removeEventHandler(this.targetElement, 'drop', onDrop);
         }
         // attach to body
         document.body.appendChild(this.fileInput);
     }
 
-    private onChange(e): void {
+    private setupOldSchoolElements(): void {
+        if (!this.formForNoFileApi)
+            return;
+
+        this.targetElement.style.display = 'none';
+        this.formForNoFileApi.setAttribute('method', this.uploadCore.options.method);
+        this.formForNoFileApi.setAttribute('enctype', 'multipart/form-data');
+        this.formForNoFileApi.setAttribute('encoding', 'multipart/form-data');
+
+        let fileInput: HTMLInputElement;
+        let submitInput: HTMLInputElement;
+        let inputs = this.formForNoFileApi.getElementsByTagName('input');
+        for (var i = 0; i < inputs.length; i++) {
+            var el = inputs[i];
+            if (el.type === 'file') {
+                fileInput = el;
+            } else if (el.type === 'submit') {
+                submitInput = el;
+            }
+        }
+
+        let handler = (e) => this.onFormChange(e, fileInput, submitInput);
+        addEventHandler(fileInput, 'change', handler);
+        this.unregisterFormOnChange = () => removeEventHandler(fileInput, 'change', handler);
+    }
+
+    private onFormChange(e, fileInput: HTMLInputElement, submitInput: HTMLInputElement) {
         let files = e.target
             ? e.target.files
                 ? e.target.files
                 : e.target.value
                     ? [{ name: e.target.value.replace(/^.+\\/, '') }]
                     : []
-            : this.fileInput.value
-                ? [{ name: this.fileInput.value.replace(/^.+\\/, '') }]
+            : fileInput.value
+                ? [{ name: fileInput.value.replace(/^.+\\/, '') }]
                 : [];
 
-        if (files.length)
-            this.putFilesToQueue(files);
+        forEach(files, (file: IUploadFile) => {
+            file.guid = file.guid || newGuid();
+        });
+
+        if (files.length === 0)
+            return;
+
+        this.addTargetIframe();
+
+        this.formForNoFileApi.setAttribute('action', this.uploadCore.getUrl(files[0]));
+        if (!submitInput) {
+            this.formForNoFileApi.submit();
+        }
+    }
+
+    private addTargetIframe() {
+        if (this.lastIframe) {
+            this.formForNoFileApi.parentNode.removeChild(this.lastIframe);
+        }
+
+        var iframeName = 'uploadIframe' + Date.now();
+        var iframe = this.lastIframe = document.createElement('iframe');
+        iframe.setAttribute('id', iframeName);
+        iframe.setAttribute('name', iframeName);
+        iframe.setAttribute('width', '0');
+        iframe.setAttribute('height', '0');
+        iframe.setAttribute('border', '0');
+        iframe.setAttribute('style', 'width: 0; height: 0; border: none;');
+        this.formForNoFileApi.setAttribute('target', iframeName);
+        this.formForNoFileApi.parentNode.insertBefore(iframe, this.formForNoFileApi.nextSibling || null);
+        window.frames[iframeName].name = iframeName;
+    }
+
+    private onChange(e): void {
+        this.putFilesToQueue(e.target.files, this.fileInput);
     }
 
     private onDrag(e: DragEvent): void {
@@ -368,13 +451,13 @@ export class UploadArea {
             let item: IFileExt = <IFileExt>items[i];
             if ((item.webkitGetAsEntry) && (entry = item.webkitGetAsEntry())) {
                 if (entry.isFile) {
-                    this.putFilesToQueue([item.getAsFile()]);
+                    this.putFilesToQueue([item.getAsFile()], this.fileInput);
                 } else if (entry.isDirectory) {
                     this.processDirectory(entry, entry.name);
                 }
             } else if (item.getAsFile) {
                 if (!item.kind || item.kind === 'file') {
-                    this.putFilesToQueue([item.getAsFile()]);
+                    this.putFilesToQueue([item.getAsFile()], this.fileInput);
                 }
             }
         }
@@ -392,7 +475,7 @@ export class UploadArea {
                             return;
                         }
                         file.fullPath = '' + path + '/' + file.name;
-                        self.putFilesToQueue([file]);
+                        self.putFilesToQueue([file], this.fileInput);
                     });
                 } else if (entry.isDirectory) {
                     self.processDirectory(entry, '' + path + '/' + entry.name);
@@ -408,7 +491,7 @@ export class UploadArea {
 
     private handleFiles(files: FileList | File[]): void {
         for (var i = 0; i < files.length; i++) {
-            this.putFilesToQueue([files[i]]);
+            this.putFilesToQueue([files[i]], this.fileInput);
         }
     }
 
@@ -440,8 +523,16 @@ export class UploadCore {
     }
 
     upload(fileList: File[] | Object): void {
+        if (!isFileApi)
+            return;
         var files = castFiles(fileList, uploadStatus.uploading);
         forEach(files, (file: IUploadFile) => this.processFile(file));
+    }
+
+    getUrl(file: IUploadFile): string {
+        return typeof this.options.url === 'function'
+            ? (<(file: IUploadFile) => string>this.options.url)(file)
+            : <string>this.options.url;
     }
 
     private processFile(file: IUploadFile): void {
@@ -452,10 +543,7 @@ export class UploadCore {
 
     private createRequest(file: IUploadFile): XMLHttpRequest {
         var xhr = new XMLHttpRequest();
-        var url = typeof this.options.url === 'function'
-            ? (<(file: IUploadFile) => string>this.options.url)(file)
-            : <string>this.options.url;
-
+        var url = this.getUrl(file);
         xhr.open(this.options.method, url, true);
 
         xhr.withCredentials = !!this.options.withCredentials;
@@ -563,10 +651,12 @@ export class UploadCore {
 
     private setResponse(file: IUploadFile, xhr: XMLHttpRequest) {
         file.responseCode = xhr.status;
-        file.responseText = xhr.responseText || xhr.statusText || (xhr.status
+        let response = xhr.responseText || xhr.statusText || (xhr.status
             ? xhr.status.toString()
             : '' || 'Invalid response from server');
-
+        file.responseText = !!this.options.localizer
+            ? this.options.localizer(response, {})
+            : response;
     }
 
     private setFullOptions(options: IUploadOptions): void {
@@ -575,6 +665,7 @@ export class UploadCore {
         this.options.headers = options.headers || {};
         this.options.params = options.params || {};
         this.options.withCredentials = options.withCredentials || false;
+        this.options.localizer = options.localizer;
     }
 
     private setFullCallbacks(callbacks: IUploadCallbacksExt) {
@@ -592,10 +683,8 @@ export class Uploader {
     uploadAreas: UploadArea[];
     queue: UploadQueue;
     options: IUploadQueueOptions;
-    isFileApi: boolean;
 
     constructor(options: IUploadQueueOptions = {}, callbacks: IUploadQueueCallbacks = {}) {
-        this.isFileApi = !!((<any>window).File && (<any>window).FormData);
         this.setOptions(options);
         this.uploadAreas = [];
         this.queue = new UploadQueue(options, callbacks);
@@ -605,8 +694,8 @@ export class Uploader {
         this.options = options;
     }
 
-    registerArea(element: Element, options: IUploadAreaOptions): UploadArea {
-        var uploadArea = new UploadArea(element, options, this);
+    registerArea(element: HTMLElement, options: IUploadAreaOptions, compatibilityForm?: Element): UploadArea {
+        var uploadArea = new UploadArea(element, options, this, <HTMLFormElement>compatibilityForm);
         this.uploadAreas.push(uploadArea);
         return uploadArea;
     }
@@ -707,7 +796,7 @@ export class UploadQueue {
 
     private setFullOptions(): void {
         this.options.maxParallelUploads = this.options.maxParallelUploads || 0;
-        this.options.autoStart = this.options.autoStart || false;
+        this.options.autoStart = isFileApi && (this.options.autoStart || false);
         this.options.autoRemove = this.options.autoRemove || false;
 
     }

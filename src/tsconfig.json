@@ -30,6 +30,7 @@
         "./uploader/getUploader.ts",
         "./uploader/uploader.ts",
         "./utils/addEventHandler.ts",
+        "./utils/fileApiCheck.ts",
         "./utils/files.ts",
         "./utils/filter.ts",
         "./utils/forEach.ts",

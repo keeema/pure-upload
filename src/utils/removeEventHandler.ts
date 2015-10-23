@@ -1,5 +1,5 @@
-function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void, isFileApi: boolean) {
-    if (isFileApi) {
+function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void) {
+    if (el.removeEventListener) {
         el.removeEventListener(event, handler);
     } else {
         var elem = <any>el;

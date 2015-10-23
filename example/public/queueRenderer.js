@@ -14,7 +14,7 @@ var QueueRenderer = (function () {
         var element = document.createElement('button');
         element.className = 'table-row-button';
         element.innerHTML = value;
-        pu.addEventHandler(element, 'click', callback, !!(window.File && window.FormData));
+        pu.addEventHandler(element, 'click', callback);
         return element;
     };
     QueueRenderer.prototype.createQueueRow = function (file, queueSettings) {

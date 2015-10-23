@@ -20,8 +20,9 @@ window.onload = function () {
         accept: '*.*',
         multiple: true
     };
+    var compatibilityForm = document.getElementById('example-compatibility-form');
+    uploaderExample1.registerArea(document.getElementById('example-button'), uploadSettings, compatibilityForm);
     uploaderExample1.registerArea(document.getElementById('example-dnd-area'), uploadSettings);
-    uploaderExample1.registerArea(document.getElementById('example-button'), uploadSettings);
     uploaderExample1.registerArea(document.getElementById('example-queue'), queueUploadSettings);
     uploaderExample1.queue.callbacks.onQueueChangedCallback = function (result) {
         queueRenderer.renderQueue('example-queue', 'Example Queue', result, uploaderExample1.queue.options);
@@ -29,5 +30,5 @@ window.onload = function () {
     uploaderExample1.queue.callbacks.onProgressCallback = function (file) {
         queueRenderer.renderItemProgress('example-queue', file);
     };
-    pu.addEventHandler(document.getElementById('example-clear-button'), 'click', function () { return uploaderExample1.queue.clearFiles(); }, !!(window.File && window.FormData));
+    pu.addEventHandler(document.getElementById('example-clear-button'), 'click', function () { return uploaderExample1.queue.clearFiles(); });
 };

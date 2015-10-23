@@ -10,8 +10,16 @@ class UploadCore {
     }
 
     upload(fileList: File[] | Object): void {
+        if (!isFileApi)
+            return;
         var files = castFiles(fileList, uploadStatus.uploading);
         forEach(files, (file: IUploadFile) => this.processFile(file));
+    }
+
+    getUrl(file: IUploadFile): string {
+        return typeof this.options.url === 'function'
+            ? (<(file: IUploadFile) => string>this.options.url)(file)
+            : <string>this.options.url;
     }
 
     private processFile(file: IUploadFile): void {
@@ -22,10 +30,7 @@ class UploadCore {
 
     private createRequest(file: IUploadFile): XMLHttpRequest {
         var xhr = new XMLHttpRequest();
-        var url = typeof this.options.url === 'function'
-            ? (<(file: IUploadFile) => string>this.options.url)(file)
-            : <string>this.options.url;
-
+        var url = this.getUrl(file);
         xhr.open(this.options.method, url, true);
 
         xhr.withCredentials = !!this.options.withCredentials;
@@ -133,10 +138,12 @@ class UploadCore {
 
     private setResponse(file: IUploadFile, xhr: XMLHttpRequest) {
         file.responseCode = xhr.status;
-        file.responseText = xhr.responseText || xhr.statusText || (xhr.status
+        let response = xhr.responseText || xhr.statusText || (xhr.status
             ? xhr.status.toString()
             : '' || 'Invalid response from server');
-
+        file.responseText = !!this.options.localizer
+            ? this.options.localizer(response, {})
+            : response;
     }
 
     private setFullOptions(options: IUploadOptions): void {
@@ -145,6 +152,7 @@ class UploadCore {
         this.options.headers = options.headers || {};
         this.options.params = options.params || {};
         this.options.withCredentials = options.withCredentials || false;
+        this.options.localizer = options.localizer;
     }
 
     private setFullCallbacks(callbacks: IUploadCallbacksExt) {
