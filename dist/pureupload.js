@@ -91,6 +91,8 @@ var pu;
     }
     pu.indexOf = indexOf;
     function keys(obj) {
+        if (Object && Object.keys)
+            return Object.keys(obj);
         var keys = [];
         for (var i in obj) {
             if (obj.hasOwnProperty(i)) {
