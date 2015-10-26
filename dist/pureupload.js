@@ -377,9 +377,20 @@ var pu;
                 }
             }
         };
+        UploadArea.prototype.isIeVersion = function (v) {
+            return RegExp('msie' + (!isNaN(v) ? ('\\s' + v.toString()) : ''), 'i').test(navigator.userAgent);
+        };
         UploadArea.prototype.onClick = function () {
+            var _this = this;
             this.fileInput.value = '';
-            this.fileInput.click();
+            if (this.isIeVersion(10)) {
+                setTimeout(function () {
+                    _this.fileInput.click();
+                }, 200);
+            }
+            else {
+                this.fileInput.click();
+            }
         };
         UploadArea.prototype.addFilesFromItems = function (items) {
             var entry;

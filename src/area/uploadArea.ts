@@ -292,11 +292,22 @@ class UploadArea {
                 this.handleFiles(files);
             }
         }
+    }   
+
+    private isIeVersion(v?: number): boolean {
+        return RegExp('msie' + (!isNaN(v) ? ('\\s' + v.toString()) : ''), 'i').test(navigator.userAgent);
     }
 
     private onClick(): void {
         this.fileInput.value = '';
-        this.fileInput.click();
+
+        if (this.isIeVersion(10)) {
+            setTimeout(() => {
+                this.fileInput.click();
+            }, 200);
+        } else {
+            this.fileInput.click();
+        }
     }
 
     private addFilesFromItems(items: FileList | File[]): void {

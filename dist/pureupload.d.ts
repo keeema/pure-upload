@@ -112,6 +112,7 @@ declare module pu {
         private onChange(e);
         private onDrag(e);
         private onDrop(e);
+        private isIeVersion(v?);
         private onClick();
         private addFilesFromItems(items);
         private processDirectory(directory, path);
