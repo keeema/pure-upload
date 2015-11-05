@@ -269,7 +269,7 @@ var pu;
             this.formForNoFileApi.setAttribute('enctype', 'multipart/form-data');
             this.formForNoFileApi.setAttribute('encoding', 'multipart/form-data');
             this.formForNoFileApi.style.position = 'relative';
-            this.formForNoFileApi.style.display = 'inline-block';
+            this.formForNoFileApi.style.display = 'block';
             this.formForNoFileApi.style.overflow = 'hidden';
             this.formForNoFileApi.style.width = this.targetElement.offsetWidth.toString() + 'px';
             this.formForNoFileApi.style.height = this.targetElement.offsetHeight.toString() + 'px';
