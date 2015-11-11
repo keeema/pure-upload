@@ -1,6 +1,6 @@
 {
   "name": "pure-upload",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "The pure upload library without dependencies",
   "author": {
     "name": "t.rut, m.horyna"
@@ -31,13 +31,10 @@
     "file",
     "api"
   ],
-  "dependencies": {
+  "devDependencies": {
     "cors": "^2.7.1",
     "express": "~4.10.2",
-    "multer": "~0.1.6"
-  },
-  "devDependencies": {
-
+    "multer": "~0.1.6",
     "gulp": "^3.9.0",
     "gulp-clean": "^0.3.1",
     "gulp-concat": "^2.6.0",
