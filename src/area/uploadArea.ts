@@ -70,7 +70,7 @@ class UploadArea {
         (options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop);
         this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
-        this.options.validateExtension = options.validateExtension === undefined || options.validateExtension === null ? false : options.validateExtension;
+        this.options.validateExtension = !!options.validateExtension;
         this.options.multiple = isFileApi &&
         (options.multiple === undefined || options.multiple === null ? true : options.multiple);
     }
@@ -87,7 +87,7 @@ class UploadArea {
         });
         this.uploader.queue.addFiles(uploadFiles);
     }
-    
+
     private validateFile(file: IUploadFile): boolean {
         if (!this.isFileSizeValid(file)) {
             file.uploadStatus = uploadStatus.failed;
@@ -96,7 +96,7 @@ class UploadArea {
                 : 'The selected file exceeds the allowed size of ' + this.options.maxFileSize + ' or its size is 0 MB. Please choose another file.';
             return false;
         }
-        if (this.isFileTypeInvalid(file)){
+        if (this.isFileTypeInvalid(file)) {
             file.uploadStatus = uploadStatus.failed;
             file.responseText = !!this.options.localizer
                 ? this.options.localizer('File format is not allowed. Only { accept } or no file extension are allowed.', this.options)
@@ -375,12 +375,18 @@ class UploadArea {
     }
 
     private isFileTypeInvalid(file: File): boolean {
-        if (file.name && (this.options.accept.trim() !== '*' || this.options.accept.trim() !== '*.*') && this.options.validateExtension) {
-            var acceptedExtensions = this.options.accept;
+        if (file.name && (this.options.accept.trim() !== '*' || this.options.accept.trim() !== '*.*') &&
+            this.options.validateExtension && this.options.accept.indexOf('/') === -1) {
+            var acceptedExtensions = this.options.accept.split(',');
             var fileExtension = file.name.substring(file.name.lastIndexOf('.'), file.name.length);
-			return acceptedExtensions.split(',').every((value) => {
-				return value.toUpperCase().trim() !== fileExtension.toUpperCase();
-			});
+            if (fileExtension.indexOf('.') === -1) return true;
+            let isFileExtensionExisted = true;
+            for (var i = 0; i < acceptedExtensions.length; i++) {
+                if (acceptedExtensions[i].toUpperCase().trim() === fileExtension.toUpperCase()) {
+                    isFileExtensionExisted = false;
+                }
+            }
+            return isFileExtensionExisted;
         }
         return false;
     }
