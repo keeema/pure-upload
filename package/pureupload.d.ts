@@ -24,6 +24,7 @@ export interface IUploadAreaOptions extends IUploadOptions {
     clickable?: boolean;
     accept?: string;
     multiple?: boolean;
+    validateExtension?: boolean;
 }
 export interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;
@@ -118,6 +119,7 @@ export class UploadArea {
     private processDirectory(directory, path);
     private handleFiles(files);
     private isFileSizeValid(file);
+    private isFileTypeInvalid(file);
     private stopEventPropagation(e);
 }
 export class UploadCore {

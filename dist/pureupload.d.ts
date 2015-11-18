@@ -24,6 +24,7 @@ declare module pu {
         clickable?: boolean;
         accept?: string;
         multiple?: boolean;
+        validateExtension?: boolean;
     }
     interface IUploadCallbacks {
         onProgressCallback?: (file: IUploadFile) => void;
@@ -118,6 +119,7 @@ declare module pu {
         private processDirectory(directory, path);
         private handleFiles(files);
         private isFileSizeValid(file);
+        private isFileTypeInvalid(file);
         private stopEventPropagation(e);
     }
     class UploadCore {
