@@ -4,4 +4,5 @@ interface IUploadAreaOptions extends IUploadOptions {
     clickable?: boolean;
     accept?: string;
     multiple?: boolean;
+    validateExtension?: boolean;
 }

@@ -70,6 +70,7 @@ class UploadArea {
         (options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop);
         this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
         this.options.accept = options.accept || '*.*';
+        this.options.validateExtension = !!options.validateExtension;
         this.options.multiple = isFileApi &&
         (options.multiple === undefined || options.multiple === null ? true : options.multiple);
     }
@@ -91,8 +92,15 @@ class UploadArea {
         if (!this.isFileSizeValid(file)) {
             file.uploadStatus = uploadStatus.failed;
             file.responseText = !!this.options.localizer
-                ? this.options.localizer('The size of this file exceeds the { maxFileSize } MB limit.', this.options)
-                : 'The size of this file exceeds the ' + this.options.maxFileSize + ' MB limit.';
+                ? this.options.localizer('The selected file exceeds the allowed size of { maxFileSize } MB or its size is 0 MB. Please choose another file.', this.options)
+                : 'The selected file exceeds the allowed size of ' + this.options.maxFileSize + ' or its size is 0 MB. Please choose another file.';
+            return false;
+        }
+        if (this.isFileTypeInvalid(file)) {
+            file.uploadStatus = uploadStatus.failed;
+            file.responseText = !!this.options.localizer
+                ? this.options.localizer('File format is not allowed. Only { accept } or no file extension are allowed.', this.options)
+                : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' or no file extension are allowed.';
             return false;
         }
         return true;
@@ -362,8 +370,25 @@ class UploadArea {
 
     private isFileSizeValid(file: File): boolean {
         var maxFileSize = this.options.maxFileSize * 1024 * 1024; // max file size in bytes
-        if (file.size > maxFileSize) return false;
+        if (file.size > maxFileSize || file.size === 0) return false;
         return true;
+    }
+
+    private isFileTypeInvalid(file: File): boolean {
+        if (file.name && (this.options.accept.trim() !== '*' || this.options.accept.trim() !== '*.*') &&
+            this.options.validateExtension && this.options.accept.indexOf('/') === -1) {
+            var acceptedExtensions = this.options.accept.split(',');
+            var fileExtension = file.name.substring(file.name.lastIndexOf('.'), file.name.length);
+            if (fileExtension.indexOf('.') === -1) return true;
+            let isFileExtensionExisted = true;
+            for (var i = 0; i < acceptedExtensions.length; i++) {
+                if (acceptedExtensions[i].toUpperCase().trim() === fileExtension.toUpperCase()) {
+                    isFileExtensionExisted = false;
+                }
+            }
+            return isFileExtensionExisted;
+        }
+        return false;
     }
 
     private stopEventPropagation(e) {
