@@ -17,7 +17,7 @@ exports.isFileApi = !!(window.File && window.FormData);
 function castFiles(fileList, status) {
     var files;
     if (typeof fileList === 'object') {
-        files = map(keys(fileList), function (key) { return fileList[key]; });
+        files = map(filter(keys(fileList), function (key) { return key !== 'length'; }), function (key) { return fileList[key]; });
     }
     else {
         files = fileList;

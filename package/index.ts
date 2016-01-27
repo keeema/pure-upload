@@ -17,7 +17,10 @@ export function castFiles(fileList: File[]| Object, status?: IUploadStatus): IUp
     let files: IUploadFile[];
 
     if (typeof fileList === 'object') {
-        files = map(keys(fileList), (key) => fileList[key]);
+        files = map(
+            filter(keys(fileList), (key) => key !== 'length'),
+            (key) => fileList[key]
+        );
     } else {
         files = <IUploadFile[]>fileList;
     }
