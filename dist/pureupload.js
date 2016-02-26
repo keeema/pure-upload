@@ -19,7 +19,7 @@ var pu;
     function castFiles(fileList, status) {
         var files;
         if (typeof fileList === 'object') {
-            files = map(keys(fileList), function (key) { return fileList[key]; });
+            files = map(filter(keys(fileList), function (key) { return key !== 'length'; }), function (key) { return fileList[key]; });
         }
         else {
             files = fileList;
@@ -205,8 +205,8 @@ var pu;
             if (this.isFileTypeInvalid(file)) {
                 file.uploadStatus = pu.uploadStatus.failed;
                 file.responseText = !!this.options.localizer
-                    ? this.options.localizer('File format is not allowed. Only { accept } or no file extension are allowed.', this.options)
-                    : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' or no file extension are allowed.';
+                    ? this.options.localizer('File format is not allowed. Only { accept } .', this.options)
+                    : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' .';
                 return false;
             }
             return true;

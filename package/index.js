@@ -203,8 +203,8 @@ var UploadArea = (function () {
         if (this.isFileTypeInvalid(file)) {
             file.uploadStatus = exports.uploadStatus.failed;
             file.responseText = !!this.options.localizer
-                ? this.options.localizer('File format is not allowed. Only { accept } or no file extension are allowed.', this.options)
-                : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' or no file extension are allowed.';
+                ? this.options.localizer('File format is not allowed. Only { accept } .', this.options)
+                : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' .';
             return false;
         }
         return true;
