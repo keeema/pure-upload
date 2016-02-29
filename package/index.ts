@@ -318,8 +318,8 @@ export class UploadArea {
         if (this.isFileTypeInvalid(file)) {
             file.uploadStatus = uploadStatus.failed;
             file.responseText = !!this.options.localizer
-                ? this.options.localizer('File format is not allowed. Only { accept } .', this.options)
-                : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' .';
+                ? this.options.localizer('File format is not allowed. Only { accept } files are allowed.', this.options)
+                : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' files are allowed.';
             return false;
         }
         return true;
