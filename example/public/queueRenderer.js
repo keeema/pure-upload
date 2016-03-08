@@ -84,4 +84,4 @@ var QueueRenderer = (function () {
         });
     };
     return QueueRenderer;
-})();
+}());

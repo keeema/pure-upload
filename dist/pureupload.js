@@ -373,12 +373,16 @@ var pu;
             if (files.length) {
                 if (!this.options.multiple)
                     files = [files[0]];
-                var result;
+                var result = void 0;
                 var items = e.dataTransfer.items;
                 if (items && items.length && (items[0].webkitGetAsEntry !== null)) {
-                    if (!this.options.multiple)
-                        items = [items[0]];
-                    this.addFilesFromItems(items);
+                    if (!this.options.multiple) {
+                        var newItems = [items[0]];
+                        this.addFilesFromItems(newItems);
+                    }
+                    else {
+                        this.addFilesFromItems(items);
+                    }
                 }
                 else {
                     this.handleFiles(files);
@@ -484,7 +488,7 @@ var pu;
             }
         };
         return UploadArea;
-    })();
+    }());
     pu.UploadArea = UploadArea;
     var UploadCore = (function () {
         function UploadCore(options, callbacks) {
@@ -635,7 +639,7 @@ var pu;
             this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (function () { return; });
         };
         return UploadCore;
-    })();
+    }());
     pu.UploadCore = UploadCore;
     var Uploader = (function () {
         function Uploader(options, callbacks) {
@@ -661,7 +665,7 @@ var pu;
             }
         };
         return Uploader;
-    })();
+    }());
     pu.Uploader = Uploader;
     var UploadQueue = (function () {
         function UploadQueue(options, callbacks) {
@@ -771,7 +775,7 @@ var pu;
             return result;
         };
         return UploadQueue;
-    })();
+    }());
     pu.UploadQueue = UploadQueue;
     var UploadStatusStatic = (function () {
         function UploadStatusStatic() {
@@ -783,7 +787,7 @@ var pu;
         UploadStatusStatic.canceled = 'canceled';
         UploadStatusStatic.removed = 'removed';
         return UploadStatusStatic;
-    })();
+    }());
     pu.UploadStatusStatic = UploadStatusStatic;
     pu.uploadStatus = UploadStatusStatic;
 })(pu || (pu = {}));
