@@ -509,12 +509,14 @@ export class UploadArea {
                 files = [files[0]];
 
             let result: FileList;
-            var items: FileList | File[] = e.dataTransfer.items;
+            var items = e.dataTransfer.items;
             if (items && items.length && ((<any>items[0]).webkitGetAsEntry !== null)) {
-                if (!this.options.multiple)
-                    items = [items[0]];
-
-                this.addFilesFromItems(items);
+                if (!this.options.multiple) {
+                    var newItems = [items[0]];
+                    this.addFilesFromItems(newItems);
+                } else {
+                    this.addFilesFromItems(items);
+                }
             } else {
                 this.handleFiles(files);
             }
@@ -537,7 +539,7 @@ export class UploadArea {
         }
     }
 
-    private addFilesFromItems(items: FileList | File[]): void {
+    private addFilesFromItems(items: FileList | File[] | DataTransferItemList | DataTransferItem[]): void {
         var entry;
         for (var i = 0; i < items.length; i++) {
             let item: IFileExt = <IFileExt>items[i];

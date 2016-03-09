@@ -19,7 +19,7 @@ var pu;
     function castFiles(fileList, status) {
         var files;
         if (typeof fileList === 'object') {
-            files = map(keys(fileList), function (key) { return fileList[key]; });
+            files = map(filter(keys(fileList), function (key) { return key !== 'length'; }), function (key) { return fileList[key]; });
         }
         else {
             files = fileList;
@@ -205,8 +205,8 @@ var pu;
             if (this.isFileTypeInvalid(file)) {
                 file.uploadStatus = pu.uploadStatus.failed;
                 file.responseText = !!this.options.localizer
-                    ? this.options.localizer('File format is not allowed. Only { accept } or no file extension are allowed.', this.options)
-                    : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' or no file extension are allowed.';
+                    ? this.options.localizer('File format is not allowed. Only { accept } files are allowed.', this.options)
+                    : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' files are allowed.';
                 return false;
             }
             return true;
@@ -373,12 +373,16 @@ var pu;
             if (files.length) {
                 if (!this.options.multiple)
                     files = [files[0]];
-                var result;
+                var result = void 0;
                 var items = e.dataTransfer.items;
                 if (items && items.length && (items[0].webkitGetAsEntry !== null)) {
-                    if (!this.options.multiple)
-                        items = [items[0]];
-                    this.addFilesFromItems(items);
+                    if (!this.options.multiple) {
+                        var newItems = [items[0]];
+                        this.addFilesFromItems(newItems);
+                    }
+                    else {
+                        this.addFilesFromItems(items);
+                    }
                 }
                 else {
                     this.handleFiles(files);
@@ -484,7 +488,7 @@ var pu;
             }
         };
         return UploadArea;
-    })();
+    }());
     pu.UploadArea = UploadArea;
     var UploadCore = (function () {
         function UploadCore(options, callbacks) {
@@ -635,7 +639,7 @@ var pu;
             this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (function () { return; });
         };
         return UploadCore;
-    })();
+    }());
     pu.UploadCore = UploadCore;
     var Uploader = (function () {
         function Uploader(options, callbacks) {
@@ -661,7 +665,7 @@ var pu;
             }
         };
         return Uploader;
-    })();
+    }());
     pu.Uploader = Uploader;
     var UploadQueue = (function () {
         function UploadQueue(options, callbacks) {
@@ -771,7 +775,7 @@ var pu;
             return result;
         };
         return UploadQueue;
-    })();
+    }());
     pu.UploadQueue = UploadQueue;
     var UploadStatusStatic = (function () {
         function UploadStatusStatic() {
@@ -783,7 +787,7 @@ var pu;
         UploadStatusStatic.canceled = 'canceled';
         UploadStatusStatic.removed = 'removed';
         return UploadStatusStatic;
-    })();
+    }());
     pu.UploadStatusStatic = UploadStatusStatic;
     pu.uploadStatus = UploadStatusStatic;
 })(pu || (pu = {}));

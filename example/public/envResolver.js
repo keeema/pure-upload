@@ -37,7 +37,7 @@ var FormDataMock = (function () {
         this.data[key] = { data: data, additional: additional };
     };
     return FormDataMock;
-})();
+}());
 var XhrMock = (function () {
     function XhrMock() {
         this.readyState = 0;
@@ -80,4 +80,4 @@ var XhrMock = (function () {
         return this.loaded;
     };
     return XhrMock;
-})();
+}());

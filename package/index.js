@@ -1,3 +1,4 @@
+"use strict";
 function addEventHandler(el, event, handler) {
     if (el.addEventListener) {
         el.addEventListener(event, handler);
@@ -371,12 +372,16 @@ var UploadArea = (function () {
         if (files.length) {
             if (!this.options.multiple)
                 files = [files[0]];
-            var result;
+            var result = void 0;
             var items = e.dataTransfer.items;
             if (items && items.length && (items[0].webkitGetAsEntry !== null)) {
-                if (!this.options.multiple)
-                    items = [items[0]];
-                this.addFilesFromItems(items);
+                if (!this.options.multiple) {
+                    var newItems = [items[0]];
+                    this.addFilesFromItems(newItems);
+                }
+                else {
+                    this.addFilesFromItems(items);
+                }
             }
             else {
                 this.handleFiles(files);
@@ -482,7 +487,7 @@ var UploadArea = (function () {
         }
     };
     return UploadArea;
-})();
+}());
 exports.UploadArea = UploadArea;
 var UploadCore = (function () {
     function UploadCore(options, callbacks) {
@@ -633,7 +638,7 @@ var UploadCore = (function () {
         this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (function () { return; });
     };
     return UploadCore;
-})();
+}());
 exports.UploadCore = UploadCore;
 var Uploader = (function () {
     function Uploader(options, callbacks) {
@@ -659,7 +664,7 @@ var Uploader = (function () {
         }
     };
     return Uploader;
-})();
+}());
 exports.Uploader = Uploader;
 var UploadQueue = (function () {
     function UploadQueue(options, callbacks) {
@@ -769,7 +774,7 @@ var UploadQueue = (function () {
         return result;
     };
     return UploadQueue;
-})();
+}());
 exports.UploadQueue = UploadQueue;
 var UploadStatusStatic = (function () {
     function UploadStatusStatic() {
@@ -781,6 +786,6 @@ var UploadStatusStatic = (function () {
     UploadStatusStatic.canceled = 'canceled';
     UploadStatusStatic.removed = 'removed';
     return UploadStatusStatic;
-})();
+}());
 exports.UploadStatusStatic = UploadStatusStatic;
 exports.uploadStatus = UploadStatusStatic;
