@@ -5,4 +5,6 @@ interface IUploadAreaOptions extends IUploadOptions {
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;
+    
+    onFileAdded?: (file: string) => void; 
 }

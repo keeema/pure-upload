@@ -81,6 +81,10 @@ class UploadArea {
             if (this.validateFile(file)) {
                 file.start = () => {
                     this.uploadCore.upload([file]);
+                    
+                    if (this.options.onFileAdded) {
+                        this.options.onFileAdded(file.guid);
+                    }
                     file.start = () => { return; };
                 };
             }
