@@ -25,6 +25,7 @@ export interface IUploadAreaOptions extends IUploadOptions {
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;
+    onFileAdded?: (file: string) => void;
 }
 export interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;

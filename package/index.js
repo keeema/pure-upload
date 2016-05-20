@@ -187,6 +187,9 @@ var UploadArea = (function () {
             if (_this.validateFile(file)) {
                 file.start = function () {
                     _this.uploadCore.upload([file]);
+                    if (_this.options.onFileAdded) {
+                        _this.options.onFileAdded(file.guid);
+                    }
                     file.start = function () { return; };
                 };
             }
