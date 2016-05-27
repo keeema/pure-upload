@@ -17,7 +17,7 @@ Uploader manages upload queue and registers upload areas.
 
 Initialization:
 ```typescript
-var uploader = pu.getUploader(uploadQueueOptions, uploadQueueCallbacks)
+let uploader = pu.getUploader(uploadQueueOptions, uploadQueueCallbacks)
 ```
 ### Upload queue options
 ```typescript
@@ -45,12 +45,12 @@ Upload area defines element registred in Uploader.
 
 Registration:
 ```typescript
-var uploadArea = uploader.registerArea(element, uploadAreaOptions);
+let uploadArea = uploader.registerArea(element, uploadAreaOptions);
 ```
 
 Registration for IE9- with manual-start:
 ```typescript
-var uploadArea = uploader.registerArea(element, uploadAreaOptions, compatibilityForm);
+let uploadArea = uploader.registerArea(element, uploadAreaOptions, compatibilityForm);
 ```
 The *compatibilityForm* objects has to be *form* element containing one *input* element for *file* and one *input* element for *submit*.
 
@@ -63,20 +63,22 @@ uploader.unregisterArea(uploadArea);
 url: string;
 method: string;
 withCredentials?: boolean;
-headers?: { [key: string]: any; };
-params?: { [key: string]: any; };
+headers?: { [key: string]: string; };
+params?: { [key: string]: string; };
 maxFileSize?: number;
 allowDragDrop?: boolean;
 clickable?: boolean;
 accept?: string;
 multiple?: boolean;
+onFileAdded?: (file: IUploadFile) => void;
+onFileError?: (file: IUploadFile, xhr: XMLHttpRequest) => void; 
 ```
 
 ### Upload file
 Standard *File* object extended with additional informations and methods to manage a file in queue.
 ```typescript
 guid: string;
-uploadStatus: IUploadStatus;
+uploadStatus: UploadStatus;
 responseCode: number;
 responseText: string;
 progress: number;

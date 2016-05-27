@@ -1,5 +1,5 @@
 let http = (url: string, success?: (result: string) => void, failure?: (status: number, statusText: string) => void) => {
-    var request = new XMLHttpRequest();
+    let request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.send(null);
 
@@ -15,7 +15,9 @@ let http = (url: string, success?: (result: string) => void, failure?: (status: 
 };
 
 let mockXhr = () => {
+    /* tslint:disable */
     XMLHttpRequest = <any>XhrMock;
+    /* tslint:enable */
     FormData = FormDataMock;
 };
 
@@ -37,8 +39,8 @@ let resolveEnvironment = (): void => {
 };
 
 class FormDataMock {
-    data: { [key: string]: { data: any, additional: any } } = {};
-    append(key: string, data: any, additional?: any) {
+    data: { [key: string]: { data: File, additional: string } } = {};
+    append(key: string, data: File, additional?: string) {
         this.data[key] = { data, additional };
     }
 }
@@ -58,7 +60,7 @@ class XhrMock {
 
     setRequestHeader(name: string, value: string) { ; }
 
-    send(formData: any): void {
+    send(formData: FormDataMock): void {
         this.file = (<FormDataMock>formData).data['file'].data;
         this.performStep();
     }
@@ -75,7 +77,7 @@ class XhrMock {
                     this.status = 200;
                     this.onload(new Event('loaded'));
                 } else {
-                    var e = <ProgressEvent>{
+                    let e = <ProgressEvent>{
                         lengthComputable: true,
                         loaded: this.loaded,
                         total: this.file.size
@@ -89,7 +91,7 @@ class XhrMock {
     }
 
     private addStep(): number {
-        var newValue = this.loaded + this.step;
+        let newValue = this.loaded + this.step;
         this.loaded = newValue > this.file.size ? this.file.size : newValue;
         return this.loaded;
     }

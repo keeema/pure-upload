@@ -1,18 +1,18 @@
 declare module pu {
     function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
-    let isFileApi: boolean;
-    function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+    const isFileApi: boolean;
+    function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
     function filter<T>(input: T[], filterFn: (item: T) => boolean): T[];
     function forEach<T>(input: T[], callback: (item: T, index?: number) => void): void;
     function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-    var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
-    var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
+    function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
+    function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
     function newGuid(): string;
     interface IFileExt extends File {
         kind: string;
         webkitGetAsEntry: () => File;
         getAsFile: () => File;
-        file: (file: any) => void;
+        file: (callback: (file: IFileExt) => void) => void;
         isFile: boolean;
         isDirectory: boolean;
         fullPath: string;
@@ -25,6 +25,8 @@ declare module pu {
         accept?: string;
         multiple?: boolean;
         validateExtension?: boolean;
+        onFileAdded?: (file: IUploadFile) => void;
+        onFileError?: (file: IUploadFile) => void;
     }
     interface IUploadCallbacks {
         onProgressCallback?: (file: IUploadFile) => void;
@@ -39,7 +41,7 @@ declare module pu {
     }
     interface IUploadFile extends File {
         guid: string;
-        uploadStatus: IUploadStatus;
+        uploadStatus: UploadStatus;
         responseCode: number;
         responseText: string;
         progress: number;
@@ -47,16 +49,17 @@ declare module pu {
         cancel: () => void;
         remove: () => void;
         start: () => void;
+        onError: (file: IUploadFile) => void;
     }
     interface IUploadOptions {
         url: string | ((file: IUploadFile) => string);
         method: string;
         withCredentials?: boolean;
         headers?: {
-            [key: string]: any;
+            [key: string]: string | number | boolean;
         };
         params?: {
-            [key: string]: any;
+            [key: string]: string | number | boolean;
         };
         localizer?: (message: string, params?: Object) => string;
     }
@@ -72,14 +75,6 @@ declare module pu {
         maxParallelUploads?: number;
         autoStart?: boolean;
         autoRemove?: boolean;
-    }
-    interface IUploadStatus {
-        queued: IUploadStatus;
-        uploading: IUploadStatus;
-        uploaded: IUploadStatus;
-        failed: IUploadStatus;
-        canceled: IUploadStatus;
-        removed: IUploadStatus;
     }
     function keys(obj: Object): any[];
     function map<T, K>(input: T[], mapper: (item: T) => K): K[];
@@ -158,7 +153,7 @@ declare module pu {
         constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacksExt);
         addFiles(files: IUploadFile[]): void;
         removeFile(file: IUploadFile, blockRecursive?: boolean): void;
-        clearFiles(excludeStatuses?: IUploadStatus[], cancelProcessing?: boolean): void;
+        clearFiles(excludeStatuses?: UploadStatus[], cancelProcessing?: boolean): void;
         private filesChanged();
         private checkAllFinished();
         private setFullOptions();
@@ -168,13 +163,12 @@ declare module pu {
         private deactivateFile(file);
         private getWaitingFiles();
     }
-    class UploadStatusStatic {
-        static queued: string;
-        static uploading: string;
-        static uploaded: string;
-        static failed: string;
-        static canceled: string;
-        static removed: string;
+    enum UploadStatus {
+        queued = 0,
+        uploading = 1,
+        uploaded = 2,
+        failed = 3,
+        canceled = 4,
+        removed = 5,
     }
-    var uploadStatus: IUploadStatus;
 }

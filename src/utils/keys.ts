@@ -1,5 +1,5 @@
 function keys(obj: Object) {
-    if(Object && Object.keys)
+    if (Object && Object.keys)
         return Object.keys(obj);
         
     let keys = [];

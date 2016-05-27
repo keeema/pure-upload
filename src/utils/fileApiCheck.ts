@@ -1,1 +1,1 @@
-let isFileApi: boolean = !!((<any>window).File && (<any>window).FormData);
+const isFileApi: boolean = !!((<{File?: Object}>window).File && (<{FormData?: Object}>window).FormData);

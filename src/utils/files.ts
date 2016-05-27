@@ -1,4 +1,4 @@
-function castFiles(fileList: File[]| Object, status?: IUploadStatus): IUploadFile[] {
+function castFiles(fileList: File[]| Object, status?: UploadStatus): IUploadFile[] {
     let files: IUploadFile[];
 
     if (typeof fileList === 'object') {
