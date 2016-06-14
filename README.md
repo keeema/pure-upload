@@ -71,7 +71,7 @@ clickable?: boolean;
 accept?: string;
 multiple?: boolean;
 onFileAdded?: (file: IUploadFile) => void;
-onFileError?: (file: IUploadFile, xhr: XMLHttpRequest) => void; 
+onFileError?: (file: IUploadFile) => void; 
 ```
 
 ### Upload file
