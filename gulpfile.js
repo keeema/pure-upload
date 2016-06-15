@@ -173,7 +173,7 @@ gulp.task('cleanPkg', function() {
 });
 
 gulp.task('copyTsToPkg', ['cleanPkg'], function() {
-  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts', '!./src/**/*.spec.ts', './package.json', './readme.md'])
+  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts', '!./src/**/*.spec.ts', './package.json', './README.md', './CHANGELOG.md'])
     .pipe(flatten())
     .pipe(gulp.dest(pkg));
 });

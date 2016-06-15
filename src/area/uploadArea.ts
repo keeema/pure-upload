@@ -79,6 +79,7 @@ class UploadArea {
         let uploadFiles = castFiles(fileList);
         forEach(uploadFiles, (file: IUploadFile) => {
             file.onError = this.options.onFileError || (() => { ; });
+            file.onCancel = this.options.onFileCanceled || (() => { ; });
             if (this.validateFile(file)) {
                 file.start = () => {
                     this.uploadCore.upload([file]);

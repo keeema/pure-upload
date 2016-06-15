@@ -192,6 +192,7 @@ var pu;
             var uploadFiles = castFiles(fileList);
             forEach(uploadFiles, function (file) {
                 file.onError = _this.options.onFileError || (function () { ; });
+                file.onCancel = _this.options.onFileCanceled || (function () { ; });
                 if (_this.validateFile(file)) {
                     file.start = function () {
                         _this.uploadCore.upload([file]);
@@ -552,6 +553,8 @@ var pu;
             file.cancel = decorateSimpleFunction(file.cancel, function () {
                 xhr.abort();
                 file.uploadStatus = UploadStatus.canceled;
+                if (file.onCancel)
+                    file.onCancel(file);
                 _this.callbacks.onCancelledCallback(file);
                 _this.callbacks.onFileStateChangedCallback(file);
                 _this.callbacks.onFinishedCallback(file);

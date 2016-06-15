@@ -58,6 +58,9 @@ class UploadCore {
             file.cancel, () => {
                 xhr.abort();
                 file.uploadStatus = UploadStatus.canceled;
+                if (file.onCancel)
+                    file.onCancel(file);
+
                 this.callbacks.onCancelledCallback(file);
                 this.callbacks.onFileStateChangedCallback(file);
                 this.callbacks.onFinishedCallback(file);

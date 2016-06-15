@@ -27,6 +27,7 @@ declare module pu {
         validateExtension?: boolean;
         onFileAdded?: (file: IUploadFile) => void;
         onFileError?: (file: IUploadFile) => void;
+        onFileCanceled?: (file: IUploadFile) => void;
     }
     interface IUploadCallbacks {
         onProgressCallback?: (file: IUploadFile) => void;
@@ -50,6 +51,7 @@ declare module pu {
         remove: () => void;
         start: () => void;
         onError: (file: IUploadFile) => void;
+        onCancel: (file: IUploadFile) => void;
     }
     interface IUploadOptions {
         url: string | ((file: IUploadFile) => string);

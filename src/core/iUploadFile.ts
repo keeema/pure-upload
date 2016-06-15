@@ -10,4 +10,5 @@ interface IUploadFile extends File {
     remove: () => void;
     start: () => void;
     onError: (file: IUploadFile) => void;
+    onCancel: (file: IUploadFile) => void;
 }

@@ -27,6 +27,7 @@ export interface IUploadAreaOptions extends IUploadOptions {
     validateExtension?: boolean;
     onFileAdded?: (file: IUploadFile) => void;
     onFileError?: (file: IUploadFile) => void;
+    onFileCanceled?: (file: IUploadFile) => void;
 }
 export interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;
@@ -50,6 +51,7 @@ export interface IUploadFile extends File {
     remove: () => void;
     start: () => void;
     onError: (file: IUploadFile) => void;
+    onCancel: (file: IUploadFile) => void;
 }
 export interface IUploadOptions {
     url: string | ((file: IUploadFile) => string);

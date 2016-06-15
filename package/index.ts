@@ -14,9 +14,9 @@ export function addEventHandler(el: HTMLInputElement | Element, event: string, h
 interface IElementWithAttachEvent {
     attachEvent?: (event: string, handler: (ev: UIEvent) => void) => void;
 }
-export const isFileApi: boolean = !!((<{File?: Object}>window).File && (<{FormData?: Object}>window).FormData);
+export const isFileApi: boolean = !!((<{ File?: Object }>window).File && (<{ FormData?: Object }>window).FormData);
 
-export function castFiles(fileList: File[]| Object, status?: UploadStatus): IUploadFile[] {
+export function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[] {
     let files: IUploadFile[];
 
     if (typeof fileList === 'object') {
@@ -29,12 +29,12 @@ export function castFiles(fileList: File[]| Object, status?: UploadStatus): IUpl
     }
 
     forEach(files, (file: IUploadFile) => {
-      file.uploadStatus = status || file.uploadStatus;
-      file.responseCode = file.responseCode || 0;
-      file.responseText = file.responseText || '';
-      file.progress = file.progress || 0;
-      file.sentBytes = file.sentBytes || 0;
-      file.cancel = file.cancel || (() => { return; });
+        file.uploadStatus = status || file.uploadStatus;
+        file.responseCode = file.responseCode || 0;
+        file.responseText = file.responseText || '';
+        file.progress = file.progress || 0;
+        file.sentBytes = file.sentBytes || 0;
+        file.cancel = file.cancel || (() => { return; });
     });
 
     return files;
@@ -78,9 +78,9 @@ export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueu
     return new Uploader(options, callbacks);
 };
 
-export function newGuid() : string {
+export function newGuid(): string {
     let d = new Date().getTime();
-    let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         /* tslint:disable */
         let r = (d + Math.random() * 16) % 16 | 0;
         d = Math.floor(d / 16);
@@ -122,7 +122,8 @@ export interface IUploadAreaOptions extends IUploadOptions {
     validateExtension?: boolean;
     
     onFileAdded?: (file: IUploadFile) => void;
-    onFileError?: (file: IUploadFile) => void; 
+    onFileError?: (file: IUploadFile) => void;
+    onFileCanceled?: (file: IUploadFile) => void;
 }
 
 export interface IUploadCallbacks {
@@ -150,6 +151,7 @@ export interface IUploadFile extends File {
     remove: () => void;
     start: () => void;
     onError: (file: IUploadFile) => void;
+    onCancel: (file: IUploadFile) => void;
 }
 
 export interface IUploadOptions {
@@ -301,6 +303,7 @@ export class UploadArea {
         let uploadFiles = castFiles(fileList);
         forEach(uploadFiles, (file: IUploadFile) => {
             file.onError = this.options.onFileError || (() => { ; });
+            file.onCancel = this.options.onFileCanceled || (() => { ; });
             if (this.validateFile(file)) {
                 file.start = () => {
                     this.uploadCore.upload([file]);
@@ -691,6 +694,9 @@ export class UploadCore {
             file.cancel, () => {
                 xhr.abort();
                 file.uploadStatus = UploadStatus.canceled;
+                if (file.onCancel)
+                    file.onCancel(file);
+
                 this.callbacks.onCancelledCallback(file);
                 this.callbacks.onFileStateChangedCallback(file);
                 this.callbacks.onFinishedCallback(file);

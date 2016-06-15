@@ -72,6 +72,7 @@ accept?: string;
 multiple?: boolean;
 onFileAdded?: (file: IUploadFile) => void;
 onFileError?: (file: IUploadFile) => void; 
+onFileCancelled?: (file: IUploadFile) => void; 
 ```
 
 ### Upload file
