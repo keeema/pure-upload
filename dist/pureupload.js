@@ -191,6 +191,8 @@ var pu;
             var _this = this;
             var uploadFiles = castFiles(fileList);
             forEach(uploadFiles, function (file) {
+                file.guid = newGuid();
+                file.url = _this.uploadCore.getUrl(file);
                 file.onError = _this.options.onFileError || (function () { ; });
                 file.onCancel = _this.options.onFileCanceled || (function () { ; });
                 if (_this.validateFile(file)) {
@@ -328,6 +330,7 @@ var pu;
             return undefined;
         };
         UploadArea.prototype.onFormChange = function (e, fileInput, submitInput) {
+            var _this = this;
             var files = e.target
                 ? e.target.files
                     ? e.target.files
@@ -339,11 +342,12 @@ var pu;
                     : [];
             forEach(files, function (file) {
                 file.guid = file.guid || newGuid();
+                file.url = _this.uploadCore.getUrl(file);
             });
             if (files.length === 0)
                 return;
             this.addTargetIframe();
-            this.formForNoFileApi.setAttribute('action', this.uploadCore.getUrl(files[0]));
+            this.formForNoFileApi.setAttribute('action', files[0].url);
             if (!submitInput) {
                 this.formForNoFileApi.submit();
             }
@@ -528,7 +532,7 @@ var pu;
         };
         UploadCore.prototype.createRequest = function (file) {
             var xhr = new XMLHttpRequest();
-            var url = this.getUrl(file);
+            var url = file.url || this.getUrl(file);
             xhr.open(this.options.method, url, true);
             xhr.withCredentials = !!this.options.withCredentials;
             this.setHeaders(xhr, file.name);
@@ -694,7 +698,6 @@ var pu;
             var _this = this;
             forEach(files, function (file) {
                 _this.queuedFiles.push(file);
-                file.guid = newGuid();
                 file.remove = decorateSimpleFunction(file.remove, function () {
                     _this.removeFile(file);
                 });

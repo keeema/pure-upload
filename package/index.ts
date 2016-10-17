@@ -141,6 +141,7 @@ export interface IUploadCallbacksExt extends IUploadCallbacks {
 
 export interface IUploadFile extends File {
     guid: string;
+    url: string;
     uploadStatus: UploadStatus;
     responseCode: number;
     responseText: string;
@@ -159,7 +160,7 @@ export interface IUploadOptions {
     method: string;
     withCredentials?: boolean;
     headers?: { [key: string]: string | number | boolean };
-    params?: { [key: string]: string | number | boolean };    
+    params?: { [key: string]: string | number | boolean };
     localizer?: (message: string, params?: Object) => string;
 }
 
@@ -302,6 +303,8 @@ export class UploadArea {
     private putFilesToQueue(fileList: FileList | File[], form: HTMLInputElement): void {
         let uploadFiles = castFiles(fileList);
         forEach(uploadFiles, (file: IUploadFile) => {
+            file.guid = newGuid();
+            file.url = this.uploadCore.getUrl(file);
             file.onError = this.options.onFileError || (() => { ; });
             file.onCancel = this.options.onFileCanceled || (() => { ; });
             if (this.validateFile(file)) {
@@ -469,6 +472,7 @@ export class UploadArea {
 
         forEach(files, (file: IUploadFile) => {
             file.guid = file.guid || newGuid();
+            file.url = this.uploadCore.getUrl(file);
         });
 
         if (files.length === 0)
@@ -476,7 +480,7 @@ export class UploadArea {
 
         this.addTargetIframe();
 
-        this.formForNoFileApi.setAttribute('action', this.uploadCore.getUrl(files[0]));
+        this.formForNoFileApi.setAttribute('action', files[0].url);
         if (!submitInput) {
             this.formForNoFileApi.submit();
         }
@@ -666,7 +670,7 @@ export class UploadCore {
 
     private createRequest(file: IUploadFile): XMLHttpRequest {
         let xhr = new XMLHttpRequest();
-        let url = this.getUrl(file);
+        let url = file.url || this.getUrl(file);
         xhr.open(this.options.method, url, true);
 
         xhr.withCredentials = !!this.options.withCredentials;
@@ -852,7 +856,6 @@ export class UploadQueue {
     addFiles(files: IUploadFile[]): void {
         forEach(files, file => {
             this.queuedFiles.push(file);
-            file.guid = newGuid();
 
             file.remove = decorateSimpleFunction(file.remove, () => {
                 this.removeFile(file);

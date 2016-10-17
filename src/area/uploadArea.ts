@@ -78,6 +78,8 @@ class UploadArea {
     private putFilesToQueue(fileList: FileList | File[], form: HTMLInputElement): void {
         let uploadFiles = castFiles(fileList);
         forEach(uploadFiles, (file: IUploadFile) => {
+            file.guid = newGuid();
+            file.url = this.uploadCore.getUrl(file);
             file.onError = this.options.onFileError || (() => { ; });
             file.onCancel = this.options.onFileCanceled || (() => { ; });
             if (this.validateFile(file)) {
@@ -245,6 +247,7 @@ class UploadArea {
 
         forEach(files, (file: IUploadFile) => {
             file.guid = file.guid || newGuid();
+            file.url = this.uploadCore.getUrl(file);
         });
 
         if (files.length === 0)
@@ -252,7 +255,7 @@ class UploadArea {
 
         this.addTargetIframe();
 
-        this.formForNoFileApi.setAttribute('action', this.uploadCore.getUrl(files[0]));
+        this.formForNoFileApi.setAttribute('action', files[0].url);
         if (!submitInput) {
             this.formForNoFileApi.submit();
         }

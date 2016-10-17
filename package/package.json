@@ -1,6 +1,6 @@
 {
   "name": "pure-upload",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "The pure upload library without dependencies",
   "author": {
     "name": "t.rut, m.horyna"
@@ -56,7 +56,7 @@
     "karma-jasmine": "^0.3.6",
     "karma-phantomjs-launcher": "^0.2.1",
     "merge2": "^0.3.6",
-    "phantomjs": "^1.9.17",
+    "phantomjs": "*",
     "run-sequence": "^1.1.2"
   }
 }

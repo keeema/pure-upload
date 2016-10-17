@@ -30,7 +30,7 @@ class UploadCore {
 
     private createRequest(file: IUploadFile): XMLHttpRequest {
         let xhr = new XMLHttpRequest();
-        let url = this.getUrl(file);
+        let url = file.url || this.getUrl(file);
         xhr.open(this.options.method, url, true);
 
         xhr.withCredentials = !!this.options.withCredentials;

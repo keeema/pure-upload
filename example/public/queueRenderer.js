@@ -1,6 +1,7 @@
-var getQueueRenderer = function () {
+function getQueueRenderer() {
     return new QueueRenderer();
-};
+}
+;
 var QueueRenderer = (function () {
     function QueueRenderer() {
     }
@@ -25,16 +26,16 @@ var QueueRenderer = (function () {
         return itemRow;
     };
     QueueRenderer.prototype.translateFileStatus = function (file) {
-        switch (file.uploadStatus.toString()) {
-            case pu.UploadStatusStatic.queued:
+        switch (file.uploadStatus) {
+            case pu.UploadStatus.queued:
                 return 'Queued';
-            case pu.UploadStatusStatic.uploading:
+            case pu.UploadStatus.uploading:
                 return 'Uploading';
-            case pu.UploadStatusStatic.uploaded:
+            case pu.UploadStatus.uploaded:
                 return 'Uploaded';
-            case pu.UploadStatusStatic.failed:
+            case pu.UploadStatus.failed:
                 return 'Failed';
-            case pu.UploadStatusStatic.canceled:
+            case pu.UploadStatus.canceled:
                 return 'Canceled';
         }
         return 'Unknown';
@@ -45,20 +46,20 @@ var QueueRenderer = (function () {
         itemRow.appendChild(this.createTextDiv('table-row-item-status', this.translateFileStatus(file)));
         itemRow.appendChild(this.createTextDiv('table-row-item-name', file.name));
         itemRow.appendChild(this.createTextDiv('table-row-item-progress', file.progress.toString() + '%'));
-        switch (file.uploadStatus.toString()) {
-            case pu.UploadStatusStatic.queued:
+        switch (file.uploadStatus) {
+            case pu.UploadStatus.queued:
                 if (!queueSettings.autoStart) {
                     itemRow.appendChild(this.createButton('Start', function () { return file.start(); }));
                     break;
                 }
                 itemRow.appendChild(this.createButton('Cancel', function () { return file.cancel(); }));
                 break;
-            case pu.UploadStatusStatic.uploading:
+            case pu.UploadStatus.uploading:
                 itemRow.appendChild(this.createButton('Cancel', function () { return file.cancel(); }));
                 break;
-            case pu.UploadStatusStatic.uploaded:
-            case pu.UploadStatusStatic.failed:
-            case pu.UploadStatusStatic.canceled:
+            case pu.UploadStatus.uploaded:
+            case pu.UploadStatus.failed:
+            case pu.UploadStatus.canceled:
                 itemRow.appendChild(this.createButton('Delete', function () { return file.remove(); }));
                 break;
         }

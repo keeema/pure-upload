@@ -42,6 +42,7 @@ export interface IUploadCallbacksExt extends IUploadCallbacks {
 }
 export interface IUploadFile extends File {
     guid: string;
+    url: string;
     uploadStatus: UploadStatus;
     responseCode: number;
     responseText: string;

@@ -13,7 +13,6 @@ class UploadQueue {
     addFiles(files: IUploadFile[]): void {
         forEach(files, file => {
             this.queuedFiles.push(file);
-            file.guid = newGuid();
 
             file.remove = decorateSimpleFunction(file.remove, () => {
                 this.removeFile(file);

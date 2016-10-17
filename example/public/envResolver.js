@@ -14,7 +14,9 @@ var http = function (url, success, failure) {
     };
 };
 var mockXhr = function () {
+    /* tslint:disable */
     XMLHttpRequest = XhrMock;
+    /* tslint:enable */
     FormData = FormDataMock;
 };
 var resolveEnvironment = function () {
