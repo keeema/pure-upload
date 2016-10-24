@@ -1,6 +1,14 @@
 CHANGELOG
 ===
 
+2.0.4
+--
+
+Fixes
+-
+
+Modified update progress condition to not throw in IE
+
 2.0.3
 --
 

@@ -743,7 +743,7 @@ export class UploadCore {
     }
 
     private updateProgress(file: IUploadFile, e?: ProgressEvent) {
-        if (e !== null) {
+        if (e) {
             if (e.lengthComputable) {
                 file.progress = Math.round(100 * (e.loaded / e.total));
                 file.sentBytes = e.loaded;

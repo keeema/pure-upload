@@ -594,7 +594,7 @@ var UploadCore = (function () {
         this.callbacks.onFinishedCallback(file);
     };
     UploadCore.prototype.updateProgress = function (file, e) {
-        if (e !== null) {
+        if (e) {
             if (e.lengthComputable) {
                 file.progress = Math.round(100 * (e.loaded / e.total));
                 file.sentBytes = e.loaded;
