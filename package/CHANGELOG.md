@@ -1,5 +1,12 @@
 CHANGELOG
 ===
+2.0.5
+--
+
+Fixes
+-
+
+Fixed publish
 
 2.0.4
 --
