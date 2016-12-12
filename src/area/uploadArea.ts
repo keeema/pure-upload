@@ -334,11 +334,11 @@ class UploadArea {
         let entry;
         for (let i = 0; i < items.length; i++) {
             let item: IFileExt = <IFileExt>items[i];
-            if ((item.webkitGetAsEntry) && (entry = item.webkitGetAsEntry())) {
+            if ((item.webkitGetAsEntry) && (entry = <IFileExt>item.webkitGetAsEntry())) {
                 if (entry.isFile) {
                     this.putFilesToQueue([item.getAsFile()], this.fileInput);
                 } else if (entry.isDirectory) {
-                    this.processDirectory(entry, entry.name);
+                    this.processDirectory(entry as any, entry.name);
                 }
             } else if (item.getAsFile) {
                 if (!item.kind || item.kind === 'file') {
