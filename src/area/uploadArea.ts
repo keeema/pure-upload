@@ -360,7 +360,7 @@ class UploadArea {
                 if (entry.isFile) {
                     this.putFilesToQueue([item.getAsFile()]);
                 } else if (entry.isDirectory) {
-                    this.processDirectory(entry, entry.name);
+                    this.processDirectory(entry as any, entry.name);
                 }
             } else if (item.getAsFile) {
                 if (!item.kind || item.kind === 'file') {
