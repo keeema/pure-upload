@@ -1,9 +1,9 @@
 function filter<T>(input: T[], filterFn: (item: T) => boolean): T[] {
-    if (!input)
-        return null;
     let result: T[] = [];
+    if (!input)
+        return result;
 
-    forEach<T>(input, function(item: T) {
+    forEach<T>(input, function (item: T) {
         if (filterFn(item))
             result.push(item);
     });

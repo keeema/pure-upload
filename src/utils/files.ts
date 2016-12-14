@@ -4,7 +4,7 @@ function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFil
     if (typeof fileList === 'object') {
         files = map(
             filter(keys(fileList), (key) => key !== 'length'),
-            (key) => fileList[key]
+            (key) => (<IFileOrObjectWithIndexer>fileList)[key]
         );
     } else {
         files = <IUploadFile[]>fileList;
@@ -20,4 +20,8 @@ function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFil
     });
 
     return files;
+}
+
+interface IFileOrObjectWithIndexer {
+    [key: string]: IUploadFile;
 }

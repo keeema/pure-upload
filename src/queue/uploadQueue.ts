@@ -18,7 +18,8 @@ class UploadQueue {
                 this.removeFile(file);
             });
 
-            this.callbacks.onFileAddedCallback(file);
+            if (this.callbacks.onFileAddedCallback)
+                this.callbacks.onFileAddedCallback(file);
 
             if (file.uploadStatus === UploadStatus.failed) {
                 if (this.callbacks.onErrorCallback) {
@@ -41,7 +42,8 @@ class UploadQueue {
         this.deactivateFile(file);
         this.queuedFiles.splice(index, 1);
 
-        this.callbacks.onFileRemovedCallback(file);
+        if (this.callbacks.onFileRemovedCallback)
+            this.callbacks.onFileRemovedCallback(file);
 
         if (!blockRecursive)
             this.filesChanged();
@@ -56,7 +58,8 @@ class UploadQueue {
             file => this.removeFile(file, true)
         );
 
-        this.callbacks.onQueueChangedCallback(this.queuedFiles);
+        if (this.callbacks.onQueueChangedCallback)
+            this.callbacks.onQueueChangedCallback(this.queuedFiles);
     }
 
     private filesChanged(): void {
@@ -66,7 +69,8 @@ class UploadQueue {
         if (this.options.autoStart)
             this.startWaitingFiles();
 
-        this.callbacks.onQueueChangedCallback(this.queuedFiles);
+        if (this.callbacks.onQueueChangedCallback)
+            this.callbacks.onQueueChangedCallback(this.queuedFiles);
 
         this.checkAllFinished();
     }
@@ -77,7 +81,7 @@ class UploadQueue {
             file => indexOf([UploadStatus.queued, UploadStatus.uploading], file.uploadStatus) >= 0
         );
 
-        if (unfinishedFiles.length === 0) {
+        if (unfinishedFiles.length === 0 && this.callbacks.onAllFinishedCallback) {
             this.callbacks.onAllFinishedCallback();
         }
     }

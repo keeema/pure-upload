@@ -5,7 +5,8 @@ var http = function (url, success, failure) {
     request.onreadystatechange = function () {
         if (request.readyState === 4) {
             if (request.status === 200) {
-                success(request.responseText);
+                if (success)
+                    success(request.responseText);
             }
             else if (failure) {
                 failure(request.status, request.statusText);
@@ -48,8 +49,8 @@ var XhrMock = (function () {
         this.loaded = 0;
         this.step = 2000000;
     }
-    XhrMock.prototype.open = function (method, url, async) { ; };
-    XhrMock.prototype.setRequestHeader = function (name, value) { ; };
+    XhrMock.prototype.open = function () { ; };
+    XhrMock.prototype.setRequestHeader = function () { ; };
     XhrMock.prototype.send = function (formData) {
         this.file = formData.data['file'].data;
         this.performStep();

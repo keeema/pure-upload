@@ -28,7 +28,7 @@ window.onload = function () {
         queueRenderer.renderQueue('example-queue', 'Example Queue', result, uploaderExample1.queue.options);
     };
     uploaderExample1.queue.callbacks.onProgressCallback = function (file) {
-        queueRenderer.renderItemProgress('example-queue', file);
+        queueRenderer.renderItemProgress(file);
     };
     pu.addEventHandler(document.getElementById('example-clear-button'), 'click', function () { return uploaderExample1.queue.clearFiles(); });
 };

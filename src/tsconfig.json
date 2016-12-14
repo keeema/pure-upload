@@ -1,8 +1,15 @@
 {
-    "version": "1.5.0-beta",
+    "version": "2.1.4*",
     "compilerOptions": {
         "target": "es5",
-        "module": "commonjs"
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "strictNullChecks": true
     },
     "filesGlob": [
         "./**/*.ts",
