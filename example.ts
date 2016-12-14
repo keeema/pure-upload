@@ -17,7 +17,7 @@ if (listenUpload) {
     console.log('Running in file-accepting mode.');
     app.use('/api/test', multer({
         dest: './uploads/',
-        rename: (fieldname, filename) => filename + Date.now(),
+        rename: (_fieldname, filename) => filename + Date.now(),
 
         onFileUploadStart: (file: Express.Multer.File) => {
             console.log(file.originalname + ' is starting ...');
@@ -29,7 +29,7 @@ if (listenUpload) {
         }
     }));
 
-    app.use('/api/check', (request: express.Request, response: express.Response) => {
+    app.use('/api/check', (_request: express.Request, response: express.Response) => {
         response.send('API OK');
     });
 } else {
@@ -38,7 +38,7 @@ if (listenUpload) {
 
 app.use(express.static('./example/public'));
 
-app.post('/api/test', (req, res: express.Response) => {
+app.post('/api/test', (_req, res: express.Response) => {
     if (done === true) {
         res.send('File uploaded.');
         done = false;

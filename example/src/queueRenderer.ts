@@ -68,8 +68,10 @@ class QueueRenderer {
         }
     }
 
-    renderItemProgress(queueId: string, file: pu.IUploadFile): void {
+    renderItemProgress(file: pu.IUploadFile): void {
         let itemRow = document.getElementById(file.guid);
+        if (!itemRow)
+            return;
         for (let i = 0; i < itemRow.childNodes.length; i++) {
             let node = itemRow.childNodes[i];
             if (node.attributes.getNamedItem('class').value === 'table-row-item-progress') {
@@ -81,11 +83,14 @@ class QueueRenderer {
 
     renderQueue(queueId: string, queueTitle: string, files: pu.IUploadFile[], queueSettings: pu.IUploadQueueOptions): void {
         let queue = document.getElementById(queueId);
+        if (!queue)
+            return;
         while (queue.firstChild) queue.removeChild(queue.firstChild);
 
         queue.appendChild(this.createTextDiv('table-header-title', queueTitle));
         pu.forEach(files, (file: pu.IUploadFile) => {
-            queue.appendChild(this.createQueueRow(file, queueSettings));
+            if (queue)
+                queue.appendChild(this.createQueueRow(file, queueSettings));
         });
     }
 }

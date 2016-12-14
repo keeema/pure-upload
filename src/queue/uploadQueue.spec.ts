@@ -149,20 +149,21 @@ describe('uploadQueue', () => {
         });
 
         describe('autoStart', () => {
-            let startFunction = function () { this.uploadStatus = UploadStatus.uploading; };
+
             let files: IUploadFile[];
 
             beforeEach(() => {
                 files = [
-                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.uploading, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.uploading, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.uploaded, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.failed, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.canceled, start: startFunction },
+                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.uploading, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.uploading, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.uploaded, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.failed, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.canceled, start: () => { ; } },
                 ];
+                files.forEach((item => item.start = () => { item.uploadStatus = UploadStatus.uploading; }));
             });
 
             it('does not start any file when there is no limit and autoStart is turned off', () => {

@@ -6,7 +6,8 @@ let http = (url: string, success?: (result: string) => void, failure?: (status: 
     request.onreadystatechange = () => {
         if (request.readyState === 4) {
             if (request.status === 200) {
-                success(request.responseText);
+                if (success)
+                    success(request.responseText);
             } else if (failure) {
                 failure(request.status, request.statusText);
             }
@@ -39,7 +40,7 @@ let resolveEnvironment = (): void => {
 };
 
 class FormDataMock {
-    data: { [key: string]: { data: File, additional: string } } = {};
+    data: { [key: string]: { data: File, additional: string | undefined } } = {};
     append(key: string, data: File, additional?: string) {
         this.data[key] = { data, additional };
     }
@@ -56,9 +57,9 @@ class XhrMock {
     private file: File;
     private timeoutId: number;
 
-    open(method: string, url: string, async?: boolean) { ; }
+    open() { ; }
 
-    setRequestHeader(name: string, value: string) { ; }
+    setRequestHeader() { ; }
 
     send(formData: FormDataMock): void {
         this.file = (<FormDataMock>formData).data['file'].data;

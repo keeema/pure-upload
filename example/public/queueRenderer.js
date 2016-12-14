@@ -64,8 +64,10 @@ var QueueRenderer = (function () {
                 break;
         }
     };
-    QueueRenderer.prototype.renderItemProgress = function (queueId, file) {
+    QueueRenderer.prototype.renderItemProgress = function (file) {
         var itemRow = document.getElementById(file.guid);
+        if (!itemRow)
+            return;
         for (var i = 0; i < itemRow.childNodes.length; i++) {
             var node = itemRow.childNodes[i];
             if (node.attributes.getNamedItem('class').value === 'table-row-item-progress') {
@@ -77,11 +79,14 @@ var QueueRenderer = (function () {
     QueueRenderer.prototype.renderQueue = function (queueId, queueTitle, files, queueSettings) {
         var _this = this;
         var queue = document.getElementById(queueId);
+        if (!queue)
+            return;
         while (queue.firstChild)
             queue.removeChild(queue.firstChild);
         queue.appendChild(this.createTextDiv('table-header-title', queueTitle));
         pu.forEach(files, function (file) {
-            queue.appendChild(_this.createQueueRow(file, queueSettings));
+            if (queue)
+                queue.appendChild(_this.createQueueRow(file, queueSettings));
         });
     };
     return QueueRenderer;

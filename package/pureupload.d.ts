@@ -1,5 +1,5 @@
 declare module "pure-upload" {
-export function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
+export function addEventHandler(el: Element | HTMLElement, event: string, handler: (ev: UIEvent) => void): void;
 export const isFileApi: boolean;
 export function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
 export function filter<T>(input: T[], filterFn: (item: T) => boolean): T[];
@@ -13,6 +13,7 @@ export interface IFileExt extends File {
     webkitGetAsEntry: () => File;
     getAsFile: () => File;
     file: (callback: (file: IFileExt) => void) => void;
+    createReader: Function;
     isFile: boolean;
     isDirectory: boolean;
     fullPath: string;
@@ -79,7 +80,7 @@ export interface IUploadQueueOptions {
     autoStart?: boolean;
     autoRemove?: boolean;
 }
-export function keys(obj: Object): any[];
+export function keys(obj: Object): string[];
 export function map<T, K>(input: T[], mapper: (item: T) => K): K[];
 export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
 export class UploadArea {
@@ -99,19 +100,20 @@ export class UploadArea {
     constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader, formForNoFileApi?: HTMLFormElement);
     destroy(): void;
     private setFullOptions(options);
-    private putFilesToQueue(fileList, form);
+    private putFilesToQueue(fileList);
     private validateFile(file);
     private setupFileApiElements();
     private setupOldSchoolElements();
     private createFormWrapper();
     private decorateInputForm();
     private findInnerSubmit();
+    private fileListToList(files);
     private onFormChange(e, fileInput, submitInput);
     private addTargetIframe();
     private onChange(e);
     private onDrag(e);
     private onDrop(e);
-    private isIeVersion(v?);
+    private isIeVersion(v);
     private onClick();
     private addFilesFromItems(items);
     private processDirectory(directory, path);
@@ -128,7 +130,7 @@ export class UploadCore {
     getUrl(file: IUploadFile): string;
     private processFile(file);
     private createRequest(file);
-    private setHeaders(xhr, fileName);
+    private setHeaders(xhr);
     private setCallbacks(xhr, file);
     private send(xhr, file);
     private createFormData(file);
