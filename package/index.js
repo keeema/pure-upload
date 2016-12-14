@@ -390,7 +390,7 @@ var UploadArea = (function () {
         this.putFilesToQueue(e.target.files);
     };
     UploadArea.prototype.onDrag = function (e) {
-        var efct;
+        var efct = undefined;
         try {
             efct = e.dataTransfer.effectAllowed;
         }
