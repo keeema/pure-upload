@@ -306,7 +306,7 @@ class UploadArea {
     }
 
     private onDrag(e: DragEvent): void {
-        let efct;
+        let efct: string | undefined = undefined;
         try {
             efct = e.dataTransfer.effectAllowed;
         } catch (err) { ; }
@@ -353,14 +353,14 @@ class UploadArea {
     }
 
     private addFilesFromItems(items: FileList | File[] | DataTransferItemList | DataTransferItem[]): void {
-        let entry;
+        let entry: IFileExt;
         for (let i = 0; i < items.length; i++) {
             let item: IFileExt = <IFileExt>items[i];
             if ((item.webkitGetAsEntry) && (entry = <IFileExt>item.webkitGetAsEntry())) {
                 if (entry.isFile) {
                     this.putFilesToQueue([item.getAsFile()]);
                 } else if (entry.isDirectory) {
-                    this.processDirectory(entry as any, entry.name);
+                    this.processDirectory(entry, entry.name);
                 }
             } else if (item.getAsFile) {
                 if (!item.kind || item.kind === 'file') {
@@ -389,7 +389,7 @@ class UploadArea {
                 }
             }
         };
-        dirReader.readEntries(entryReader, function (error: string) {
+        dirReader.readEntries(entryReader, function(error: string) {
             return typeof console !== 'undefined' && console !== null
                 ? typeof console.log === 'function' ? console.log(error) : void 0
                 : void 0;
