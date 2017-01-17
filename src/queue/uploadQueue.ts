@@ -1,4 +1,5 @@
 class UploadQueue {
+    offset: IOffsetInfo = { fileCount: 0, running: false };
     options: IUploadQueueOptions;
     callbacks: IUploadQueueCallbacksExt;
     queuedFiles: IUploadFile[] = [];
@@ -88,6 +89,7 @@ class UploadQueue {
 
     private setFullOptions(): void {
         this.options.maxParallelUploads = this.options.maxParallelUploads || 0;
+        this.options.parallelBatchOffset = this.options.parallelBatchOffset || 0;
         this.options.autoStart = isFileApi && (this.options.autoStart || false);
         this.options.autoRemove = this.options.autoRemove || false;
 
@@ -141,21 +143,44 @@ class UploadQueue {
             file => file.uploadStatus === UploadStatus.queued
         );
 
-        if (this.options.maxParallelUploads > 0) {
-            let uploadingFilesCount = filter(
+        if (this.options.maxParallelUploads) {
+            const uploadingFilesCount = filter(
                 this.queuedFiles,
                 file => file.uploadStatus === UploadStatus.uploading
             ).length;
 
-            let count = this.options.maxParallelUploads - uploadingFilesCount;
+            let count = Math.min(result.length, this.options.maxParallelUploads - uploadingFilesCount);
 
             if (count <= 0) {
                 return [];
+            }
+
+            if (this.options.parallelBatchOffset) {
+                if (!this.offset.running) {
+                    this.startOffset();
+                }
+
+                count = Math.min(this.offset.fileCount + count, this.options.maxParallelUploads) - this.offset.fileCount;
+                this.offset.fileCount += count;
             }
 
             result = result.slice(0, count);
         }
 
         return result;
+    }
+
+    private startOffset() {
+        this.offset.fileCount = 0;
+        this.offset.running = true;
+
+        setTimeout(
+            () => {
+                this.offset.fileCount = 0;
+                this.offset.running = false;
+                this.filesChanged();
+            },
+            this.options.parallelBatchOffset
+        );
     }
 }

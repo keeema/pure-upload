@@ -19,6 +19,10 @@ export interface IFileExt extends File {
     fullPath: string;
 }
 export function indexOf<T>(input: T[], item: T): number;
+export interface IOffsetInfo {
+    running: boolean;
+    fileCount: number;
+}
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
     allowDragDrop?: boolean;
@@ -77,6 +81,7 @@ export interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUpload
 }
 export interface IUploadQueueOptions {
     maxParallelUploads?: number;
+    parallelBatchOffset?: number;
     autoStart?: boolean;
     autoRemove?: boolean;
 }
@@ -152,6 +157,7 @@ export class Uploader {
     unregisterArea(area: UploadArea): void;
 }
 export class UploadQueue {
+    offset: IOffsetInfo;
     options: IUploadQueueOptions;
     callbacks: IUploadQueueCallbacksExt;
     queuedFiles: IUploadFile[];
@@ -167,6 +173,7 @@ export class UploadQueue {
     private removeFinishedFiles();
     private deactivateFile(file);
     private getWaitingFiles();
+    private startOffset();
 }
 export enum UploadStatus {
     queued = 0,

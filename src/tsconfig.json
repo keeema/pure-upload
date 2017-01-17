@@ -1,5 +1,5 @@
 {
-    "version": "2.1.4*",
+    "version": "2.1.*",
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
@@ -30,6 +30,7 @@
         "./queue/iUploadQueueCallbacks.ts",
         "./queue/iUploadQueueCallbacksExt.ts",
         "./queue/iUploadQueueOptions.ts",
+        "./queue/iOffsetInfo.ts",
         "./queue/uploadQueue.spec.ts",
         "./queue/uploadQueue.ts",
         "./uploader/getUploader.ts",

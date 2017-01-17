@@ -22,6 +22,7 @@ let uploader = pu.getUploader(uploadQueueOptions, uploadQueueCallbacks)
 ### Upload queue options
 ```typescript
 maxParallelUploads?: number;
+parallelBatchOffset?: number;
 autoStart?: boolean;
 autoRemove?: boolean;
 ```

@@ -726,6 +726,7 @@ var pu;
     pu.Uploader = Uploader;
     var UploadQueue = (function () {
         function UploadQueue(options, callbacks) {
+            this.offset = { fileCount: 0, running: false };
             this.queuedFiles = [];
             this.options = options;
             this.callbacks = callbacks;
@@ -791,6 +792,7 @@ var pu;
         };
         UploadQueue.prototype.setFullOptions = function () {
             this.options.maxParallelUploads = this.options.maxParallelUploads || 0;
+            this.options.parallelBatchOffset = this.options.parallelBatchOffset || 0;
             this.options.autoStart = pu.isFileApi && (this.options.autoStart || false);
             this.options.autoRemove = this.options.autoRemove || false;
         };
@@ -824,15 +826,32 @@ var pu;
             if (!this.options.autoStart)
                 return [];
             var result = filter(this.queuedFiles, function (file) { return file.uploadStatus === UploadStatus.queued; });
-            if (this.options.maxParallelUploads > 0) {
+            if (this.options.maxParallelUploads) {
                 var uploadingFilesCount = filter(this.queuedFiles, function (file) { return file.uploadStatus === UploadStatus.uploading; }).length;
-                var count = this.options.maxParallelUploads - uploadingFilesCount;
+                var count = Math.min(result.length, this.options.maxParallelUploads - uploadingFilesCount);
                 if (count <= 0) {
                     return [];
+                }
+                if (this.options.parallelBatchOffset) {
+                    if (!this.offset.running) {
+                        this.startOffset();
+                    }
+                    count = Math.min(this.offset.fileCount + count, this.options.maxParallelUploads) - this.offset.fileCount;
+                    this.offset.fileCount += count;
                 }
                 result = result.slice(0, count);
             }
             return result;
+        };
+        UploadQueue.prototype.startOffset = function () {
+            var _this = this;
+            this.offset.fileCount = 0;
+            this.offset.running = true;
+            setTimeout(function () {
+                _this.offset.fileCount = 0;
+                _this.offset.running = false;
+                _this.filesChanged();
+            }, this.options.parallelBatchOffset);
         };
         return UploadQueue;
     }());

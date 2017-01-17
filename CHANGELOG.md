@@ -1,12 +1,19 @@
 CHANGELOG
 ===
-2.0.5
+
+2.1.0
+--
+New features
+-
+
+Added offset for batches limited by max uploading file count.
+
+
+2.0.5 - 2.0.8
 --
 
 Fixes
--
 
-Fixed publish
 
 2.0.4
 --
@@ -14,7 +21,7 @@ Fixed publish
 Fixes
 -
 
-Modified update progress condition to not throw in IE
+Modified update progress condition to not throw in IE.
 
 2.0.3
 --

@@ -19,6 +19,10 @@ declare module pu {
         fullPath: string;
     }
     function indexOf<T>(input: T[], item: T): number;
+    interface IOffsetInfo {
+        running: boolean;
+        fileCount: number;
+    }
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
         allowDragDrop?: boolean;
@@ -77,6 +81,7 @@ declare module pu {
     }
     interface IUploadQueueOptions {
         maxParallelUploads?: number;
+        parallelBatchOffset?: number;
         autoStart?: boolean;
         autoRemove?: boolean;
     }
@@ -152,6 +157,7 @@ declare module pu {
         unregisterArea(area: UploadArea): void;
     }
     class UploadQueue {
+        offset: IOffsetInfo;
         options: IUploadQueueOptions;
         callbacks: IUploadQueueCallbacksExt;
         queuedFiles: IUploadFile[];
@@ -167,6 +173,7 @@ declare module pu {
         private removeFinishedFiles();
         private deactivateFile(file);
         private getWaitingFiles();
+        private startOffset();
     }
     enum UploadStatus {
         queued = 0,
