@@ -128,8 +128,10 @@ export interface IUploadAreaOptions extends IUploadOptions {
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;
-    
+    manualStart?: boolean;
+
     onFileAdded?: (file: IUploadFile) => void;
+    onFileSelected?: (file: IUploadFile) => void;
     onFileError?: (file: IUploadFile) => void;
     onFileCanceled?: (file: IUploadFile) => void;
 }
@@ -243,6 +245,7 @@ export class UploadArea {
     private formForNoFileApi: HTMLFormElement;
     private formForNoFileApiProvided: boolean;
     private lastIframe: HTMLElement;
+    private fileList: IUploadFile[] | null | undefined;
     private unregisterOnClick: () => void;
     private unregisterOnDrop: () => void;
     private unregisterOnDragOver: () => void;
@@ -266,6 +269,17 @@ export class UploadArea {
         } else {
             this.setupOldSchoolElements();
         }
+    }
+
+    start() {
+        if (this.options.manualStart && this.fileList) {
+            this.putFilesToQueue();
+            this.clear();
+        }
+    }
+
+    clear() {
+        this.fileList = null;
     }
 
     destroy(): void {
@@ -314,9 +328,24 @@ export class UploadArea {
             (options.multiple === undefined || options.multiple === null ? true : options.multiple);
     }
 
-    private putFilesToQueue(fileList: FileList | File[]): void {
-        let uploadFiles = castFiles(fileList);
-        forEach(uploadFiles, (file: IUploadFile) => {
+    private selectFiles(fileList: FileList | File[]) {
+        this.fileList = castFiles(fileList);
+
+        if (this.options.onFileSelected)
+            forEach(this.fileList, (file: IUploadFile) => {
+                if (this.options.onFileSelected)
+                    this.options.onFileSelected(file);
+            });
+
+        if (!this.options.manualStart)
+            this.putFilesToQueue();
+    }
+
+    private putFilesToQueue(): void {
+        if (!this.fileList)
+            return;
+
+        forEach(this.fileList, (file: IUploadFile) => {
             file.guid = newGuid();
             file.url = this.uploadCore.getUrl(file);
             file.onError = this.options.onFileError || (() => { ; });
@@ -334,7 +363,7 @@ export class UploadArea {
                 file.onError(file);
             }
         });
-        this.uploader.queue.addFiles(uploadFiles);
+        this.uploader.queue.addFiles(this.fileList);
     }
 
     private validateFile(file: IUploadFile): boolean {
@@ -538,7 +567,7 @@ export class UploadArea {
     }
 
     private onChange(e: Event): void {
-        this.putFilesToQueue(<FileList>(<HTMLInputElement>e.target).files);
+        this.selectFiles(<FileList>(<HTMLInputElement>e.target).files);
     }
 
     private onDrag(e: DragEvent): void {
@@ -594,13 +623,13 @@ export class UploadArea {
             let item: IFileExt = <IFileExt>items[i];
             if ((item.webkitGetAsEntry) && (entry = <IFileExt>item.webkitGetAsEntry())) {
                 if (entry.isFile) {
-                    this.putFilesToQueue([item.getAsFile()]);
+                    this.selectFiles([item.getAsFile()]);
                 } else if (entry.isDirectory) {
                     this.processDirectory(entry, entry.name);
                 }
             } else if (item.getAsFile) {
                 if (!item.kind || item.kind === 'file') {
-                    this.putFilesToQueue([item.getAsFile()]);
+                    this.selectFiles([item.getAsFile()]);
                 }
             }
         }
@@ -618,14 +647,14 @@ export class UploadArea {
                             return;
                         }
                         file.fullPath = '' + path + '/' + file.name;
-                        self.putFilesToQueue([file]);
+                        self.selectFiles([file]);
                     });
                 } else if (entry.isDirectory) {
                     self.processDirectory(entry, '' + path + '/' + entry.name);
                 }
             }
         };
-        dirReader.readEntries(entryReader, function(error: string) {
+        dirReader.readEntries(entryReader, function (error: string) {
             return typeof console !== 'undefined' && console !== null
                 ? typeof console.log === 'function' ? console.log(error) : void 0
                 : void 0;
@@ -634,7 +663,7 @@ export class UploadArea {
 
     private handleFiles(files: FileList | File[]): void {
         for (let i = 0; i < files.length; i++) {
-            this.putFilesToQueue([files[i]]);
+            this.selectFiles([files[i]]);
         }
     }
 

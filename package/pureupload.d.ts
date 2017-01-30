@@ -30,7 +30,9 @@ export interface IUploadAreaOptions extends IUploadOptions {
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;
+    manualStart?: boolean;
     onFileAdded?: (file: IUploadFile) => void;
+    onFileSelected?: (file: IUploadFile) => void;
     onFileError?: (file: IUploadFile) => void;
     onFileCanceled?: (file: IUploadFile) => void;
 }
@@ -97,15 +99,19 @@ export class UploadArea {
     private formForNoFileApi;
     private formForNoFileApiProvided;
     private lastIframe;
+    private fileList;
     private unregisterOnClick;
     private unregisterOnDrop;
     private unregisterOnDragOver;
     private unregisterOnChange;
     private unregisterFormOnChange;
     constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader, formForNoFileApi?: HTMLFormElement);
+    start(): void;
+    clear(): void;
     destroy(): void;
     private setFullOptions(options);
-    private putFilesToQueue(fileList);
+    private selectFiles(fileList);
+    private putFilesToQueue();
     private validateFile(file);
     private setupFileApiElements();
     private setupOldSchoolElements();

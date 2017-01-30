@@ -1,6 +1,14 @@
 CHANGELOG
 ===
 
+2.2.0
+--
+New features
+-
+
+Added manual triggering of adding file to UploadQueue in UploadArea.
+
+
 2.1.0
 --
 New features

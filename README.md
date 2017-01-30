@@ -71,7 +71,9 @@ allowDragDrop?: boolean;
 clickable?: boolean;
 accept?: string;
 multiple?: boolean;
+manualStart?: boolean;
 onFileAdded?: (file: IUploadFile) => void;
+onFileSelected?: (file: IUploadFile) => void
 onFileError?: (file: IUploadFile) => void; 
 onFileCancelled?: (file: IUploadFile) => void; 
 ```

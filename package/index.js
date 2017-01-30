@@ -151,6 +151,15 @@ var UploadArea = (function () {
             this.setupOldSchoolElements();
         }
     }
+    UploadArea.prototype.start = function () {
+        if (this.options.manualStart && this.fileList) {
+            this.putFilesToQueue();
+            this.clear();
+        }
+    };
+    UploadArea.prototype.clear = function () {
+        this.fileList = null;
+    };
     UploadArea.prototype.destroy = function () {
         if (exports.isFileApi) {
             if (this.unregisterOnClick)
@@ -189,10 +198,22 @@ var UploadArea = (function () {
         this.options.multiple = exports.isFileApi &&
             (options.multiple === undefined || options.multiple === null ? true : options.multiple);
     };
-    UploadArea.prototype.putFilesToQueue = function (fileList) {
+    UploadArea.prototype.selectFiles = function (fileList) {
         var _this = this;
-        var uploadFiles = castFiles(fileList);
-        forEach(uploadFiles, function (file) {
+        this.fileList = castFiles(fileList);
+        if (this.options.onFileSelected)
+            forEach(this.fileList, function (file) {
+                if (_this.options.onFileSelected)
+                    _this.options.onFileSelected(file);
+            });
+        if (!this.options.manualStart)
+            this.putFilesToQueue();
+    };
+    UploadArea.prototype.putFilesToQueue = function () {
+        var _this = this;
+        if (!this.fileList)
+            return;
+        forEach(this.fileList, function (file) {
             file.guid = newGuid();
             file.url = _this.uploadCore.getUrl(file);
             file.onError = _this.options.onFileError || (function () { ; });
@@ -210,7 +231,7 @@ var UploadArea = (function () {
                 file.onError(file);
             }
         });
-        this.uploader.queue.addFiles(uploadFiles);
+        this.uploader.queue.addFiles(this.fileList);
     };
     UploadArea.prototype.validateFile = function (file) {
         if (!this.isFileSizeValid(file)) {
@@ -387,7 +408,7 @@ var UploadArea = (function () {
             frame.name = iframeName;
     };
     UploadArea.prototype.onChange = function (e) {
-        this.putFilesToQueue(e.target.files);
+        this.selectFiles(e.target.files);
     };
     UploadArea.prototype.onDrag = function (e) {
         var efct = undefined;
@@ -443,7 +464,7 @@ var UploadArea = (function () {
             var item = items[i];
             if ((item.webkitGetAsEntry) && (entry = item.webkitGetAsEntry())) {
                 if (entry.isFile) {
-                    this.putFilesToQueue([item.getAsFile()]);
+                    this.selectFiles([item.getAsFile()]);
                 }
                 else if (entry.isDirectory) {
                     this.processDirectory(entry, entry.name);
@@ -451,7 +472,7 @@ var UploadArea = (function () {
             }
             else if (item.getAsFile) {
                 if (!item.kind || item.kind === 'file') {
-                    this.putFilesToQueue([item.getAsFile()]);
+                    this.selectFiles([item.getAsFile()]);
                 }
             }
         }
@@ -468,7 +489,7 @@ var UploadArea = (function () {
                             return;
                         }
                         file.fullPath = '' + path + '/' + file.name;
-                        self.putFilesToQueue([file]);
+                        self.selectFiles([file]);
                     });
                 }
                 else if (entry.isDirectory) {
@@ -484,7 +505,7 @@ var UploadArea = (function () {
     };
     UploadArea.prototype.handleFiles = function (files) {
         for (var i = 0; i < files.length; i++) {
-            this.putFilesToQueue([files[i]]);
+            this.selectFiles([files[i]]);
         }
     };
     UploadArea.prototype.isFileSizeValid = function (file) {
