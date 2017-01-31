@@ -1,6 +1,13 @@
 CHANGELOG
 ===
 
+2.2.2
+--
+New features
+-
+
+Automatic clearing of manual upload file list after puting to queue is done on parameter.
+
 2.2.0
 --
 New features

@@ -152,10 +152,12 @@ var pu;
                 this.setupOldSchoolElements();
             }
         }
-        UploadArea.prototype.start = function () {
+        UploadArea.prototype.start = function (autoClear) {
+            if (autoClear === void 0) { autoClear = false; }
             if (this.options.manualStart && this.fileList) {
                 this.putFilesToQueue();
-                this.clear();
+                if (autoClear)
+                    this.clear();
             }
         };
         UploadArea.prototype.clear = function () {

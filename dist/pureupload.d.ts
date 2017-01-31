@@ -106,7 +106,7 @@ declare module pu {
         private unregisterOnChange;
         private unregisterFormOnChange;
         constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader, formForNoFileApi?: HTMLFormElement);
-        start(): void;
+        start(autoClear?: boolean): void;
         clear(): void;
         destroy(): void;
         private setFullOptions(options);

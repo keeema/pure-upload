@@ -33,10 +33,11 @@ class UploadArea {
         }
     }
 
-    start() {
+    start(autoClear: boolean = false) {
         if (this.options.manualStart && this.fileList) {
             this.putFilesToQueue();
-            this.clear();
+            if (autoClear)
+                this.clear();
         }
     }
 
