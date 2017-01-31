@@ -66,18 +66,25 @@ method: string;
 withCredentials?: boolean;
 headers?: { [key: string]: string; };
 params?: { [key: string]: string; };
+localizer?: (message: string, params?: Object) => string;
 maxFileSize?: number;
-allowDragDrop?: boolean;
-clickable?: boolean;
+allowDragDrop?: boolean | (() => boolean);
+clickable?: boolean | (() => boolean);
 accept?: string;
 multiple?: boolean;
+validateExtension?: boolean;
 manualStart?: boolean;
 onFileAdded?: (file: IUploadFile) => void;
-onFileSelected?: (file: IUploadFile) => void
-onFileError?: (file: IUploadFile) => void; 
-onFileCancelled?: (file: IUploadFile) => void; 
+onFileSelected?: (file: IUploadFile) => void;
+onFileError?: (file: IUploadFile) => void;
+onFileCanceled?: (file: IUploadFile) => void;
 ```
+### Upload area - manual starting
+```typescript
+start(autoClear?: boolean): void;
+clear(): void;
 
+```
 ### Upload file
 Standard *File* object extended with additional informations and methods to manage a file in queue.
 ```typescript

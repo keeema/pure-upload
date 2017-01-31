@@ -110,6 +110,7 @@ class UploadArea {
 
         forEach(this.fileList, (file: IUploadFile) => {
             file.guid = newGuid();
+            delete file.uploadStatus;
             file.url = this.uploadCore.getUrl(file);
             file.onError = this.options.onFileError || (() => { ; });
             file.onCancel = this.options.onFileCanceled || (() => { ; });
@@ -161,27 +162,26 @@ class UploadArea {
         if (this.formForNoFileApi)
             this.formForNoFileApi.style.display = 'none';
 
-        let onChange = (e: Event) => this.onChange(e);
+        const onChange = (e: Event) => this.onChange(e);
         addEventHandler(this.fileInput, 'change', onChange);
         this.unregisterOnChange = () => removeEventHandler(this.fileInput, 'change', onchange);
 
         if (this.options.multiple) {
             this.fileInput.setAttribute('multiple', '');
         }
-        if (this.options.clickable) {
-            let onClick = () => this.onClick();
-            addEventHandler(this.targetElement, 'click', onClick);
-            this.unregisterOnClick = () => removeEventHandler(this.targetElement, 'click', onClick);
-        }
-        if (this.options.allowDragDrop) {
-            let onDrag = (e: DragEvent) => this.onDrag(e);
-            addEventHandler(this.targetElement, 'dragover', onDrag);
-            this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, 'dragover', onDrag);
 
-            let onDrop = (e: DragEvent) => this.onDrop(e);
-            addEventHandler(this.targetElement, 'drop', onDrop);
-            this.unregisterOnDrop = () => removeEventHandler(this.targetElement, 'drop', onDrop);
-        }
+        const onClick = () => this.onClick();
+        addEventHandler(this.targetElement, 'click', onClick);
+        this.unregisterOnClick = () => removeEventHandler(this.targetElement, 'click', onClick);
+
+        const onDrag = (e: DragEvent) => this.onDrag(e);
+        addEventHandler(this.targetElement, 'dragover', onDrag);
+        this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, 'dragover', onDrag);
+
+        const onDrop = (e: DragEvent) => this.onDrop(e);
+        addEventHandler(this.targetElement, 'drop', onDrop);
+        this.unregisterOnDrop = () => removeEventHandler(this.targetElement, 'drop', onDrop);
+
         // attach to body
         document.body.appendChild(this.fileInput);
     }
@@ -334,6 +334,9 @@ class UploadArea {
     }
 
     private onDrag(e: DragEvent): void {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
+
         let efct: string | undefined = undefined;
         try {
             efct = e.dataTransfer.effectAllowed;
@@ -343,6 +346,9 @@ class UploadArea {
     }
 
     private onDrop(e: DragEvent): void {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
+
         this.stopEventPropagation(e);
         if (!e.dataTransfer) {
             return;
@@ -371,6 +377,9 @@ class UploadArea {
     }
 
     private onClick(): void {
+        if (!getValueOrResult(this.options.clickable))
+            return;
+
         this.fileInput.value = '';
 
         if (this.isIeVersion(10)) {

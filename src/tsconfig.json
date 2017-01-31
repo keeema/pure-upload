@@ -35,6 +35,7 @@
         "./queue/uploadQueue.ts",
         "./uploader/getUploader.ts",
         "./uploader/uploader.ts",
+        "./utils/getValueOrResult.ts",
         "./utils/addEventHandler.ts",
         "./utils/fileApiCheck.ts",
         "./utils/files.ts",

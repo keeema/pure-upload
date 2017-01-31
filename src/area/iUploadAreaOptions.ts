@@ -1,7 +1,7 @@
 interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
-    allowDragDrop?: boolean;
-    clickable?: boolean;
+    allowDragDrop?: boolean | (() => boolean);
+    clickable?: boolean | (() => boolean);
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;

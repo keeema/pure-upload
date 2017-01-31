@@ -7,6 +7,7 @@ declare module pu {
     function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
     function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
     function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
+    function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
     function newGuid(): string;
     interface IFileExt extends File {
         kind: string;
@@ -25,8 +26,8 @@ declare module pu {
     }
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
-        allowDragDrop?: boolean;
-        clickable?: boolean;
+        allowDragDrop?: boolean | (() => boolean);
+        clickable?: boolean | (() => boolean);
         accept?: string;
         multiple?: boolean;
         validateExtension?: boolean;

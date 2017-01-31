@@ -72,6 +72,12 @@ function getUploader(options, callbacks) {
 }
 exports.getUploader = getUploader;
 ;
+function getValueOrResult(valueOrGetter) {
+    if (typeof valueOrGetter === 'function')
+        return valueOrGetter();
+    return valueOrGetter;
+}
+exports.getValueOrResult = getValueOrResult;
 function newGuid() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -217,6 +223,7 @@ var UploadArea = (function () {
             return;
         forEach(this.fileList, function (file) {
             file.guid = newGuid();
+            delete file.uploadStatus;
             file.url = _this.uploadCore.getUrl(file);
             file.onError = _this.options.onFileError || (function () { ; });
             file.onCancel = _this.options.onFileCanceled || (function () { ; });
@@ -269,19 +276,15 @@ var UploadArea = (function () {
         if (this.options.multiple) {
             this.fileInput.setAttribute('multiple', '');
         }
-        if (this.options.clickable) {
-            var onClick_1 = function () { return _this.onClick(); };
-            addEventHandler(this.targetElement, 'click', onClick_1);
-            this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, 'click', onClick_1); };
-        }
-        if (this.options.allowDragDrop) {
-            var onDrag_1 = function (e) { return _this.onDrag(e); };
-            addEventHandler(this.targetElement, 'dragover', onDrag_1);
-            this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, 'dragover', onDrag_1); };
-            var onDrop_1 = function (e) { return _this.onDrop(e); };
-            addEventHandler(this.targetElement, 'drop', onDrop_1);
-            this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, 'drop', onDrop_1); };
-        }
+        var onClick = function () { return _this.onClick(); };
+        addEventHandler(this.targetElement, 'click', onClick);
+        this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, 'click', onClick); };
+        var onDrag = function (e) { return _this.onDrag(e); };
+        addEventHandler(this.targetElement, 'dragover', onDrag);
+        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, 'dragover', onDrag); };
+        var onDrop = function (e) { return _this.onDrop(e); };
+        addEventHandler(this.targetElement, 'drop', onDrop);
+        this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, 'drop', onDrop); };
         // attach to body
         document.body.appendChild(this.fileInput);
     };
@@ -413,6 +416,8 @@ var UploadArea = (function () {
         this.selectFiles(e.target.files);
     };
     UploadArea.prototype.onDrag = function (e) {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
         var efct = undefined;
         try {
             efct = e.dataTransfer.effectAllowed;
@@ -424,6 +429,8 @@ var UploadArea = (function () {
         this.stopEventPropagation(e);
     };
     UploadArea.prototype.onDrop = function (e) {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
         this.stopEventPropagation(e);
         if (!e.dataTransfer) {
             return;
@@ -452,6 +459,8 @@ var UploadArea = (function () {
     };
     UploadArea.prototype.onClick = function () {
         var _this = this;
+        if (!getValueOrResult(this.options.clickable))
+            return;
         this.fileInput.value = '';
         if (this.isIeVersion(10)) {
             setTimeout(function () { _this.fileInput.click(); }, 200);
@@ -758,10 +767,12 @@ var UploadQueue = (function () {
     UploadQueue.prototype.addFiles = function (files) {
         var _this = this;
         forEach(files, function (file) {
-            _this.queuedFiles.push(file);
-            file.remove = decorateSimpleFunction(file.remove, function () {
-                _this.removeFile(file);
-            });
+            if (!_this.queuedFiles.some(function (queuedFile) { return queuedFile === file || (!!queuedFile.guid && queuedFile.guid === file.guid); })) {
+                _this.queuedFiles.push(file);
+                file.remove = decorateSimpleFunction(file.remove, function () {
+                    _this.removeFile(file);
+                });
+            }
             if (_this.callbacks.onFileAddedCallback)
                 _this.callbacks.onFileAddedCallback(file);
             if (file.uploadStatus === UploadStatus.failed) {

@@ -13,11 +13,13 @@ class UploadQueue {
 
     addFiles(files: IUploadFile[]): void {
         forEach(files, file => {
-            this.queuedFiles.push(file);
+            if (!this.queuedFiles.some(queuedFile => queuedFile === file || (!!queuedFile.guid && queuedFile.guid === file.guid))) {
+                this.queuedFiles.push(file);
 
-            file.remove = decorateSimpleFunction(file.remove, () => {
-                this.removeFile(file);
-            });
+                file.remove = decorateSimpleFunction(file.remove, () => {
+                    this.removeFile(file);
+                });
+            }
 
             if (this.callbacks.onFileAddedCallback)
                 this.callbacks.onFileAddedCallback(file);

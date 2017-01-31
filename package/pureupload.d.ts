@@ -7,6 +7,7 @@ export function forEach<T>(input: T[], callback: (item: T, index?: number) => vo
 export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
 export function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
 export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
+export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
 export function newGuid(): string;
 export interface IFileExt extends File {
     kind: string;
@@ -25,8 +26,8 @@ export interface IOffsetInfo {
 }
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
-    allowDragDrop?: boolean;
-    clickable?: boolean;
+    allowDragDrop?: boolean | (() => boolean);
+    clickable?: boolean | (() => boolean);
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;

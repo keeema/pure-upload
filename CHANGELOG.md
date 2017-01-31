@@ -1,9 +1,17 @@
 CHANGELOG
 ===
 
+2.2.3
+--
+Fix
+-
+
+Removed duplications when same file is adding many times to queue.
+Few options of UploadArea changed to be acceptable as a function.
+
 2.2.2
 --
-New features
+Fix
 -
 
 Automatic clearing of manual upload file list after puting to queue is done on parameter.
