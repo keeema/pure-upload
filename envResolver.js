@@ -1,18 +1,23 @@
 var http = function (url, success, failure) {
     var request = new XMLHttpRequest();
-    request.open("GET", url, true);
+    request.open('GET', url, true);
     request.send(null);
     request.onreadystatechange = function () {
-        if (request.readyState == 4) {
-            if (request.status == 200)
-                success(request.responseText);
-            else if (failure)
+        if (request.readyState === 4) {
+            if (request.status === 200) {
+                if (success)
+                    success(request.responseText);
+            }
+            else if (failure) {
                 failure(request.status, request.statusText);
+            }
         }
     };
 };
 var mockXhr = function () {
+    /* tslint:disable */
     XMLHttpRequest = XhrMock;
+    /* tslint:enable */
     FormData = FormDataMock;
 };
 var resolveEnvironment = function () {
@@ -35,19 +40,17 @@ var FormDataMock = (function () {
         this.data[key] = { data: data, additional: additional };
     };
     return FormDataMock;
-})();
+}());
 var XhrMock = (function () {
     function XhrMock() {
-        this.loaded = 0;
-        this.step = 2000000;
         this.readyState = 0;
         this.status = 0;
-        this.upload = { onprogress: function () { } };
+        this.upload = { onprogress: function () { ; } };
+        this.loaded = 0;
+        this.step = 2000000;
     }
-    XhrMock.prototype.open = function (method, url, async) {
-    };
-    XhrMock.prototype.setRequestHeader = function (name, value) {
-    };
+    XhrMock.prototype.open = function () { ; };
+    XhrMock.prototype.setRequestHeader = function () { ; };
     XhrMock.prototype.send = function (formData) {
         this.file = formData.data['file'].data;
         this.performStep();
@@ -80,4 +83,4 @@ var XhrMock = (function () {
         return this.loaded;
     };
     return XhrMock;
-})();
+}());
