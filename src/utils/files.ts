@@ -2,15 +2,14 @@ function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFil
     let files: IUploadFile[];
 
     if (typeof fileList === 'object') {
-        files = map(
-            filter(keys(fileList), (key) => key !== 'length'),
-            (key) => (<IFileOrObjectWithIndexer>fileList)[key]
-        );
+        files = Object.keys(fileList)
+            .filter(key => key !== 'length')
+            .map(key => (<IFileOrObjectWithIndexer>fileList)[key]);
     } else {
         files = <IUploadFile[]>fileList;
     }
 
-    forEach(files, (file: IUploadFile) => {
+    files.forEach((file: IUploadFile) => {
         file.uploadStatus = status || file.uploadStatus;
         file.responseCode = file.responseCode || 0;
         file.responseText = file.responseText || '';

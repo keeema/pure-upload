@@ -84,7 +84,7 @@ var QueueRenderer = (function () {
         while (queue.firstChild)
             queue.removeChild(queue.firstChild);
         queue.appendChild(this.createTextDiv('table-header-title', queueTitle));
-        pu.forEach(files, function (file) {
+        files.forEach(function (file) {
             if (queue)
                 queue.appendChild(_this.createQueueRow(file, queueSettings));
         });

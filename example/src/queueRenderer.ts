@@ -88,7 +88,7 @@ class QueueRenderer {
         while (queue.firstChild) queue.removeChild(queue.firstChild);
 
         queue.appendChild(this.createTextDiv('table-header-title', queueTitle));
-        pu.forEach(files, (file: pu.IUploadFile) => {
+        files.forEach((file: pu.IUploadFile) => {
             if (queue)
                 queue.appendChild(this.createQueueRow(file, queueSettings));
         });

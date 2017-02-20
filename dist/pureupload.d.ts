@@ -2,8 +2,6 @@ declare module pu {
     function addEventHandler(el: Element | HTMLElement, event: string, handler: (ev: UIEvent) => void): void;
     const isFileApi: boolean;
     function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
-    function filter<T>(input: T[], filterFn: (item: T) => boolean): T[];
-    function forEach<T>(input: T[], callback: (item: T, index?: number) => void): void;
     function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
     function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
     function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
@@ -19,7 +17,6 @@ declare module pu {
         isDirectory: boolean;
         fullPath: string;
     }
-    function indexOf<T>(input: T[], item: T): number;
     interface IOffsetInfo {
         running: boolean;
         fileCount: number;
@@ -88,8 +85,6 @@ declare module pu {
         autoStart?: boolean;
         autoRemove?: boolean;
     }
-    function keys(obj: Object): string[];
-    function map<T, K>(input: T[], mapper: (item: T) => K): K[];
     function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
     class UploadArea {
         targetElement: HTMLElement;
@@ -97,16 +92,12 @@ declare module pu {
         uploader: Uploader;
         private uploadCore;
         private fileInput;
-        private formForNoFileApi;
-        private formForNoFileApiProvided;
-        private lastIframe;
         private fileList;
         private unregisterOnClick;
         private unregisterOnDrop;
         private unregisterOnDragOver;
         private unregisterOnChange;
-        private unregisterFormOnChange;
-        constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader, formForNoFileApi?: HTMLFormElement);
+        constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader);
         start(autoClear?: boolean): void;
         clear(): void;
         destroy(): void;
@@ -115,13 +106,6 @@ declare module pu {
         private putFilesToQueue();
         private validateFile(file);
         private setupFileApiElements();
-        private setupOldSchoolElements();
-        private createFormWrapper();
-        private decorateInputForm();
-        private findInnerSubmit();
-        private fileListToList(files);
-        private onFormChange(e, fileInput, submitInput);
-        private addTargetIframe();
         private onChange(e);
         private onDrag(e);
         private onDrop(e);
@@ -160,7 +144,7 @@ declare module pu {
         options: IUploadQueueOptions;
         constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
         setOptions(options: IUploadQueueOptions): void;
-        registerArea(element: HTMLElement, options: IUploadAreaOptions, compatibilityForm?: Element): UploadArea;
+        registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
         unregisterArea(area: UploadArea): void;
     }
     class UploadQueue {

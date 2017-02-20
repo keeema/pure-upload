@@ -22,8 +22,7 @@ window.onload = () => {
         multiple: true
     };
 
-    let compatibilityForm = document.getElementById('example-compatibility-form');
-    uploaderExample1.registerArea(<HTMLElement>document.getElementById('example-button'), uploadSettings, <HTMLElement>compatibilityForm);
+    uploaderExample1.registerArea(<HTMLElement>document.getElementById('example-button'), uploadSettings);
     uploaderExample1.registerArea(<HTMLElement>document.getElementById('example-dnd-area'), uploadSettings);
     uploaderExample1.registerArea(<HTMLElement>document.getElementById('example-queue'), queueUploadSettings);
 

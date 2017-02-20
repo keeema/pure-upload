@@ -13,7 +13,7 @@ class UploadCore {
         if (!isFileApi)
             return;
         let files = castFiles(fileList, UploadStatus.uploading);
-        forEach(files, (file: IUploadFile) => this.processFile(file));
+        files.forEach((file: IUploadFile) => this.processFile(file));
     }
 
     getUrl(file: IUploadFile): string {
@@ -49,7 +49,7 @@ class UploadCore {
         if (!this.options.headers['X-Requested-With'])
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-        forEach(keys(this.options.headers), (headerName: string) => {
+        Object.keys(this.options.headers).forEach((headerName: string) => {
             if (!this.options.headers)
                 return;
             let headerValue = this.options.headers[headerName];
@@ -94,7 +94,7 @@ class UploadCore {
     private createFormData(file: IUploadFile): FormData {
         let formData = new FormData();
         if (this.options.params) {
-            forEach(keys(this.options.params), (paramName: string) => {
+            Object.keys(this.options.params).forEach((paramName: string) => {
                 if (!this.options.params)
                     return;
                 let paramValue = this.options.params[paramName];

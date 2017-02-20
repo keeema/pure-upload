@@ -39,13 +39,8 @@
         "./utils/addEventHandler.ts",
         "./utils/fileApiCheck.ts",
         "./utils/files.ts",
-        "./utils/filter.ts",
-        "./utils/forEach.ts",
         "./utils/functions.ts",
         "./utils/guidGenerator.ts",
-        "./utils/indexOf.ts",
-        "./utils/keys.ts",
-        "./utils/map.ts",
         "./utils/removeEventHandler.ts",
         "../decl/jasmine/jasmine.d.ts"
     ]

@@ -20,8 +20,7 @@ window.onload = function () {
         accept: '*.*',
         multiple: true
     };
-    var compatibilityForm = document.getElementById('example-compatibility-form');
-    uploaderExample1.registerArea(document.getElementById('example-button'), uploadSettings, compatibilityForm);
+    uploaderExample1.registerArea(document.getElementById('example-button'), uploadSettings);
     uploaderExample1.registerArea(document.getElementById('example-dnd-area'), uploadSettings);
     uploaderExample1.registerArea(document.getElementById('example-queue'), queueUploadSettings);
     uploaderExample1.queue.callbacks.onQueueChangedCallback = function (result) {

@@ -1,6 +1,14 @@
 CHANGELOG
 ===
 
+3.0.0
+--
+Cleaning
+-
+
+Removed compatibility parts for obsolette browser without FileAPI.
+
+
 2.2.3
 --
 Fix

@@ -1,33 +1,35 @@
 import express = require('express');
 import multer = require('multer');
-let cors = require('cors');
+import cors = require('cors');
 
-let app: express.Application = express();
-let done = false;
+const app: express.Application = express();
 
 app.use(cors());
 
-let args = process.argv.slice(2);
+const args = process.argv.slice(2);
 let listenUpload = true;
 
 if (args.length && args.filter(arg => arg === 'fake' || arg === 'f').length)
     listenUpload = false;
 
 if (listenUpload) {
+    const storage = multer.diskStorage({
+        destination: './uploads/',
+        filename: (_req, file, callback) => callback(null, file.fieldname + '-' + Date.now())
+    });
+    const upload = multer({ storage: storage }).any();
+
     console.log('Running in file-accepting mode.');
-    app.use('/api/test', multer({
-        dest: './uploads/',
-        rename: (_fieldname, filename) => filename + Date.now(),
-
-        onFileUploadStart: (file: Express.Multer.File) => {
-            console.log(file.originalname + ' is starting ...');
-        },
-
-        onFileUploadComplete: (file) => {
-            console.log(file.fieldname + ' uploaded to  ' + file.path);
-            done = true;
-        }
-    }));
+    app.post('/api/test', function (req, res) {
+        upload(req, res, (err: string) => {
+            if (err) {
+                console.log(`Error uploading file ${req.file ? req.file.filename : ''}: ${err}`);
+                return res.end('Error uploading file.');
+            }
+            console.log(`File ${req.file ? req.file.filename : ''} is uploaded`);
+            res.end('File is uploaded');
+        });
+    });
 
     app.use('/api/check', (_request: express.Request, response: express.Response) => {
         response.send('API OK');
@@ -37,13 +39,6 @@ if (listenUpload) {
 }
 
 app.use(express.static('./example/public'));
-
-app.post('/api/test', (_req, res: express.Response) => {
-    if (done === true) {
-        res.send('File uploaded.');
-        done = false;
-    }
-});
 
 app.listen(3000, () => {
     console.log('Listening on port 3000');
