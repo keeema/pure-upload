@@ -1,6 +1,7 @@
 interface IUploadFile extends File {
     guid: string;
-    uploadStatus: IUploadStatus;
+    url: string;
+    uploadStatus: UploadStatus;
     responseCode: number;
     responseText: string;
     progress: number;
@@ -9,4 +10,6 @@ interface IUploadFile extends File {
     cancel: () => void;
     remove: () => void;
     start: () => void;
+    onError: (file: IUploadFile) => void;
+    onCancel: (file: IUploadFile) => void;
 }

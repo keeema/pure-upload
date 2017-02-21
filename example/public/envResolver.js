@@ -14,7 +14,9 @@ var http = function (url, success, failure) {
     };
 };
 var mockXhr = function () {
+    /* tslint:disable */
     XMLHttpRequest = XhrMock;
+    /* tslint:enable */
     FormData = FormDataMock;
 };
 var resolveEnvironment = function () {
@@ -37,7 +39,7 @@ var FormDataMock = (function () {
         this.data[key] = { data: data, additional: additional };
     };
     return FormDataMock;
-})();
+}());
 var XhrMock = (function () {
     function XhrMock() {
         this.readyState = 0;
@@ -80,4 +82,4 @@ var XhrMock = (function () {
         return this.loaded;
     };
     return XhrMock;
-})();
+}());

@@ -1,10 +1,11 @@
 {
   "name": "pure-upload",
-  "version": "1.0.19",
+  "version": "2.0.5",
   "description": "The pure upload library without dependencies",
   "author": {
     "name": "t.rut, m.horyna"
   },
+  "license": "MIT",
   "contributors": [
     {
       "name": "Tomáš Růt",
@@ -31,13 +32,10 @@
     "file",
     "api"
   ],
-  "dependencies": {
+  "devDependencies": {
     "cors": "^2.7.1",
     "express": "~4.10.2",
-    "multer": "~0.1.6"
-  },
-  "devDependencies": {
-
+    "multer": "~0.1.6",
     "gulp": "^3.9.0",
     "gulp-clean": "^0.3.1",
     "gulp-concat": "^2.6.0",
@@ -58,7 +56,7 @@
     "karma-jasmine": "^0.3.6",
     "karma-phantomjs-launcher": "^0.2.1",
     "merge2": "^0.3.6",
-    "phantomjs": "^1.9.17",
+    "phantomjs": "*",
     "run-sequence": "^1.1.2"
   }
 }

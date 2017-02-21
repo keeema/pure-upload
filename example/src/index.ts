@@ -1,9 +1,9 @@
 window.onload = () => {
     resolveEnvironment();
-    var queueRenderer = getQueueRenderer();
-    var uploaderExample1 = pu.getUploader({ maxParallelUploads: 2, autoStart: false, autoRemove: false }, {});
+    let queueRenderer = getQueueRenderer();
+    let uploaderExample1 = pu.getUploader({ maxParallelUploads: 2, autoStart: false, autoRemove: false }, {});
 
-    var uploadSettings = {
+    let uploadSettings = {
         url: '/api/test',
         method: 'POST',
         maxFileSize: 1024,
@@ -12,7 +12,7 @@ window.onload = () => {
         accept: '*.*',
         multiple: true
     };
-    var queueUploadSettings = {
+    let queueUploadSettings = {
         url: '/api/test',
         method: 'POST',
         maxFileSize: 1024,

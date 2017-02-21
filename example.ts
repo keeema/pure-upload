@@ -1,14 +1,14 @@
 import express = require('express');
 import multer = require('multer');
-var cors = require('cors');
+let cors = require('cors');
 
-var app: express.Application = express();
-var done = false;
+let app: express.Application = express();
+let done = false;
 
 app.use(cors());
 
-var args = process.argv.slice(2);
-var listenUpload = true;
+let args = process.argv.slice(2);
+let listenUpload = true;
 
 if (args.length && args.filter(arg => arg === 'fake' || arg === 'f').length)
     listenUpload = false;

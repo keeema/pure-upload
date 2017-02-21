@@ -1,18 +1,18 @@
 declare module "pure-upload" {
 export function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
-export let isFileApi: boolean;
-export function castFiles(fileList: File[] | Object, status?: IUploadStatus): IUploadFile[];
+export const isFileApi: boolean;
+export function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
 export function filter<T>(input: T[], filterFn: (item: T) => boolean): T[];
 export function forEach<T>(input: T[], callback: (item: T, index?: number) => void): void;
 export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-export var getUploadCore: (options: IUploadOptions, callbacks: IUploadCallbacks) => UploadCore;
-export var getUploader: (options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks) => Uploader;
+export function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
+export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
 export function newGuid(): string;
 export interface IFileExt extends File {
     kind: string;
     webkitGetAsEntry: () => File;
     getAsFile: () => File;
-    file: (file: any) => void;
+    file: (callback: (file: IFileExt) => void) => void;
     isFile: boolean;
     isDirectory: boolean;
     fullPath: string;
@@ -24,6 +24,10 @@ export interface IUploadAreaOptions extends IUploadOptions {
     clickable?: boolean;
     accept?: string;
     multiple?: boolean;
+    validateExtension?: boolean;
+    onFileAdded?: (file: IUploadFile) => void;
+    onFileError?: (file: IUploadFile) => void;
+    onFileCanceled?: (file: IUploadFile) => void;
 }
 export interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;
@@ -38,7 +42,8 @@ export interface IUploadCallbacksExt extends IUploadCallbacks {
 }
 export interface IUploadFile extends File {
     guid: string;
-    uploadStatus: IUploadStatus;
+    url: string;
+    uploadStatus: UploadStatus;
     responseCode: number;
     responseText: string;
     progress: number;
@@ -46,16 +51,18 @@ export interface IUploadFile extends File {
     cancel: () => void;
     remove: () => void;
     start: () => void;
+    onError: (file: IUploadFile) => void;
+    onCancel: (file: IUploadFile) => void;
 }
 export interface IUploadOptions {
     url: string | ((file: IUploadFile) => string);
     method: string;
     withCredentials?: boolean;
     headers?: {
-        [key: string]: any;
+        [key: string]: string | number | boolean;
     };
     params?: {
-        [key: string]: any;
+        [key: string]: string | number | boolean;
     };
     localizer?: (message: string, params?: Object) => string;
 }
@@ -71,14 +78,6 @@ export interface IUploadQueueOptions {
     maxParallelUploads?: number;
     autoStart?: boolean;
     autoRemove?: boolean;
-}
-export interface IUploadStatus {
-    queued: IUploadStatus;
-    uploading: IUploadStatus;
-    uploaded: IUploadStatus;
-    failed: IUploadStatus;
-    canceled: IUploadStatus;
-    removed: IUploadStatus;
 }
 export function keys(obj: Object): any[];
 export function map<T, K>(input: T[], mapper: (item: T) => K): K[];
@@ -118,6 +117,7 @@ export class UploadArea {
     private processDirectory(directory, path);
     private handleFiles(files);
     private isFileSizeValid(file);
+    private isFileTypeInvalid(file);
     private stopEventPropagation(e);
 }
 export class UploadCore {
@@ -156,7 +156,7 @@ export class UploadQueue {
     constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacksExt);
     addFiles(files: IUploadFile[]): void;
     removeFile(file: IUploadFile, blockRecursive?: boolean): void;
-    clearFiles(excludeStatuses?: IUploadStatus[], cancelProcessing?: boolean): void;
+    clearFiles(excludeStatuses?: UploadStatus[], cancelProcessing?: boolean): void;
     private filesChanged();
     private checkAllFinished();
     private setFullOptions();
@@ -166,13 +166,12 @@ export class UploadQueue {
     private deactivateFile(file);
     private getWaitingFiles();
 }
-export class UploadStatusStatic {
-    static queued: string;
-    static uploading: string;
-    static uploaded: string;
-    static failed: string;
-    static canceled: string;
-    static removed: string;
+export enum UploadStatus {
+    queued = 0,
+    uploading = 1,
+    uploaded = 2,
+    failed = 3,
+    canceled = 4,
+    removed = 5,
 }
-export var uploadStatus: IUploadStatus;
 }

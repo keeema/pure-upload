@@ -166,14 +166,14 @@ gulp.task('test', ['removeSpecsTs'], function() {
 
 ///////////////////////////////
 gulp.task('cleanPkg', function() {
-  return gulp.src(['./package/*.*', '!./package/package.json'], {
+  return gulp.src(['./package/*.*'], {
       force: true
     })
     .pipe(clean());
 });
 
 gulp.task('copyTsToPkg', ['cleanPkg'], function() {
-  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts', '!./src/**/*.spec.ts'])
+  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts', '!./src/**/*.spec.ts', './package.json', './README.md', './CHANGELOG.md'])
     .pipe(flatten())
     .pipe(gulp.dest(pkg));
 });
