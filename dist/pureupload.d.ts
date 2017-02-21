@@ -1,31 +1,36 @@
 declare module pu {
-    function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
+    function addEventHandler(el: Element | HTMLElement, event: string, handler: (ev: UIEvent) => void): void;
     const isFileApi: boolean;
     function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
-    function filter<T>(input: T[], filterFn: (item: T) => boolean): T[];
-    function forEach<T>(input: T[], callback: (item: T, index?: number) => void): void;
     function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
     function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
     function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
+    function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
     function newGuid(): string;
     interface IFileExt extends File {
         kind: string;
         webkitGetAsEntry: () => File;
         getAsFile: () => File;
         file: (callback: (file: IFileExt) => void) => void;
+        createReader: Function;
         isFile: boolean;
         isDirectory: boolean;
         fullPath: string;
     }
-    function indexOf<T>(input: T[], item: T): number;
+    interface IOffsetInfo {
+        running: boolean;
+        fileCount: number;
+    }
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
-        allowDragDrop?: boolean;
-        clickable?: boolean;
+        allowDragDrop?: boolean | (() => boolean);
+        clickable?: boolean | (() => boolean);
         accept?: string;
         multiple?: boolean;
         validateExtension?: boolean;
+        manualStart?: boolean;
         onFileAdded?: (file: IUploadFile) => void;
+        onFileSelected?: (file: IUploadFile) => void;
         onFileError?: (file: IUploadFile) => void;
         onFileCanceled?: (file: IUploadFile) => void;
     }
@@ -76,11 +81,10 @@ declare module pu {
     }
     interface IUploadQueueOptions {
         maxParallelUploads?: number;
+        parallelBatchOffset?: number;
         autoStart?: boolean;
         autoRemove?: boolean;
     }
-    function keys(obj: Object): any[];
-    function map<T, K>(input: T[], mapper: (item: T) => K): K[];
     function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
     class UploadArea {
         targetElement: HTMLElement;
@@ -88,30 +92,24 @@ declare module pu {
         uploader: Uploader;
         private uploadCore;
         private fileInput;
-        private formForNoFileApi;
-        private formForNoFileApiProvided;
-        private lastIframe;
+        private fileList;
         private unregisterOnClick;
         private unregisterOnDrop;
         private unregisterOnDragOver;
         private unregisterOnChange;
-        private unregisterFormOnChange;
-        constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader, formForNoFileApi?: HTMLFormElement);
+        constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader);
+        start(autoClear?: boolean): void;
+        clear(): void;
         destroy(): void;
         private setFullOptions(options);
-        private putFilesToQueue(fileList, form);
+        private selectFiles(fileList);
+        private putFilesToQueue();
         private validateFile(file);
         private setupFileApiElements();
-        private setupOldSchoolElements();
-        private createFormWrapper();
-        private decorateInputForm();
-        private findInnerSubmit();
-        private onFormChange(e, fileInput, submitInput);
-        private addTargetIframe();
         private onChange(e);
         private onDrag(e);
         private onDrop(e);
-        private isIeVersion(v?);
+        private isIeVersion(v);
         private onClick();
         private addFilesFromItems(items);
         private processDirectory(directory, path);
@@ -128,7 +126,7 @@ declare module pu {
         getUrl(file: IUploadFile): string;
         private processFile(file);
         private createRequest(file);
-        private setHeaders(xhr, fileName);
+        private setHeaders(xhr);
         private setCallbacks(xhr, file);
         private send(xhr, file);
         private createFormData(file);
@@ -146,10 +144,11 @@ declare module pu {
         options: IUploadQueueOptions;
         constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
         setOptions(options: IUploadQueueOptions): void;
-        registerArea(element: HTMLElement, options: IUploadAreaOptions, compatibilityForm?: Element): UploadArea;
+        registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
         unregisterArea(area: UploadArea): void;
     }
     class UploadQueue {
+        offset: IOffsetInfo;
         options: IUploadQueueOptions;
         callbacks: IUploadQueueCallbacksExt;
         queuedFiles: IUploadFile[];
@@ -165,6 +164,7 @@ declare module pu {
         private removeFinishedFiles();
         private deactivateFile(file);
         private getWaitingFiles();
+        private startOffset();
     }
     enum UploadStatus {
         queued = 0,

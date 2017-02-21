@@ -18,12 +18,14 @@ exports.isFileApi = !!(window.File && window.FormData);
 function castFiles(fileList, status) {
     var files;
     if (typeof fileList === 'object') {
-        files = map(filter(keys(fileList), function (key) { return key !== 'length'; }), function (key) { return fileList[key]; });
+        files = Object.keys(fileList)
+            .filter(function (key) { return key !== 'length'; })
+            .map(function (key) { return fileList[key]; });
     }
     else {
         files = fileList;
     }
-    forEach(files, function (file) {
+    files.forEach(function (file) {
         file.uploadStatus = status || file.uploadStatus;
         file.responseCode = file.responseCode || 0;
         file.responseText = file.responseText || '';
@@ -34,25 +36,6 @@ function castFiles(fileList, status) {
     return files;
 }
 exports.castFiles = castFiles;
-function filter(input, filterFn) {
-    if (!input)
-        return null;
-    var result = [];
-    forEach(input, function (item) {
-        if (filterFn(item))
-            result.push(item);
-    });
-    return result;
-}
-exports.filter = filter;
-function forEach(input, callback) {
-    if (!input)
-        return;
-    for (var i = 0; i < input.length; i++) {
-        callback(input[i], i);
-    }
-}
-exports.forEach = forEach;
 function decorateSimpleFunction(origFn, newFn, newFirst) {
     if (newFirst === void 0) { newFirst = false; }
     if (!origFn)
@@ -72,6 +55,12 @@ function getUploader(options, callbacks) {
 }
 exports.getUploader = getUploader;
 ;
+function getValueOrResult(valueOrGetter) {
+    if (typeof valueOrGetter === 'function')
+        return valueOrGetter();
+    return valueOrGetter;
+}
+exports.getValueOrResult = getValueOrResult;
 function newGuid() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -85,38 +74,6 @@ function newGuid() {
 }
 exports.newGuid = newGuid;
 ;
-function indexOf(input, item) {
-    if (!input)
-        return -1;
-    for (var i = 0; i < input.length; i++) {
-        if (input[i] === item)
-            return i;
-    }
-    return -1;
-}
-exports.indexOf = indexOf;
-function keys(obj) {
-    if (Object && Object.keys)
-        return Object.keys(obj);
-    var keys = [];
-    for (var i in obj) {
-        if (obj.hasOwnProperty(i)) {
-            keys.push(i);
-        }
-    }
-    return keys;
-}
-exports.keys = keys;
-function map(input, mapper) {
-    if (!input)
-        return null;
-    var result = [];
-    forEach(input, function (item) {
-        result.push(mapper(item));
-    });
-    return result;
-}
-exports.map = map;
 function removeEventHandler(el, event, handler) {
     if (el.removeEventListener) {
         el.removeEventListener(event, handler);
@@ -133,12 +90,7 @@ function removeEventHandler(el, event, handler) {
 }
 exports.removeEventHandler = removeEventHandler;
 var UploadArea = (function () {
-    function UploadArea(targetElement, options, uploader, formForNoFileApi) {
-        if (formForNoFileApi) {
-            this.formForNoFileApi = formForNoFileApi.tagName.toLowerCase() === 'form'
-                ? formForNoFileApi
-                : formForNoFileApi.getElementsByTagName('form')[0];
-        }
+    function UploadArea(targetElement, options, uploader) {
         this.targetElement = targetElement;
         this.options = options;
         this.uploader = uploader;
@@ -148,33 +100,32 @@ var UploadArea = (function () {
             this.setupFileApiElements();
         }
         else {
-            this.setupOldSchoolElements();
+            throw 'Only browsers with FileAPI supported.';
         }
     }
+    UploadArea.prototype.start = function (autoClear) {
+        if (autoClear === void 0) { autoClear = false; }
+        if (this.options.manualStart && this.fileList) {
+            this.putFilesToQueue();
+            if (autoClear)
+                this.clear();
+        }
+    };
+    UploadArea.prototype.clear = function () {
+        this.fileList = null;
+    };
     UploadArea.prototype.destroy = function () {
-        if (exports.isFileApi) {
-            if (this.unregisterOnClick)
-                this.unregisterOnClick();
-            if (this.unregisterOnDrop)
-                this.unregisterOnDrop();
-            if (this.unregisterOnChange)
-                this.unregisterOnChange();
-            if (this.unregisterOnDragOver)
-                this.unregisterOnDragOver();
-            this.targetElement.removeEventListener('dragover', this.onDrag);
-            this.targetElement.removeEventListener('drop', this.onDrop);
-            document.body.removeChild(this.fileInput);
-        }
-        else {
-            if (this.unregisterFormOnChange)
-                this.unregisterFormOnChange();
-            if (this.lastIframe)
-                this.formForNoFileApi.parentNode.removeChild(this.lastIframe);
-            if (!this.formForNoFileApiProvided) {
-                this.formForNoFileApi.parentNode.insertBefore(this.targetElement, this.formForNoFileApi.nextSibling || null);
-                this.targetElement.parentNode.removeChild(this.formForNoFileApi);
-            }
-        }
+        if (this.unregisterOnClick)
+            this.unregisterOnClick();
+        if (this.unregisterOnDrop)
+            this.unregisterOnDrop();
+        if (this.unregisterOnChange)
+            this.unregisterOnChange();
+        if (this.unregisterOnDragOver)
+            this.unregisterOnDragOver();
+        this.targetElement.removeEventListener('dragover', this.onDrag);
+        this.targetElement.removeEventListener('drop', this.onDrop);
+        document.body.removeChild(this.fileInput);
     };
     UploadArea.prototype.setFullOptions = function (options) {
         this.options.maxFileSize = options.maxFileSize || 1024;
@@ -186,11 +137,24 @@ var UploadArea = (function () {
         this.options.multiple = exports.isFileApi &&
             (options.multiple === undefined || options.multiple === null ? true : options.multiple);
     };
-    UploadArea.prototype.putFilesToQueue = function (fileList, form) {
+    UploadArea.prototype.selectFiles = function (fileList) {
         var _this = this;
-        var uploadFiles = castFiles(fileList);
-        forEach(uploadFiles, function (file) {
+        this.fileList = castFiles(fileList);
+        if (this.options.onFileSelected)
+            this.fileList.forEach(function (file) {
+                if (_this.options.onFileSelected)
+                    _this.options.onFileSelected(file);
+            });
+        if (!this.options.manualStart)
+            this.putFilesToQueue();
+    };
+    UploadArea.prototype.putFilesToQueue = function () {
+        var _this = this;
+        if (!this.fileList)
+            return;
+        this.fileList.forEach(function (file) {
             file.guid = newGuid();
+            delete file.uploadStatus;
             file.url = _this.uploadCore.getUrl(file);
             file.onError = _this.options.onFileError || (function () { ; });
             file.onCancel = _this.options.onFileCanceled || (function () { ; });
@@ -207,7 +171,7 @@ var UploadArea = (function () {
                 file.onError(file);
             }
         });
-        this.uploader.queue.addFiles(uploadFiles);
+        this.uploader.queue.addFiles(this.fileList);
     };
     UploadArea.prototype.validateFile = function (file) {
         if (!this.isFileSizeValid(file)) {
@@ -222,7 +186,9 @@ var UploadArea = (function () {
             file.uploadStatus = UploadStatus.failed;
             file.responseText = !!this.options.localizer
                 ? this.options.localizer('File format is not allowed. Only { accept } files are allowed.', this.options)
-                : 'File format is not allowed. Only ' + this.options.accept.split('.').join(' ') + ' files are allowed.';
+                : 'File format is not allowed. Only ' + (this.options.accept
+                    ? this.options.accept.split('.').join(' ')
+                    : '') + ' files are allowed.';
             return false;
         }
         return true;
@@ -231,147 +197,33 @@ var UploadArea = (function () {
         var _this = this;
         this.fileInput = document.createElement('input');
         this.fileInput.setAttribute('type', 'file');
-        this.fileInput.setAttribute('accept', this.options.accept);
+        this.fileInput.setAttribute('accept', this.options.accept ? this.options.accept : '');
         this.fileInput.style.display = 'none';
-        if (this.formForNoFileApi)
-            this.formForNoFileApi.style.display = 'none';
         var onChange = function (e) { return _this.onChange(e); };
         addEventHandler(this.fileInput, 'change', onChange);
         this.unregisterOnChange = function () { return removeEventHandler(_this.fileInput, 'change', onchange); };
         if (this.options.multiple) {
             this.fileInput.setAttribute('multiple', '');
         }
-        if (this.options.clickable) {
-            var onClick_1 = function () { return _this.onClick(); };
-            addEventHandler(this.targetElement, 'click', onClick_1);
-            this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, 'click', onClick_1); };
-        }
-        if (this.options.allowDragDrop) {
-            var onDrag_1 = function (e) { return _this.onDrag(e); };
-            addEventHandler(this.targetElement, 'dragover', onDrag_1);
-            this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, 'dragover', onDrag_1); };
-            var onDrop_1 = function (e) { return _this.onDrop(e); };
-            addEventHandler(this.targetElement, 'drop', onDrop_1);
-            this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, 'drop', onDrop_1); };
-        }
+        var onClick = function () { return _this.onClick(); };
+        addEventHandler(this.targetElement, 'click', onClick);
+        this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, 'click', onClick); };
+        var onDrag = function (e) { return _this.onDrag(e); };
+        addEventHandler(this.targetElement, 'dragover', onDrag);
+        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, 'dragover', onDrag); };
+        var onDrop = function (e) { return _this.onDrop(e); };
+        addEventHandler(this.targetElement, 'drop', onDrop);
+        this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, 'drop', onDrop); };
         // attach to body
         document.body.appendChild(this.fileInput);
     };
-    UploadArea.prototype.setupOldSchoolElements = function () {
-        var _this = this;
-        if (!this.options.clickable)
-            return;
-        if (this.formForNoFileApi) {
-            this.decorateInputForm();
-        }
-        else {
-            this.createFormWrapper();
-        }
-        var submitInput = this.findInnerSubmit();
-        var handler = function (e) { return _this.onFormChange(e, _this.fileInput, submitInput); };
-        addEventHandler(this.fileInput, 'change', handler);
-        this.unregisterFormOnChange = function () { return removeEventHandler(_this.fileInput, 'change', handler); };
-    };
-    UploadArea.prototype.createFormWrapper = function () {
-        this.fileInput = document.createElement('input');
-        this.fileInput.setAttribute('type', 'file');
-        this.fileInput.setAttribute('accept', this.options.accept);
-        this.fileInput.setAttribute('name', 'file');
-        this.fileInput.style.position = 'absolute';
-        this.fileInput.style.left = '0';
-        this.fileInput.style.right = '0';
-        this.fileInput.style.top = '0';
-        this.fileInput.style.bottom = '0';
-        this.fileInput.style.width = '100%';
-        this.fileInput.style.height = '100%';
-        this.fileInput.style.fontSize = '10000%'; //IE one click
-        this.fileInput.style.opacity = '0';
-        this.fileInput.style.filter = 'alpha(opacity=0)';
-        this.fileInput.style.cursor = 'pointer';
-        this.formForNoFileApi = document.createElement('form');
-        this.formForNoFileApi.setAttribute('method', this.uploadCore.options.method);
-        this.formForNoFileApi.setAttribute('enctype', 'multipart/form-data');
-        this.formForNoFileApi.setAttribute('encoding', 'multipart/form-data');
-        this.formForNoFileApi.style.position = 'relative';
-        this.formForNoFileApi.style.display = 'block';
-        this.formForNoFileApi.style.overflow = 'hidden';
-        this.formForNoFileApi.style.width = this.targetElement.offsetWidth.toString() + 'px';
-        this.formForNoFileApi.style.height = this.targetElement.offsetHeight.toString() + 'px';
-        if (this.targetElement.clientHeight === 0 || this.targetElement.clientWidth === 0) {
-            console.warn('upload element height and width has to be set to be able catch upload');
-        }
-        this.targetElement.parentNode.insertBefore(this.formForNoFileApi, this.targetElement.nextSibling || null);
-        this.formForNoFileApi.appendChild(this.targetElement);
-        this.formForNoFileApi.appendChild(this.fileInput);
-    };
-    UploadArea.prototype.decorateInputForm = function () {
-        this.formForNoFileApiProvided = true;
-        this.targetElement.style.display = 'none';
-        this.formForNoFileApi.setAttribute('method', this.uploadCore.options.method);
-        this.formForNoFileApi.setAttribute('enctype', 'multipart/form-data');
-        this.formForNoFileApi.setAttribute('encoding', 'multipart/form-data');
-        var inputs = this.formForNoFileApi.getElementsByTagName('input');
-        for (var i = 0; i < inputs.length; i++) {
-            var el = inputs[i];
-            if (el.type === 'file') {
-                this.fileInput = el;
-            }
-        }
-    };
-    UploadArea.prototype.findInnerSubmit = function () {
-        var inputs = this.formForNoFileApi.getElementsByTagName('input');
-        for (var i = 0; i < inputs.length; i++) {
-            var el = inputs[i];
-            if (el.type === 'submit') {
-                return el;
-            }
-        }
-        return undefined;
-    };
-    UploadArea.prototype.onFormChange = function (e, fileInput, submitInput) {
-        var _this = this;
-        var files = e.target
-            ? e.target.files
-                ? e.target.files
-                : e.target.value
-                    ? [{ name: e.target.value.replace(/^.+\\/, '') }]
-                    : []
-            : fileInput.value
-                ? [{ name: fileInput.value.replace(/^.+\\/, '') }]
-                : [];
-        forEach(files, function (file) {
-            file.guid = file.guid || newGuid();
-            file.url = _this.uploadCore.getUrl(file);
-        });
-        if (files.length === 0)
-            return;
-        this.addTargetIframe();
-        this.formForNoFileApi.setAttribute('action', files[0].url);
-        if (!submitInput) {
-            this.formForNoFileApi.submit();
-        }
-    };
-    UploadArea.prototype.addTargetIframe = function () {
-        if (this.lastIframe) {
-            this.formForNoFileApi.parentNode.removeChild(this.lastIframe);
-        }
-        var iframeName = 'uploadIframe' + Date.now();
-        var iframe = this.lastIframe = document.createElement('iframe');
-        iframe.setAttribute('id', iframeName);
-        iframe.setAttribute('name', iframeName);
-        iframe.style.border = 'none';
-        iframe.style.display = 'none';
-        iframe.style.width = '0';
-        iframe.style.height = '0';
-        this.formForNoFileApi.setAttribute('target', iframeName);
-        this.formForNoFileApi.parentNode.insertBefore(iframe, this.formForNoFileApi.nextSibling || null);
-        window.frames[iframeName].name = iframeName;
-    };
     UploadArea.prototype.onChange = function (e) {
-        this.putFilesToQueue(e.target.files, this.fileInput);
+        this.selectFiles(e.target.files);
     };
     UploadArea.prototype.onDrag = function (e) {
-        var efct;
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
+        var efct = undefined;
         try {
             efct = e.dataTransfer.effectAllowed;
         }
@@ -382,6 +234,8 @@ var UploadArea = (function () {
         this.stopEventPropagation(e);
     };
     UploadArea.prototype.onDrop = function (e) {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
         this.stopEventPropagation(e);
         if (!e.dataTransfer) {
             return;
@@ -410,6 +264,8 @@ var UploadArea = (function () {
     };
     UploadArea.prototype.onClick = function () {
         var _this = this;
+        if (!getValueOrResult(this.options.clickable))
+            return;
         this.fileInput.value = '';
         if (this.isIeVersion(10)) {
             setTimeout(function () { _this.fileInput.click(); }, 200);
@@ -424,7 +280,7 @@ var UploadArea = (function () {
             var item = items[i];
             if ((item.webkitGetAsEntry) && (entry = item.webkitGetAsEntry())) {
                 if (entry.isFile) {
-                    this.putFilesToQueue([item.getAsFile()], this.fileInput);
+                    this.selectFiles([item.getAsFile()]);
                 }
                 else if (entry.isDirectory) {
                     this.processDirectory(entry, entry.name);
@@ -432,13 +288,12 @@ var UploadArea = (function () {
             }
             else if (item.getAsFile) {
                 if (!item.kind || item.kind === 'file') {
-                    this.putFilesToQueue([item.getAsFile()], this.fileInput);
+                    this.selectFiles([item.getAsFile()]);
                 }
             }
         }
     };
     UploadArea.prototype.processDirectory = function (directory, path) {
-        var _this = this;
         var dirReader = directory.createReader();
         var self = this;
         var entryReader = function (entries) {
@@ -450,7 +305,7 @@ var UploadArea = (function () {
                             return;
                         }
                         file.fullPath = '' + path + '/' + file.name;
-                        self.putFilesToQueue([file], _this.fileInput);
+                        self.selectFiles([file]);
                     });
                 }
                 else if (entry.isDirectory) {
@@ -466,7 +321,7 @@ var UploadArea = (function () {
     };
     UploadArea.prototype.handleFiles = function (files) {
         for (var i = 0; i < files.length; i++) {
-            this.putFilesToQueue([files[i]], this.fileInput);
+            this.selectFiles([files[i]]);
         }
     };
     UploadArea.prototype.isFileSizeValid = function (file) {
@@ -476,7 +331,7 @@ var UploadArea = (function () {
         return true;
     };
     UploadArea.prototype.isFileTypeInvalid = function (file) {
-        if (file.name && (this.options.accept.trim() !== '*' || this.options.accept.trim() !== '*.*') &&
+        if (file.name && this.options.accept && (this.options.accept.trim() !== '*' || this.options.accept.trim() !== '*.*') &&
             this.options.validateExtension && this.options.accept.indexOf('/') === -1) {
             var acceptedExtensions = this.options.accept.split(',');
             var fileExtension = file.name.substring(file.name.lastIndexOf('.'), file.name.length);
@@ -498,7 +353,7 @@ var UploadArea = (function () {
             e.preventDefault();
         }
         else {
-            return e.returnValue = false;
+            e.returnValue = false;
         }
     };
     return UploadArea;
@@ -517,7 +372,7 @@ var UploadCore = (function () {
         if (!exports.isFileApi)
             return;
         var files = castFiles(fileList, UploadStatus.uploading);
-        forEach(files, function (file) { return _this.processFile(file); });
+        files.forEach(function (file) { return _this.processFile(file); });
     };
     UploadCore.prototype.getUrl = function (file) {
         return typeof this.options.url === 'function'
@@ -534,18 +389,22 @@ var UploadCore = (function () {
         var url = file.url || this.getUrl(file);
         xhr.open(this.options.method, url, true);
         xhr.withCredentials = !!this.options.withCredentials;
-        this.setHeaders(xhr, file.name);
+        this.setHeaders(xhr);
         return xhr;
     };
-    UploadCore.prototype.setHeaders = function (xhr, fileName) {
+    UploadCore.prototype.setHeaders = function (xhr) {
         var _this = this;
+        if (!this.options.headers)
+            return;
         if (!this.options.headers['Accept'])
             xhr.setRequestHeader('Accept', 'application/json');
         if (!this.options.headers['Cache-Control'])
             xhr.setRequestHeader('Cache-Control', 'no-cache');
         if (!this.options.headers['X-Requested-With'])
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        forEach(keys(this.options.headers), function (headerName) {
+        Object.keys(this.options.headers).forEach(function (headerName) {
+            if (!_this.options.headers)
+                return;
             var headerValue = _this.options.headers[headerName];
             if (headerValue !== undefined && headerValue !== null)
                 xhr.setRequestHeader(headerName, (headerValue || '').toString());
@@ -558,28 +417,37 @@ var UploadCore = (function () {
             file.uploadStatus = UploadStatus.canceled;
             if (file.onCancel)
                 file.onCancel(file);
-            _this.callbacks.onCancelledCallback(file);
-            _this.callbacks.onFileStateChangedCallback(file);
-            _this.callbacks.onFinishedCallback(file);
+            if (_this.callbacks.onCancelledCallback)
+                _this.callbacks.onCancelledCallback(file);
+            if (_this.callbacks.onFileStateChangedCallback)
+                _this.callbacks.onFileStateChangedCallback(file);
+            if (_this.callbacks.onFinishedCallback)
+                _this.callbacks.onFinishedCallback(file);
         }, true);
-        xhr.onload = function (e) { return _this.onload(file, xhr); };
+        xhr.onload = function () { return _this.onload(file, xhr); };
         xhr.onerror = function () { return _this.handleError(file, xhr); };
         xhr.upload.onprogress = function (e) { return _this.updateProgress(file, e); };
     };
     UploadCore.prototype.send = function (xhr, file) {
         var formData = this.createFormData(file);
-        this.callbacks.onUploadStartedCallback(file);
-        this.callbacks.onFileStateChangedCallback(file);
+        if (this.callbacks.onUploadStartedCallback)
+            this.callbacks.onUploadStartedCallback(file);
+        if (this.callbacks.onFileStateChangedCallback)
+            this.callbacks.onFileStateChangedCallback(file);
         xhr.send(formData);
     };
     UploadCore.prototype.createFormData = function (file) {
         var _this = this;
         var formData = new FormData();
-        forEach(keys(this.options.params), function (paramName) {
-            var paramValue = _this.options.params[paramName];
-            if (paramValue !== undefined && paramValue !== null)
-                formData.append(paramName, paramValue);
-        });
+        if (this.options.params) {
+            Object.keys(this.options.params).forEach(function (paramName) {
+                if (!_this.options.params)
+                    return;
+                var paramValue = _this.options.params[paramName];
+                if (paramValue !== undefined && paramValue !== null)
+                    formData.append(paramName, paramValue);
+            });
+        }
         formData.append('file', file, file.name);
         return formData;
     };
@@ -589,9 +457,12 @@ var UploadCore = (function () {
         if (file.onError) {
             file.onError(file);
         }
-        this.callbacks.onErrorCallback(file);
-        this.callbacks.onFileStateChangedCallback(file);
-        this.callbacks.onFinishedCallback(file);
+        if (this.callbacks.onErrorCallback)
+            this.callbacks.onErrorCallback(file);
+        if (this.callbacks.onFileStateChangedCallback)
+            this.callbacks.onFileStateChangedCallback(file);
+        if (this.callbacks.onFinishedCallback)
+            this.callbacks.onFinishedCallback(file);
     };
     UploadCore.prototype.updateProgress = function (file, e) {
         if (e) {
@@ -608,7 +479,8 @@ var UploadCore = (function () {
             file.progress = 100;
             file.sentBytes = file.size;
         }
-        this.callbacks.onProgressCallback(file);
+        if (this.callbacks.onProgressCallback)
+            this.callbacks.onProgressCallback(file);
     };
     UploadCore.prototype.onload = function (file, xhr) {
         if (xhr.readyState !== 4)
@@ -625,9 +497,12 @@ var UploadCore = (function () {
     UploadCore.prototype.finished = function (file, xhr) {
         file.uploadStatus = UploadStatus.uploaded;
         this.setResponse(file, xhr);
-        this.callbacks.onUploadedCallback(file);
-        this.callbacks.onFileStateChangedCallback(file);
-        this.callbacks.onFinishedCallback(file);
+        if (this.callbacks.onUploadedCallback)
+            this.callbacks.onUploadedCallback(file);
+        if (this.callbacks.onFileStateChangedCallback)
+            this.callbacks.onFileStateChangedCallback(file);
+        if (this.callbacks.onFinishedCallback)
+            this.callbacks.onFinishedCallback(file);
     };
     ;
     UploadCore.prototype.setResponse = function (file, xhr) {
@@ -670,13 +545,13 @@ var Uploader = (function () {
     Uploader.prototype.setOptions = function (options) {
         this.options = options;
     };
-    Uploader.prototype.registerArea = function (element, options, compatibilityForm) {
-        var uploadArea = new UploadArea(element, options, this, compatibilityForm);
+    Uploader.prototype.registerArea = function (element, options) {
+        var uploadArea = new UploadArea(element, options, this);
         this.uploadAreas.push(uploadArea);
         return uploadArea;
     };
     Uploader.prototype.unregisterArea = function (area) {
-        var areaIndex = indexOf(this.uploadAreas, area);
+        var areaIndex = this.uploadAreas.indexOf(area);
         if (areaIndex >= 0) {
             this.uploadAreas[areaIndex].destroy();
             this.uploadAreas.splice(areaIndex, 1);
@@ -687,6 +562,7 @@ var Uploader = (function () {
 exports.Uploader = Uploader;
 var UploadQueue = (function () {
     function UploadQueue(options, callbacks) {
+        this.offset = { fileCount: 0, running: false };
         this.queuedFiles = [];
         this.options = options;
         this.callbacks = callbacks;
@@ -695,12 +571,15 @@ var UploadQueue = (function () {
     }
     UploadQueue.prototype.addFiles = function (files) {
         var _this = this;
-        forEach(files, function (file) {
-            _this.queuedFiles.push(file);
-            file.remove = decorateSimpleFunction(file.remove, function () {
-                _this.removeFile(file);
-            });
-            _this.callbacks.onFileAddedCallback(file);
+        files.forEach(function (file) {
+            if (!_this.queuedFiles.some(function (queuedFile) { return queuedFile === file || (!!queuedFile.guid && queuedFile.guid === file.guid); })) {
+                _this.queuedFiles.push(file);
+                file.remove = decorateSimpleFunction(file.remove, function () {
+                    _this.removeFile(file);
+                });
+            }
+            if (_this.callbacks.onFileAddedCallback)
+                _this.callbacks.onFileAddedCallback(file);
             if (file.uploadStatus === UploadStatus.failed) {
                 if (_this.callbacks.onErrorCallback) {
                     _this.callbacks.onErrorCallback(file);
@@ -714,12 +593,13 @@ var UploadQueue = (function () {
     };
     UploadQueue.prototype.removeFile = function (file, blockRecursive) {
         if (blockRecursive === void 0) { blockRecursive = false; }
-        var index = indexOf(this.queuedFiles, file);
+        var index = this.queuedFiles.indexOf(file);
         if (index < 0)
             return;
         this.deactivateFile(file);
         this.queuedFiles.splice(index, 1);
-        this.callbacks.onFileRemovedCallback(file);
+        if (this.callbacks.onFileRemovedCallback)
+            this.callbacks.onFileRemovedCallback(file);
         if (!blockRecursive)
             this.filesChanged();
     };
@@ -729,25 +609,31 @@ var UploadQueue = (function () {
         if (cancelProcessing === void 0) { cancelProcessing = false; }
         if (!cancelProcessing)
             excludeStatuses = excludeStatuses.concat([UploadStatus.queued, UploadStatus.uploading]);
-        forEach(filter(this.queuedFiles, function (file) { return indexOf(excludeStatuses, file.uploadStatus) < 0; }), function (file) { return _this.removeFile(file, true); });
-        this.callbacks.onQueueChangedCallback(this.queuedFiles);
+        this.queuedFiles
+            .filter(function (file) { return excludeStatuses.indexOf(file.uploadStatus) < 0; })
+            .forEach(function (file) { return _this.removeFile(file, true); });
+        if (this.callbacks.onQueueChangedCallback)
+            this.callbacks.onQueueChangedCallback(this.queuedFiles);
     };
     UploadQueue.prototype.filesChanged = function () {
         if (this.options.autoRemove)
             this.removeFinishedFiles();
         if (this.options.autoStart)
             this.startWaitingFiles();
-        this.callbacks.onQueueChangedCallback(this.queuedFiles);
+        if (this.callbacks.onQueueChangedCallback)
+            this.callbacks.onQueueChangedCallback(this.queuedFiles);
         this.checkAllFinished();
     };
     UploadQueue.prototype.checkAllFinished = function () {
-        var unfinishedFiles = filter(this.queuedFiles, function (file) { return indexOf([UploadStatus.queued, UploadStatus.uploading], file.uploadStatus) >= 0; });
-        if (unfinishedFiles.length === 0) {
+        var unfinishedFiles = this.queuedFiles
+            .filter(function (file) { return [UploadStatus.queued, UploadStatus.uploading].indexOf(file.uploadStatus) >= 0; });
+        if (unfinishedFiles.length === 0 && this.callbacks.onAllFinishedCallback) {
             this.callbacks.onAllFinishedCallback();
         }
     };
     UploadQueue.prototype.setFullOptions = function () {
         this.options.maxParallelUploads = this.options.maxParallelUploads || 0;
+        this.options.parallelBatchOffset = this.options.parallelBatchOffset || 0;
         this.options.autoStart = exports.isFileApi && (this.options.autoStart || false);
         this.options.autoRemove = this.options.autoRemove || false;
     };
@@ -760,14 +646,13 @@ var UploadQueue = (function () {
         this.callbacks.onFileStateChangedCallback = function () { return _this.filesChanged(); };
     };
     UploadQueue.prototype.startWaitingFiles = function () {
-        forEach(this.getWaitingFiles(), function (file) { return file.start(); });
+        this.getWaitingFiles().forEach(function (file) { return file.start(); });
     };
     UploadQueue.prototype.removeFinishedFiles = function () {
         var _this = this;
-        forEach(filter(this.queuedFiles, function (file) { return indexOf([
-            UploadStatus.uploaded,
-            UploadStatus.canceled
-        ], file.uploadStatus) >= 0; }), function (file) { return _this.removeFile(file, true); });
+        this.queuedFiles
+            .filter(function (file) { return [UploadStatus.uploaded, UploadStatus.canceled].indexOf(file.uploadStatus) >= 0; })
+            .forEach(function (file) { return _this.removeFile(file, true); });
     };
     UploadQueue.prototype.deactivateFile = function (file) {
         if (file.uploadStatus === UploadStatus.uploading)
@@ -780,20 +665,38 @@ var UploadQueue = (function () {
     UploadQueue.prototype.getWaitingFiles = function () {
         if (!this.options.autoStart)
             return [];
-        var result = filter(this.queuedFiles, function (file) { return file.uploadStatus === UploadStatus.queued; });
-        if (this.options.maxParallelUploads > 0) {
-            var uploadingFilesCount = filter(this.queuedFiles, function (file) { return file.uploadStatus === UploadStatus.uploading; }).length;
-            var count = this.options.maxParallelUploads - uploadingFilesCount;
+        var result = this.queuedFiles.filter(function (file) { return file.uploadStatus === UploadStatus.queued; });
+        if (this.options.maxParallelUploads) {
+            var uploadingFilesCount = this.queuedFiles.filter(function (file) { return file.uploadStatus === UploadStatus.uploading; }).length;
+            var count = Math.min(result.length, this.options.maxParallelUploads - uploadingFilesCount);
             if (count <= 0) {
                 return [];
+            }
+            if (this.options.parallelBatchOffset) {
+                if (!this.offset.running) {
+                    this.startOffset();
+                }
+                count = Math.min(this.offset.fileCount + count, this.options.maxParallelUploads) - this.offset.fileCount;
+                this.offset.fileCount += count;
             }
             result = result.slice(0, count);
         }
         return result;
     };
+    UploadQueue.prototype.startOffset = function () {
+        var _this = this;
+        this.offset.fileCount = 0;
+        this.offset.running = true;
+        setTimeout(function () {
+            _this.offset.fileCount = 0;
+            _this.offset.running = false;
+            _this.filesChanged();
+        }, this.options.parallelBatchOffset);
+    };
     return UploadQueue;
 }());
 exports.UploadQueue = UploadQueue;
+var UploadStatus;
 (function (UploadStatus) {
     UploadStatus[UploadStatus["queued"] = 0] = "queued";
     UploadStatus[UploadStatus["uploading"] = 1] = "uploading";
@@ -801,5 +704,4 @@ exports.UploadQueue = UploadQueue;
     UploadStatus[UploadStatus["failed"] = 3] = "failed";
     UploadStatus[UploadStatus["canceled"] = 4] = "canceled";
     UploadStatus[UploadStatus["removed"] = 5] = "removed";
-})(exports.UploadStatus || (exports.UploadStatus = {}));
-var UploadStatus = exports.UploadStatus;
+})(UploadStatus = exports.UploadStatus || (exports.UploadStatus = {}));

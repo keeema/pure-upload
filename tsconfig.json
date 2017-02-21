@@ -1,8 +1,15 @@
 {
-    "version": "1.5.0-beta",
+    "version": "2.1.*",
     "compilerOptions": {
         "target": "es5",
-        "module": "commonjs"
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "strictNullChecks": true
     },
     "filesGlob": [
         "./dist/**/*.d.ts",
@@ -12,12 +19,6 @@
     ],
     "files": [
         "./dist/pureupload.d.ts",
-        "./decl/express/express.d.ts",
-        "./decl/jasmine/jasmine.d.ts",
-        "./decl/mime/mime.d.ts",
-        "./decl/multer/multer.d.ts",
-        "./decl/node/node.d.ts",
-        "./decl/serve-static/serve-static.d.ts",
         "./example.ts",
         "./example/src/envResolver.ts",
         "./example/src/index.ts",

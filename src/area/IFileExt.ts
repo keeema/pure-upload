@@ -3,7 +3,7 @@ interface IFileExt extends File {
     webkitGetAsEntry: () => File;
     getAsFile: () => File;
     file: (callback: (file: IFileExt) => void) => void;
-
+    createReader: Function;
     isFile: boolean;
     isDirectory: boolean;
     fullPath: string;

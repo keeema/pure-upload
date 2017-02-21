@@ -22,21 +22,20 @@ window.onload = () => {
         multiple: true
     };
 
-    let compatibilityForm = document.getElementById('example-compatibility-form'); 
-    uploaderExample1.registerArea(document.getElementById('example-button'), uploadSettings, compatibilityForm);
-    uploaderExample1.registerArea(document.getElementById('example-dnd-area'), uploadSettings);
-    uploaderExample1.registerArea(document.getElementById('example-queue'), queueUploadSettings);
+    uploaderExample1.registerArea(<HTMLElement>document.getElementById('example-button'), uploadSettings);
+    uploaderExample1.registerArea(<HTMLElement>document.getElementById('example-dnd-area'), uploadSettings);
+    uploaderExample1.registerArea(<HTMLElement>document.getElementById('example-queue'), queueUploadSettings);
 
     uploaderExample1.queue.callbacks.onQueueChangedCallback = (result: pu.IUploadFile[]) => {
         queueRenderer.renderQueue('example-queue', 'Example Queue', result, uploaderExample1.queue.options);
     };
 
     uploaderExample1.queue.callbacks.onProgressCallback = (file: pu.IUploadFile) => {
-        queueRenderer.renderItemProgress('example-queue', file);
+        queueRenderer.renderItemProgress(file);
     };
 
     pu.addEventHandler(
-        document.getElementById('example-clear-button'),
+        <HTMLElement>document.getElementById('example-clear-button'),
         'click',
         () => uploaderExample1.queue.clearFiles());
 };

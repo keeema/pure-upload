@@ -1,31 +1,36 @@
 declare module "pure-upload" {
-export function addEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
+export function addEventHandler(el: Element | HTMLElement, event: string, handler: (ev: UIEvent) => void): void;
 export const isFileApi: boolean;
 export function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
-export function filter<T>(input: T[], filterFn: (item: T) => boolean): T[];
-export function forEach<T>(input: T[], callback: (item: T, index?: number) => void): void;
 export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
 export function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
 export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
+export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
 export function newGuid(): string;
 export interface IFileExt extends File {
     kind: string;
     webkitGetAsEntry: () => File;
     getAsFile: () => File;
     file: (callback: (file: IFileExt) => void) => void;
+    createReader: Function;
     isFile: boolean;
     isDirectory: boolean;
     fullPath: string;
 }
-export function indexOf<T>(input: T[], item: T): number;
+export interface IOffsetInfo {
+    running: boolean;
+    fileCount: number;
+}
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
-    allowDragDrop?: boolean;
-    clickable?: boolean;
+    allowDragDrop?: boolean | (() => boolean);
+    clickable?: boolean | (() => boolean);
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;
+    manualStart?: boolean;
     onFileAdded?: (file: IUploadFile) => void;
+    onFileSelected?: (file: IUploadFile) => void;
     onFileError?: (file: IUploadFile) => void;
     onFileCanceled?: (file: IUploadFile) => void;
 }
@@ -76,11 +81,10 @@ export interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUpload
 }
 export interface IUploadQueueOptions {
     maxParallelUploads?: number;
+    parallelBatchOffset?: number;
     autoStart?: boolean;
     autoRemove?: boolean;
 }
-export function keys(obj: Object): any[];
-export function map<T, K>(input: T[], mapper: (item: T) => K): K[];
 export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
 export class UploadArea {
     targetElement: HTMLElement;
@@ -88,30 +92,24 @@ export class UploadArea {
     uploader: Uploader;
     private uploadCore;
     private fileInput;
-    private formForNoFileApi;
-    private formForNoFileApiProvided;
-    private lastIframe;
+    private fileList;
     private unregisterOnClick;
     private unregisterOnDrop;
     private unregisterOnDragOver;
     private unregisterOnChange;
-    private unregisterFormOnChange;
-    constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader, formForNoFileApi?: HTMLFormElement);
+    constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader);
+    start(autoClear?: boolean): void;
+    clear(): void;
     destroy(): void;
     private setFullOptions(options);
-    private putFilesToQueue(fileList, form);
+    private selectFiles(fileList);
+    private putFilesToQueue();
     private validateFile(file);
     private setupFileApiElements();
-    private setupOldSchoolElements();
-    private createFormWrapper();
-    private decorateInputForm();
-    private findInnerSubmit();
-    private onFormChange(e, fileInput, submitInput);
-    private addTargetIframe();
     private onChange(e);
     private onDrag(e);
     private onDrop(e);
-    private isIeVersion(v?);
+    private isIeVersion(v);
     private onClick();
     private addFilesFromItems(items);
     private processDirectory(directory, path);
@@ -128,7 +126,7 @@ export class UploadCore {
     getUrl(file: IUploadFile): string;
     private processFile(file);
     private createRequest(file);
-    private setHeaders(xhr, fileName);
+    private setHeaders(xhr);
     private setCallbacks(xhr, file);
     private send(xhr, file);
     private createFormData(file);
@@ -146,10 +144,11 @@ export class Uploader {
     options: IUploadQueueOptions;
     constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
     setOptions(options: IUploadQueueOptions): void;
-    registerArea(element: HTMLElement, options: IUploadAreaOptions, compatibilityForm?: Element): UploadArea;
+    registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
     unregisterArea(area: UploadArea): void;
 }
 export class UploadQueue {
+    offset: IOffsetInfo;
     options: IUploadQueueOptions;
     callbacks: IUploadQueueCallbacksExt;
     queuedFiles: IUploadFile[];
@@ -165,6 +164,7 @@ export class UploadQueue {
     private removeFinishedFiles();
     private deactivateFile(file);
     private getWaitingFiles();
+    private startOffset();
 }
 export enum UploadStatus {
     queued = 0,

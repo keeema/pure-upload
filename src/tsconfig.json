@@ -1,8 +1,15 @@
 {
-    "version": "1.5.0-beta",
+    "version": "2.1.*",
     "compilerOptions": {
         "target": "es5",
-        "module": "commonjs"
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "strictNullChecks": true
     },
     "filesGlob": [
         "./**/*.ts",
@@ -23,20 +30,17 @@
         "./queue/iUploadQueueCallbacks.ts",
         "./queue/iUploadQueueCallbacksExt.ts",
         "./queue/iUploadQueueOptions.ts",
+        "./queue/iOffsetInfo.ts",
         "./queue/uploadQueue.spec.ts",
         "./queue/uploadQueue.ts",
         "./uploader/getUploader.ts",
         "./uploader/uploader.ts",
+        "./utils/getValueOrResult.ts",
         "./utils/addEventHandler.ts",
         "./utils/fileApiCheck.ts",
         "./utils/files.ts",
-        "./utils/filter.ts",
-        "./utils/forEach.ts",
         "./utils/functions.ts",
         "./utils/guidGenerator.ts",
-        "./utils/indexOf.ts",
-        "./utils/keys.ts",
-        "./utils/map.ts",
         "./utils/removeEventHandler.ts",
         "../decl/jasmine/jasmine.d.ts"
     ]

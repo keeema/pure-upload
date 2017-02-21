@@ -13,14 +13,14 @@ class Uploader {
         this.options = options;
     }
 
-    registerArea(element: HTMLElement, options: IUploadAreaOptions, compatibilityForm?: Element): UploadArea {
-        let uploadArea = new UploadArea(element, options, this, <HTMLFormElement>compatibilityForm);
+    registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea {
+        const uploadArea = new UploadArea(element, options, this);
         this.uploadAreas.push(uploadArea);
         return uploadArea;
     }
 
     unregisterArea(area: UploadArea): void {
-        let areaIndex = indexOf(this.uploadAreas, area);
+        const areaIndex = this.uploadAreas.indexOf(area);
         if (areaIndex >= 0) {
             this.uploadAreas[areaIndex].destroy();
             this.uploadAreas.splice(areaIndex, 1);

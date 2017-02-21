@@ -13,7 +13,7 @@ class UploadCore {
         if (!isFileApi)
             return;
         let files = castFiles(fileList, UploadStatus.uploading);
-        forEach(files, (file: IUploadFile) => this.processFile(file));
+        files.forEach((file: IUploadFile) => this.processFile(file));
     }
 
     getUrl(file: IUploadFile): string {
@@ -34,11 +34,14 @@ class UploadCore {
         xhr.open(this.options.method, url, true);
 
         xhr.withCredentials = !!this.options.withCredentials;
-        this.setHeaders(xhr, file.name);
+        this.setHeaders(xhr);
         return xhr;
     }
 
-    private setHeaders(xhr: XMLHttpRequest, fileName: string) {
+    private setHeaders(xhr: XMLHttpRequest) {
+        if (!this.options.headers)
+            return;
+
         if (!this.options.headers['Accept'])
             xhr.setRequestHeader('Accept', 'application/json');
         if (!this.options.headers['Cache-Control'])
@@ -46,7 +49,9 @@ class UploadCore {
         if (!this.options.headers['X-Requested-With'])
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-        forEach(keys(this.options.headers), (headerName: string) => {
+        Object.keys(this.options.headers).forEach((headerName: string) => {
+            if (!this.options.headers)
+                return;
             let headerValue = this.options.headers[headerName];
             if (headerValue !== undefined && headerValue !== null)
                 xhr.setRequestHeader(headerName, (headerValue || '').toString());
@@ -60,32 +65,43 @@ class UploadCore {
                 file.uploadStatus = UploadStatus.canceled;
                 if (file.onCancel)
                     file.onCancel(file);
+                if (this.callbacks.onCancelledCallback)
+                    this.callbacks.onCancelledCallback(file);
 
-                this.callbacks.onCancelledCallback(file);
-                this.callbacks.onFileStateChangedCallback(file);
-                this.callbacks.onFinishedCallback(file);
+                if (this.callbacks.onFileStateChangedCallback)
+                    this.callbacks.onFileStateChangedCallback(file);
+
+                if (this.callbacks.onFinishedCallback)
+                    this.callbacks.onFinishedCallback(file);
             },
             true);
 
-        xhr.onload = (e) => this.onload(file, xhr);
+        xhr.onload = () => this.onload(file, xhr);
         xhr.onerror = () => this.handleError(file, xhr);
         xhr.upload.onprogress = (e: ProgressEvent) => this.updateProgress(file, e);
     }
 
     private send(xhr: XMLHttpRequest, file: IUploadFile) {
         let formData = this.createFormData(file);
-        this.callbacks.onUploadStartedCallback(file);
-        this.callbacks.onFileStateChangedCallback(file);
+        if (this.callbacks.onUploadStartedCallback)
+            this.callbacks.onUploadStartedCallback(file);
+
+        if (this.callbacks.onFileStateChangedCallback)
+            this.callbacks.onFileStateChangedCallback(file);
         xhr.send(formData);
     }
 
     private createFormData(file: IUploadFile): FormData {
         let formData = new FormData();
-        forEach(keys(this.options.params), (paramName: string) => {
-            let paramValue = this.options.params[paramName];
-            if (paramValue !== undefined && paramValue !== null)
-                formData.append(paramName, paramValue);
-        });
+        if (this.options.params) {
+            Object.keys(this.options.params).forEach((paramName: string) => {
+                if (!this.options.params)
+                    return;
+                let paramValue = this.options.params[paramName];
+                if (paramValue !== undefined && paramValue !== null)
+                    formData.append(paramName, paramValue);
+            });
+        }
 
         formData.append('file', file, file.name);
         return formData;
@@ -97,9 +113,13 @@ class UploadCore {
         if (file.onError) {
             file.onError(file);
         }
-        this.callbacks.onErrorCallback(file);
-        this.callbacks.onFileStateChangedCallback(file);
-        this.callbacks.onFinishedCallback(file);
+
+        if (this.callbacks.onErrorCallback)
+            this.callbacks.onErrorCallback(file);
+        if (this.callbacks.onFileStateChangedCallback)
+            this.callbacks.onFileStateChangedCallback(file);
+        if (this.callbacks.onFinishedCallback)
+            this.callbacks.onFinishedCallback(file);
     }
 
     private updateProgress(file: IUploadFile, e?: ProgressEvent) {
@@ -116,7 +136,8 @@ class UploadCore {
             file.sentBytes = file.size;
         }
 
-        this.callbacks.onProgressCallback(file);
+        if (this.callbacks.onProgressCallback)
+            this.callbacks.onProgressCallback(file);
     }
 
     private onload(file: IUploadFile, xhr: XMLHttpRequest) {
@@ -136,9 +157,13 @@ class UploadCore {
     private finished(file: IUploadFile, xhr: XMLHttpRequest) {
         file.uploadStatus = UploadStatus.uploaded;
         this.setResponse(file, xhr);
-        this.callbacks.onUploadedCallback(file);
-        this.callbacks.onFileStateChangedCallback(file);
-        this.callbacks.onFinishedCallback(file);
+
+        if (this.callbacks.onUploadedCallback)
+            this.callbacks.onUploadedCallback(file);
+        if (this.callbacks.onFileStateChangedCallback)
+            this.callbacks.onFileStateChangedCallback(file);
+        if (this.callbacks.onFinishedCallback)
+            this.callbacks.onFinishedCallback(file);
     };
 
     private setResponse(file: IUploadFile, xhr: XMLHttpRequest) {

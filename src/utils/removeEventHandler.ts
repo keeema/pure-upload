@@ -11,6 +11,7 @@ function removeEventHandler(el: HTMLInputElement | Element, event: string, handl
     }
 }
 
-interface IElementWithDettachEvent {
-    detachEvent?: (event: string, handler: (ev: UIEvent) => void) => void;
+interface IElementWithDettachEvent extends HTMLElement {
+    [key: string]: Function | Object | string | void | null | number | boolean;
+    detachEvent: (event: string, handler: (ev: UIEvent) => void) => void;
 }

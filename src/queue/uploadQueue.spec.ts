@@ -149,20 +149,21 @@ describe('uploadQueue', () => {
         });
 
         describe('autoStart', () => {
-            let startFunction = function () { this.uploadStatus = UploadStatus.uploading; };
+
             let files: IUploadFile[];
 
             beforeEach(() => {
                 files = [
-                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.uploading, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.uploading, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.uploaded, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.failed, start: startFunction },
-                    <IUploadFile>{ uploadStatus: UploadStatus.canceled, start: startFunction },
+                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.queued, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.uploading, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.uploading, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.uploaded, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.failed, start: () => { ; } },
+                    <IUploadFile>{ uploadStatus: UploadStatus.canceled, start: () => { ; } },
                 ];
+                files.forEach((item => item.start = () => { item.uploadStatus = UploadStatus.uploading; }));
             });
 
             it('does not start any file when there is no limit and autoStart is turned off', () => {
@@ -227,6 +228,54 @@ describe('uploadQueue', () => {
                 expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
                 expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
             });
+
+            it(
+                'starts limited count of files with offset when set limit and parallelBatchOffset and autoStart is turned on',
+                (done: Function) => {
+                    uploadQueue = new UploadQueue({ autoStart: true, maxParallelUploads: 2, parallelBatchOffset: 1000 }, {});
+                    files.forEach(file => uploadQueue.queuedFiles.push(file));
+                    uploadQueue.queuedFiles[3].uploadStatus = UploadStatus.queued;
+                    uploadQueue.queuedFiles[4].uploadStatus = UploadStatus.queued;
+                    uploadQueue['filesChanged']();
+
+                    expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.uploading);
+                    expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.uploading);
+                    expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.queued);
+                    expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.queued);
+                    expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.queued);
+                    expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
+                    expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
+                    expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+
+                    uploadQueue.queuedFiles[0].uploadStatus = UploadStatus.uploaded;
+                    uploadQueue['filesChanged']();
+
+                    // only the uploaded file changed because of offset
+                    expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.uploaded);
+                    expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.uploading);
+                    expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.queued);
+                    expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.queued);
+                    expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.queued);
+                    expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
+                    expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
+                    expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+
+                    setTimeout(
+                        () => {
+                            expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.uploaded);
+                            expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.uploading);
+                            expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.uploading);
+                            expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.queued);
+                            expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.queued);
+                            expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
+                            expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
+                            expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+
+                            done();
+                        },
+                        1000
+                    );
+                });
         });
     });
 });

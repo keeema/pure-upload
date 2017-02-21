@@ -1,12 +1,50 @@
 CHANGELOG
 ===
-2.0.5
+
+3.0.0
+--
+Cleaning
+-
+
+Removed compatibility parts for obsolette browser without FileAPI.
+
+
+2.2.3
+--
+Fix
+-
+
+Removed duplications when same file is adding many times to queue.
+Few options of UploadArea changed to be acceptable as a function.
+
+2.2.2
+--
+Fix
+-
+
+Automatic clearing of manual upload file list after puting to queue is done on parameter.
+
+2.2.0
+--
+New features
+-
+
+Added manual triggering of adding file to UploadQueue in UploadArea.
+
+
+2.1.0
+--
+New features
+-
+
+Added offset for batches limited by max uploading file count.
+
+
+2.0.5 - 2.0.8
 --
 
 Fixes
--
 
-Fixed publish
 
 2.0.4
 --
@@ -14,7 +52,7 @@ Fixed publish
 Fixes
 -
 
-Modified update progress condition to not throw in IE
+Modified update progress condition to not throw in IE.
 
 2.0.3
 --

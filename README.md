@@ -1,17 +1,25 @@
 # Pure-upload
 [![npm version](https://badge.fury.io/js/pure-upload.svg)](http://badge.fury.io/js/pure-upload)  [![Bower version](https://badge.fury.io/bo/pure-upload.svg)](http://badge.fury.io/bo/pure-upload)
 
-The pure JS (TS) upload library with no dependencies compatible with Google Chrome, Firefox, IE10+ (IE9- with auto-start by default, manual-start optionally) and mobile browsers.
+The pure JS (TS) upload library with no dependencies compatible with Google Chrome, Firefox, IE10+, Edge and modern mobile browsers.
 
 ## Installation
 1. Dowload as a ZIP file directly from [GitHub](https://github.com/keeema/pure-upload/archive/master.zip) pages and include to your project.
-2. Install with npm by `npm install pure-upload --save`.
+2. Install with npm by `npm install pure-upload --save` or `yarn add pure-upload`.
 3. Install with bower by `bower install pure-upload`.
 
 ## Example
 See a simple [example](http://keeema.github.io/pure-upload).
 
 ## Api
+
+### Using NPM package:
+Import pure-upload with standard import syntax:
+
+```typescript
+import * as pu from 'pure-upload';
+```
+
 ### Uploader
 Uploader manages upload queue and registers upload areas.
 
@@ -22,6 +30,7 @@ let uploader = pu.getUploader(uploadQueueOptions, uploadQueueCallbacks)
 ### Upload queue options
 ```typescript
 maxParallelUploads?: number;
+parallelBatchOffset?: number;
 autoStart?: boolean;
 autoRemove?: boolean;
 ```
@@ -48,12 +57,6 @@ Registration:
 let uploadArea = uploader.registerArea(element, uploadAreaOptions);
 ```
 
-Registration for IE9- with manual-start:
-```typescript
-let uploadArea = uploader.registerArea(element, uploadAreaOptions, compatibilityForm);
-```
-The *compatibilityForm* objects has to be *form* element containing one *input* element for *file* and one *input* element for *submit*.
-
 Unregistration:
 ```typescript
 uploader.unregisterArea(uploadArea);
@@ -65,16 +68,25 @@ method: string;
 withCredentials?: boolean;
 headers?: { [key: string]: string; };
 params?: { [key: string]: string; };
+localizer?: (message: string, params?: Object) => string;
 maxFileSize?: number;
-allowDragDrop?: boolean;
-clickable?: boolean;
+allowDragDrop?: boolean | (() => boolean);
+clickable?: boolean | (() => boolean);
 accept?: string;
 multiple?: boolean;
+validateExtension?: boolean;
+manualStart?: boolean;
 onFileAdded?: (file: IUploadFile) => void;
-onFileError?: (file: IUploadFile) => void; 
-onFileCancelled?: (file: IUploadFile) => void; 
+onFileSelected?: (file: IUploadFile) => void;
+onFileError?: (file: IUploadFile) => void;
+onFileCanceled?: (file: IUploadFile) => void;
 ```
+### Upload area - manual starting
+```typescript
+start(autoClear?: boolean): void;
+clear(): void;
 
+```
 ### Upload file
 Standard *File* object extended with additional informations and methods to manage a file in queue.
 ```typescript
