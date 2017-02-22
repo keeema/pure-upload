@@ -52,6 +52,16 @@ export function decorateSimpleFunction(origFn: () => void, newFn: () => void, ne
         : () => { origFn(); newFn(); };
 }
 
+function applyDefaults<T, S>(target: T, source: S): T & S {
+    let to = Object(target);
+
+    for (var nextKey in source) {
+        if (Object.prototype.hasOwnProperty.call(source, nextKey) && (to[nextKey] === undefined || to[nextKey] === null)) {
+            to[nextKey] = source[nextKey];
+        }
+    }
+    return to;
+};
 export function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore {
     return new UploadCore(options, callbacks);
 };
@@ -89,6 +99,22 @@ export interface IFileExt extends File {
     fullPath: string;
 }
 
+export interface ILocalizer {
+    fileSizeInvalid: (maxFileSize: number) => string;
+    fileTypeInvalid: (accept: string) => string;
+    invalidResponseFromServer: () => string;
+}
+
+function getDefaultLocalizer(): ILocalizer {
+    return {
+        fileSizeInvalid: (maxFileSize) => 'The selected file exceeds the allowed size of ' + maxFileSize
+            + ' or its size is 0 MB. Please choose another file.',
+        fileTypeInvalid: accept => 'File format is not allowed. Only ' + (accept
+            ? accept.split('.').join(' ')
+            : '') + ' files are allowed.',
+        invalidResponseFromServer: () => 'Invalid response from server'
+    };
+}
 export interface IOffsetInfo {
     running: boolean;
     fileCount: number;
@@ -108,6 +134,16 @@ export interface IUploadAreaOptions extends IUploadOptions {
     onFileCanceled?: (file: IUploadFile) => void;
 }
 
+interface IFullUploadAreaOptions extends IUploadAreaOptions {
+    maxFileSize: number;
+    allowDragDrop: boolean | (() => boolean);
+    clickable: boolean | (() => boolean);
+    accept: string;
+    multiple: boolean;
+    validateExtension: boolean;
+
+    localizer: ILocalizer;
+}
 export interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;
     onCancelledCallback?: (file: IUploadFile) => void;
@@ -143,7 +179,14 @@ export interface IUploadOptions {
     withCredentials?: boolean;
     headers?: { [key: string]: string | number | boolean };
     params?: { [key: string]: string | number | boolean };
-    localizer?: (message: string, params?: Object) => string;
+    localizer?: ILocalizer;
+}
+
+interface IFullUploadOptions extends IUploadOptions {
+    withCredentials: boolean;
+    headers: { [key: string]: string | number | boolean };
+    params: { [key: string]: string | number | boolean };
+    localizer: ILocalizer;
 }
 
 export interface IUploadQueueCallbacks extends IUploadCallbacks {
@@ -182,11 +225,11 @@ interface IElementWithDettachEvent extends HTMLElement {
 }
 export class UploadArea {
     public targetElement: HTMLElement;
-    public options: IUploadAreaOptions;
     public uploader: Uploader;
+    private options: IFullUploadAreaOptions;
     private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
-    private fileList: IUploadFile[] | null | undefined;
+    private fileList?: IUploadFile[] | null;
     private unregisterOnClick: () => void;
     private unregisterOnDrop: () => void;
     private unregisterOnDragOver: () => void;
@@ -194,10 +237,9 @@ export class UploadArea {
 
     constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader) {
         this.targetElement = targetElement;
-        this.options = options;
+        this.options = applyDefaults(options, this.defaultOptions());
         this.uploader = uploader;
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
-        this.setFullOptions(options);
         if (isFileApi) {
             this.setupFileApiElements();
         } else {
@@ -236,15 +278,16 @@ export class UploadArea {
         document.body.removeChild(this.fileInput);
     }
 
-    private setFullOptions(options: IUploadAreaOptions): void {
-        this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = isFileApi &&
-            (options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop);
-        this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
-        this.options.accept = options.accept || '*.*';
-        this.options.validateExtension = !!options.validateExtension;
-        this.options.multiple = isFileApi &&
-            (options.multiple === undefined || options.multiple === null ? true : options.multiple);
+    private defaultOptions() {
+        return {
+            localizer: getDefaultLocalizer(),
+            maxFileSize: 1024,
+            allowDragDrop: true,
+            clickable: true,
+            accept: '*.*',
+            validateExtension: false,
+            multiple: true,
+        };
     }
 
     private selectFiles(fileList: FileList | File[]) {
@@ -289,21 +332,12 @@ export class UploadArea {
     private validateFile(file: IUploadFile): boolean {
         if (!this.isFileSizeValid(file)) {
             file.uploadStatus = UploadStatus.failed;
-            file.responseText = !!this.options.localizer
-                ? this.options.localizer(
-                    'The selected file exceeds the allowed size of { maxFileSize } MB or its size is 0 MB. Please choose another file.',
-                    this.options)
-                : 'The selected file exceeds the allowed size of ' + this.options.maxFileSize
-                + ' or its size is 0 MB. Please choose another file.';
+            file.responseText = this.options.localizer.fileSizeInvalid(this.options.maxFileSize);
             return false;
         }
         if (this.isFileTypeInvalid(file)) {
             file.uploadStatus = UploadStatus.failed;
-            file.responseText = !!this.options.localizer
-                ? this.options.localizer('File format is not allowed. Only { accept } files are allowed.', this.options)
-                : 'File format is not allowed. Only ' + (this.options.accept
-                    ? this.options.accept.split('.').join(' ')
-                    : '') + ' files are allowed.';
+            file.responseText = this.options.localizer.fileTypeInvalid(this.options.accept);
             return false;
         }
         return true;
@@ -482,13 +516,12 @@ export class UploadArea {
     }
 }
 export class UploadCore {
-    public options: IUploadOptions;
-    public callbacks: IUploadCallbacksExt;
+    private options: IFullUploadOptions;
+    private callbacks: IUploadCallbacksExt;
 
     constructor(options: IUploadOptions, callbacks: IUploadCallbacksExt = {}) {
-        this.options = options;
         this.callbacks = callbacks;
-        this.setFullOptions(options);
+        this.options = applyDefaults(options, this.getDefaultOptions());
         this.setFullCallbacks(callbacks);
     }
 
@@ -651,21 +684,18 @@ export class UploadCore {
 
     private setResponse(file: IUploadFile, xhr: XMLHttpRequest) {
         file.responseCode = xhr.status;
-        let response = xhr.responseText || xhr.statusText || (xhr.status
+        file.responseText = xhr.responseText || xhr.statusText || (xhr.status
             ? xhr.status.toString()
-            : '' || 'Invalid response from server');
-        file.responseText = !!this.options.localizer
-            ? this.options.localizer(response, {})
-            : response;
+            : '' || this.options.localizer.invalidResponseFromServer());
     }
 
-    private setFullOptions(options: IUploadOptions): void {
-        this.options.url = options.url;
-        this.options.method = options.method;
-        this.options.headers = options.headers || {};
-        this.options.params = options.params || {};
-        this.options.withCredentials = options.withCredentials || false;
-        this.options.localizer = options.localizer;
+    private getDefaultOptions() {
+        return {
+            headers: {},
+            params: {},
+            withCredentials: false,
+            localizer: getDefaultLocalizer()
+        };
     }
 
     private setFullCallbacks(callbacks: IUploadCallbacksExt) {

@@ -45,6 +45,16 @@ function decorateSimpleFunction(origFn, newFn, newFirst) {
         : function () { origFn(); newFn(); };
 }
 exports.decorateSimpleFunction = decorateSimpleFunction;
+function applyDefaults(target, source) {
+    var to = Object(target);
+    for (var nextKey in source) {
+        if (Object.prototype.hasOwnProperty.call(source, nextKey) && (to[nextKey] === undefined || to[nextKey] === null)) {
+            to[nextKey] = source[nextKey];
+        }
+    }
+    return to;
+}
+;
 function getUploadCore(options, callbacks) {
     return new UploadCore(options, callbacks);
 }
@@ -74,6 +84,16 @@ function newGuid() {
 }
 exports.newGuid = newGuid;
 ;
+function getDefaultLocalizer() {
+    return {
+        fileSizeInvalid: function (maxFileSize) { return 'The selected file exceeds the allowed size of ' + maxFileSize
+            + ' or its size is 0 MB. Please choose another file.'; },
+        fileTypeInvalid: function (accept) { return 'File format is not allowed. Only ' + (accept
+            ? accept.split('.').join(' ')
+            : '') + ' files are allowed.'; },
+        invalidResponseFromServer: function () { return 'Invalid response from server'; }
+    };
+}
 function removeEventHandler(el, event, handler) {
     if (el.removeEventListener) {
         el.removeEventListener(event, handler);
@@ -92,10 +112,9 @@ exports.removeEventHandler = removeEventHandler;
 var UploadArea = (function () {
     function UploadArea(targetElement, options, uploader) {
         this.targetElement = targetElement;
-        this.options = options;
+        this.options = applyDefaults(options, this.defaultOptions());
         this.uploader = uploader;
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
-        this.setFullOptions(options);
         if (exports.isFileApi) {
             this.setupFileApiElements();
         }
@@ -127,15 +146,16 @@ var UploadArea = (function () {
         this.targetElement.removeEventListener('drop', this.onDrop);
         document.body.removeChild(this.fileInput);
     };
-    UploadArea.prototype.setFullOptions = function (options) {
-        this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = exports.isFileApi &&
-            (options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop);
-        this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
-        this.options.accept = options.accept || '*.*';
-        this.options.validateExtension = !!options.validateExtension;
-        this.options.multiple = exports.isFileApi &&
-            (options.multiple === undefined || options.multiple === null ? true : options.multiple);
+    UploadArea.prototype.defaultOptions = function () {
+        return {
+            localizer: getDefaultLocalizer(),
+            maxFileSize: 1024,
+            allowDragDrop: true,
+            clickable: true,
+            accept: '*.*',
+            validateExtension: false,
+            multiple: true,
+        };
     };
     UploadArea.prototype.selectFiles = function (fileList) {
         var _this = this;
@@ -176,19 +196,12 @@ var UploadArea = (function () {
     UploadArea.prototype.validateFile = function (file) {
         if (!this.isFileSizeValid(file)) {
             file.uploadStatus = UploadStatus.failed;
-            file.responseText = !!this.options.localizer
-                ? this.options.localizer('The selected file exceeds the allowed size of { maxFileSize } MB or its size is 0 MB. Please choose another file.', this.options)
-                : 'The selected file exceeds the allowed size of ' + this.options.maxFileSize
-                    + ' or its size is 0 MB. Please choose another file.';
+            file.responseText = this.options.localizer.fileSizeInvalid(this.options.maxFileSize);
             return false;
         }
         if (this.isFileTypeInvalid(file)) {
             file.uploadStatus = UploadStatus.failed;
-            file.responseText = !!this.options.localizer
-                ? this.options.localizer('File format is not allowed. Only { accept } files are allowed.', this.options)
-                : 'File format is not allowed. Only ' + (this.options.accept
-                    ? this.options.accept.split('.').join(' ')
-                    : '') + ' files are allowed.';
+            file.responseText = this.options.localizer.fileTypeInvalid(this.options.accept);
             return false;
         }
         return true;
@@ -362,9 +375,8 @@ exports.UploadArea = UploadArea;
 var UploadCore = (function () {
     function UploadCore(options, callbacks) {
         if (callbacks === void 0) { callbacks = {}; }
-        this.options = options;
         this.callbacks = callbacks;
-        this.setFullOptions(options);
+        this.options = applyDefaults(options, this.getDefaultOptions());
         this.setFullCallbacks(callbacks);
     }
     UploadCore.prototype.upload = function (fileList) {
@@ -507,20 +519,17 @@ var UploadCore = (function () {
     ;
     UploadCore.prototype.setResponse = function (file, xhr) {
         file.responseCode = xhr.status;
-        var response = xhr.responseText || xhr.statusText || (xhr.status
+        file.responseText = xhr.responseText || xhr.statusText || (xhr.status
             ? xhr.status.toString()
-            : '' || 'Invalid response from server');
-        file.responseText = !!this.options.localizer
-            ? this.options.localizer(response, {})
-            : response;
+            : '' || this.options.localizer.invalidResponseFromServer());
     };
-    UploadCore.prototype.setFullOptions = function (options) {
-        this.options.url = options.url;
-        this.options.method = options.method;
-        this.options.headers = options.headers || {};
-        this.options.params = options.params || {};
-        this.options.withCredentials = options.withCredentials || false;
-        this.options.localizer = options.localizer;
+    UploadCore.prototype.getDefaultOptions = function () {
+        return {
+            headers: {},
+            params: {},
+            withCredentials: false,
+            localizer: getDefaultLocalizer()
+        };
     };
     UploadCore.prototype.setFullCallbacks = function (callbacks) {
         this.callbacks.onProgressCallback = callbacks.onProgressCallback || (function () { return; });

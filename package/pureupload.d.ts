@@ -17,6 +17,11 @@ export interface IFileExt extends File {
     isDirectory: boolean;
     fullPath: string;
 }
+export interface ILocalizer {
+    fileSizeInvalid: (maxFileSize: number) => string;
+    fileTypeInvalid: (accept: string) => string;
+    invalidResponseFromServer: () => string;
+}
 export interface IOffsetInfo {
     running: boolean;
     fileCount: number;
@@ -69,7 +74,7 @@ export interface IUploadOptions {
     params?: {
         [key: string]: string | number | boolean;
     };
-    localizer?: (message: string, params?: Object) => string;
+    localizer?: ILocalizer;
 }
 export interface IUploadQueueCallbacks extends IUploadCallbacks {
     onFileAddedCallback?: (file: IUploadFile) => void;
@@ -88,11 +93,11 @@ export interface IUploadQueueOptions {
 export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
 export class UploadArea {
     targetElement: HTMLElement;
-    options: IUploadAreaOptions;
     uploader: Uploader;
+    private options;
     private uploadCore;
     private fileInput;
-    private fileList;
+    private fileList?;
     private unregisterOnClick;
     private unregisterOnDrop;
     private unregisterOnDragOver;
@@ -101,7 +106,7 @@ export class UploadArea {
     start(autoClear?: boolean): void;
     clear(): void;
     destroy(): void;
-    private setFullOptions(options);
+    private defaultOptions();
     private selectFiles(fileList);
     private putFilesToQueue();
     private validateFile(file);
@@ -119,8 +124,8 @@ export class UploadArea {
     private stopEventPropagation(e);
 }
 export class UploadCore {
-    options: IUploadOptions;
-    callbacks: IUploadCallbacksExt;
+    private options;
+    private callbacks;
     constructor(options: IUploadOptions, callbacks?: IUploadCallbacksExt);
     upload(fileList: File[] | Object): void;
     getUrl(file: IUploadFile): string;
@@ -135,7 +140,7 @@ export class UploadCore {
     private onload(file, xhr);
     private finished(file, xhr);
     private setResponse(file, xhr);
-    private setFullOptions(options);
+    private getDefaultOptions();
     private setFullCallbacks(callbacks);
 }
 export class Uploader {
