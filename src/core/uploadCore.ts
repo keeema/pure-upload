@@ -1,11 +1,10 @@
 class UploadCore {
-    public options: IUploadOptions;
-    public callbacks: IUploadCallbacksExt;
+    private options: IFullUploadOptions;
+    private callbacks: IUploadCallbacksExt;
 
     constructor(options: IUploadOptions, callbacks: IUploadCallbacksExt = {}) {
-        this.options = options;
         this.callbacks = callbacks;
-        this.setFullOptions(options);
+        this.options = applyDefaults(options, this.getDefaultOptions());
         this.setFullCallbacks(callbacks);
     }
 
@@ -168,21 +167,18 @@ class UploadCore {
 
     private setResponse(file: IUploadFile, xhr: XMLHttpRequest) {
         file.responseCode = xhr.status;
-        let response = xhr.responseText || xhr.statusText || (xhr.status
+        file.responseText = xhr.responseText || xhr.statusText || (xhr.status
             ? xhr.status.toString()
-            : '' || 'Invalid response from server');
-        file.responseText = !!this.options.localizer
-            ? this.options.localizer(response, {})
-            : response;
+            : '' || this.options.localizer.invalidResponseFromServer());
     }
 
-    private setFullOptions(options: IUploadOptions): void {
-        this.options.url = options.url;
-        this.options.method = options.method;
-        this.options.headers = options.headers || {};
-        this.options.params = options.params || {};
-        this.options.withCredentials = options.withCredentials || false;
-        this.options.localizer = options.localizer;
+    private getDefaultOptions() {
+        return {
+            headers: {},
+            params: {},
+            withCredentials: false,
+            localizer: getDefaultLocalizer()
+        };
     }
 
     private setFullCallbacks(callbacks: IUploadCallbacksExt) {

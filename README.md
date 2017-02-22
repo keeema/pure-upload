@@ -68,7 +68,7 @@ method: string;
 withCredentials?: boolean;
 headers?: { [key: string]: string; };
 params?: { [key: string]: string; };
-localizer?: (message: string, params?: Object) => string;
+localizer?: ILocalizer;
 maxFileSize?: number;
 allowDragDrop?: boolean | (() => boolean);
 clickable?: boolean | (() => boolean);
@@ -85,7 +85,11 @@ onFileCanceled?: (file: IUploadFile) => void;
 ```typescript
 start(autoClear?: boolean): void;
 clear(): void;
-
+```
+### Localizer
+```typescript
+fileSizeInvalid: (maxFileSize: number) => string;
+fileTypeInvalid: (accept: string) => string;
 ```
 ### Upload file
 Standard *File* object extended with additional informations and methods to manage a file in queue.
