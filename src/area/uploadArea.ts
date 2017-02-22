@@ -1,10 +1,10 @@
 class UploadArea {
     public targetElement: HTMLElement;
-    public options: IUploadAreaOptions;
     public uploader: Uploader;
+    private options: IFullUploadAreaOptions;
     private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
-    private fileList: IUploadFile[] | null | undefined;
+    private fileList?: IUploadFile[] | null;
     private unregisterOnClick: () => void;
     private unregisterOnDrop: () => void;
     private unregisterOnDragOver: () => void;
@@ -12,10 +12,9 @@ class UploadArea {
 
     constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader) {
         this.targetElement = targetElement;
-        this.options = options;
+        this.options = applyDefaults(options, this.defaultOptions());
         this.uploader = uploader;
         this.uploadCore = getUploadCore(this.options, this.uploader.queue.callbacks);
-        this.setFullOptions(options);
         if (isFileApi) {
             this.setupFileApiElements();
         } else {
@@ -54,15 +53,16 @@ class UploadArea {
         document.body.removeChild(this.fileInput);
     }
 
-    private setFullOptions(options: IUploadAreaOptions): void {
-        this.options.maxFileSize = options.maxFileSize || 1024;
-        this.options.allowDragDrop = isFileApi &&
-            (options.allowDragDrop === undefined || options.allowDragDrop === null ? true : options.allowDragDrop);
-        this.options.clickable = options.clickable === undefined || options.clickable === null ? true : options.clickable;
-        this.options.accept = options.accept || '*.*';
-        this.options.validateExtension = !!options.validateExtension;
-        this.options.multiple = isFileApi &&
-            (options.multiple === undefined || options.multiple === null ? true : options.multiple);
+    private defaultOptions() {
+        return {
+            localizer: getDefaultLocalizer(),
+            maxFileSize: 1024,
+            allowDragDrop: true,
+            clickable: true,
+            accept: '*.*',
+            validateExtension: false,
+            multiple: true,
+        };
     }
 
     private selectFiles(fileList: FileList | File[]) {
@@ -107,21 +107,12 @@ class UploadArea {
     private validateFile(file: IUploadFile): boolean {
         if (!this.isFileSizeValid(file)) {
             file.uploadStatus = UploadStatus.failed;
-            file.responseText = !!this.options.localizer
-                ? this.options.localizer(
-                    'The selected file exceeds the allowed size of { maxFileSize } MB or its size is 0 MB. Please choose another file.',
-                    this.options)
-                : 'The selected file exceeds the allowed size of ' + this.options.maxFileSize
-                + ' or its size is 0 MB. Please choose another file.';
+            file.responseText = this.options.localizer.fileSizeInvalid(this.options.maxFileSize);
             return false;
         }
         if (this.isFileTypeInvalid(file)) {
             file.uploadStatus = UploadStatus.failed;
-            file.responseText = !!this.options.localizer
-                ? this.options.localizer('File format is not allowed. Only { accept } files are allowed.', this.options)
-                : 'File format is not allowed. Only ' + (this.options.accept
-                    ? this.options.accept.split('.').join(' ')
-                    : '') + ' files are allowed.';
+            file.responseText = this.options.localizer.fileTypeInvalid(this.options.accept);
             return false;
         }
         return true;
