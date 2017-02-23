@@ -1,5 +1,17 @@
 CHANGELOG
 ===
+4.0.1
+--
+Fix
+-
+Options access modifier reverted to public.
+
+4.0.0
+--
+Changed localizations
+-
+
+Localizations are now accessible through new options property with specific errors.
 
 3.0.0
 --

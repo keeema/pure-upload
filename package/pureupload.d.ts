@@ -17,6 +17,25 @@ export interface IFileExt extends File {
     isDirectory: boolean;
     fullPath: string;
 }
+export interface IFullUploadAreaOptions extends IUploadAreaOptions {
+    maxFileSize: number;
+    allowDragDrop: boolean | (() => boolean);
+    clickable: boolean | (() => boolean);
+    accept: string;
+    multiple: boolean;
+    validateExtension: boolean;
+    localizer: ILocalizer;
+}
+export interface IFullUploadOptions extends IUploadOptions {
+    withCredentials: boolean;
+    headers: {
+        [key: string]: string | number | boolean;
+    };
+    params: {
+        [key: string]: string | number | boolean;
+    };
+    localizer: ILocalizer;
+}
 export interface ILocalizer {
     fileSizeInvalid: (maxFileSize: number) => string;
     fileTypeInvalid: (accept: string) => string;
@@ -94,7 +113,7 @@ export function removeEventHandler(el: HTMLInputElement | Element, event: string
 export class UploadArea {
     targetElement: HTMLElement;
     uploader: Uploader;
-    private options;
+    options: IFullUploadAreaOptions;
     private uploadCore;
     private fileInput;
     private fileList?;
@@ -124,8 +143,8 @@ export class UploadArea {
     private stopEventPropagation(e);
 }
 export class UploadCore {
-    private options;
-    private callbacks;
+    options: IFullUploadOptions;
+    callbacks: IUploadCallbacksExt;
     constructor(options: IUploadOptions, callbacks?: IUploadCallbacksExt);
     upload(fileList: File[] | Object): void;
     getUrl(file: IUploadFile): string;

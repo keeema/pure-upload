@@ -89,9 +89,7 @@ var pu;
         return {
             fileSizeInvalid: function (maxFileSize) { return 'The selected file exceeds the allowed size of ' + maxFileSize
                 + ' or its size is 0 MB. Please choose another file.'; },
-            fileTypeInvalid: function (accept) { return 'File format is not allowed. Only ' + (accept
-                ? accept.split('.').join(' ')
-                : '') + ' files are allowed.'; },
+            fileTypeInvalid: function (accept) { return 'File format is not allowed. Only ' + (accept ? accept : '') + ' files are allowed.'; },
             invalidResponseFromServer: function () { return 'Invalid response from server'; }
         };
     }

@@ -99,6 +99,24 @@ export interface IFileExt extends File {
     fullPath: string;
 }
 
+export interface IFullUploadAreaOptions extends IUploadAreaOptions {
+    maxFileSize: number;
+    allowDragDrop: boolean | (() => boolean);
+    clickable: boolean | (() => boolean);
+    accept: string;
+    multiple: boolean;
+    validateExtension: boolean;
+
+    localizer: ILocalizer;
+}
+
+export interface IFullUploadOptions extends IUploadOptions {
+    withCredentials: boolean;
+    headers: { [key: string]: string | number | boolean };
+    params: { [key: string]: string | number | boolean };
+    localizer: ILocalizer;
+}
+
 export interface ILocalizer {
     fileSizeInvalid: (maxFileSize: number) => string;
     fileTypeInvalid: (accept: string) => string;
@@ -109,9 +127,7 @@ function getDefaultLocalizer(): ILocalizer {
     return {
         fileSizeInvalid: (maxFileSize) => 'The selected file exceeds the allowed size of ' + maxFileSize
             + ' or its size is 0 MB. Please choose another file.',
-        fileTypeInvalid: accept => 'File format is not allowed. Only ' + (accept
-            ? accept.split('.').join(' ')
-            : '') + ' files are allowed.',
+        fileTypeInvalid: accept => 'File format is not allowed. Only ' + (accept ? accept : '') + ' files are allowed.',
         invalidResponseFromServer: () => 'Invalid response from server'
     };
 }
@@ -134,16 +150,6 @@ export interface IUploadAreaOptions extends IUploadOptions {
     onFileCanceled?: (file: IUploadFile) => void;
 }
 
-interface IFullUploadAreaOptions extends IUploadAreaOptions {
-    maxFileSize: number;
-    allowDragDrop: boolean | (() => boolean);
-    clickable: boolean | (() => boolean);
-    accept: string;
-    multiple: boolean;
-    validateExtension: boolean;
-
-    localizer: ILocalizer;
-}
 export interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;
     onCancelledCallback?: (file: IUploadFile) => void;
@@ -180,13 +186,6 @@ export interface IUploadOptions {
     headers?: { [key: string]: string | number | boolean };
     params?: { [key: string]: string | number | boolean };
     localizer?: ILocalizer;
-}
-
-interface IFullUploadOptions extends IUploadOptions {
-    withCredentials: boolean;
-    headers: { [key: string]: string | number | boolean };
-    params: { [key: string]: string | number | boolean };
-    localizer: ILocalizer;
 }
 
 export interface IUploadQueueCallbacks extends IUploadCallbacks {
@@ -226,7 +225,7 @@ interface IElementWithDettachEvent extends HTMLElement {
 export class UploadArea {
     public targetElement: HTMLElement;
     public uploader: Uploader;
-    private options: IFullUploadAreaOptions;
+    public options: IFullUploadAreaOptions;
     private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
     private fileList?: IUploadFile[] | null;
@@ -516,8 +515,8 @@ export class UploadArea {
     }
 }
 export class UploadCore {
-    private options: IFullUploadOptions;
-    private callbacks: IUploadCallbacksExt;
+    public options: IFullUploadOptions;
+    public callbacks: IUploadCallbacksExt;
 
     constructor(options: IUploadOptions, callbacks: IUploadCallbacksExt = {}) {
         this.callbacks = callbacks;
