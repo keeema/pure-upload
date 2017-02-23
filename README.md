@@ -90,6 +90,7 @@ clear(): void;
 ```typescript
 fileSizeInvalid: (maxFileSize: number) => string;
 fileTypeInvalid: (accept: string) => string;
+invalidResponseFromServer: () => string;
 ```
 ### Upload file
 Standard *File* object extended with additional informations and methods to manage a file in queue.
