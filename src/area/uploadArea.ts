@@ -1,7 +1,7 @@
 class UploadArea {
     public targetElement: HTMLElement;
     public uploader: Uploader;
-    private options: IFullUploadAreaOptions;
+    public options: IFullUploadAreaOptions;
     private uploadCore: UploadCore;
     private fileInput: HTMLInputElement;
     private fileList?: IUploadFile[] | null;

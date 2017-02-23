@@ -1,6 +1,6 @@
 class UploadCore {
-    private options: IFullUploadOptions;
-    private callbacks: IUploadCallbacksExt;
+    public options: IFullUploadOptions;
+    public callbacks: IUploadCallbacksExt;
 
     constructor(options: IUploadOptions, callbacks: IUploadCallbacksExt = {}) {
         this.callbacks = callbacks;
