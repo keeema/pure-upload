@@ -62,6 +62,7 @@ class UploadArea {
             accept: '*.*',
             validateExtension: false,
             multiple: true,
+            allowEmptyFile: false
         };
     }
 
@@ -260,7 +261,7 @@ class UploadArea {
 
     private isFileSizeValid(file: File): boolean {
         let maxFileSize = this.options.maxFileSize * 1024 * 1024; // max file size in bytes
-        if (file.size > maxFileSize || file.size === 0) return false;
+        if (file.size > maxFileSize || (!this.options.allowEmptyFile && file.size === 0)) return false;
         return true;
     }
 

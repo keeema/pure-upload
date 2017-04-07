@@ -154,6 +154,7 @@ var pu;
                 accept: '*.*',
                 validateExtension: false,
                 multiple: true,
+                allowEmptyFile: false
             };
         };
         UploadArea.prototype.selectFiles = function (fileList) {

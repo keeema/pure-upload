@@ -154,6 +154,7 @@ var UploadArea = (function () {
             accept: '*.*',
             validateExtension: false,
             multiple: true,
+            allowEmptyFile: false
         };
     };
     UploadArea.prototype.selectFiles = function (fileList) {
@@ -338,7 +339,7 @@ var UploadArea = (function () {
     };
     UploadArea.prototype.isFileSizeValid = function (file) {
         var maxFileSize = this.options.maxFileSize * 1024 * 1024; // max file size in bytes
-        if (file.size > maxFileSize || file.size === 0)
+        if (file.size > maxFileSize || (!this.options.allowEmptyFile && file.size === 0))
             return false;
         return true;
     };

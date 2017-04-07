@@ -143,6 +143,7 @@ export interface IUploadAreaOptions extends IUploadOptions {
     multiple?: boolean;
     validateExtension?: boolean;
     manualStart?: boolean;
+    allowEmptyFile?: boolean;
 
     onFileAdded?: (file: IUploadFile) => void;
     onFileSelected?: (file: IUploadFile) => void;
@@ -286,6 +287,7 @@ export class UploadArea {
             accept: '*.*',
             validateExtension: false,
             multiple: true,
+            allowEmptyFile: false
         };
     }
 
@@ -484,7 +486,7 @@ export class UploadArea {
 
     private isFileSizeValid(file: File): boolean {
         let maxFileSize = this.options.maxFileSize * 1024 * 1024; // max file size in bytes
-        if (file.size > maxFileSize || file.size === 0) return false;
+        if (file.size > maxFileSize || (!this.options.allowEmptyFile && file.size === 0)) return false;
         return true;
     }
 
