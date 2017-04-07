@@ -1,5 +1,9 @@
 CHANGELOG
 ===
+4.1.0
+--
+Added option to allow upload of empty files
+
 4.0.1
 --
 Fix
