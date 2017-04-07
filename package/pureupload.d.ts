@@ -53,6 +53,7 @@ export interface IUploadAreaOptions extends IUploadOptions {
     multiple?: boolean;
     validateExtension?: boolean;
     manualStart?: boolean;
+    allowEmptyFile?: boolean;
     onFileAdded?: (file: IUploadFile) => void;
     onFileSelected?: (file: IUploadFile) => void;
     onFileError?: (file: IUploadFile) => void;
