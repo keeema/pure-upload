@@ -89,9 +89,7 @@ var pu;
         return {
             fileSizeInvalid: function (maxFileSize) { return 'The selected file exceeds the allowed size of ' + maxFileSize
                 + ' or its size is 0 MB. Please choose another file.'; },
-            fileTypeInvalid: function (accept) { return 'File format is not allowed. Only ' + (accept
-                ? accept.split('.').join(' ')
-                : '') + ' files are allowed.'; },
+            fileTypeInvalid: function (accept) { return 'File format is not allowed. Only ' + (accept ? accept : '') + ' files are allowed.'; },
             invalidResponseFromServer: function () { return 'Invalid response from server'; }
         };
     }
@@ -143,8 +141,12 @@ var pu;
                 this.unregisterOnChange();
             if (this.unregisterOnDragOver)
                 this.unregisterOnDragOver();
-            this.targetElement.removeEventListener('dragover', this.onDrag);
-            this.targetElement.removeEventListener('drop', this.onDrop);
+            if (this.unregisterOnDragLeave)
+                this.unregisterOnDragLeave();
+            if (this.unregisterOnDragOverGlobal)
+                this.unregisterOnDragOverGlobal();
+            if (this.unregisterOnDragLeaveGlobal)
+                this.unregisterOnDragLeaveGlobal();
             document.body.removeChild(this.fileInput);
         };
         UploadArea.prototype.defaultOptions = function () {
@@ -156,6 +158,7 @@ var pu;
                 accept: '*.*',
                 validateExtension: false,
                 multiple: true,
+                allowEmptyFile: false
             };
         };
         UploadArea.prototype.selectFiles = function (fileList) {
@@ -219,17 +222,30 @@ var pu;
             if (this.options.multiple) {
                 this.fileInput.setAttribute('multiple', '');
             }
+            this.registerEvents();
+            // attach to body
+            document.body.appendChild(this.fileInput);
+        };
+        UploadArea.prototype.registerEvents = function () {
+            var _this = this;
             var onClick = function () { return _this.onClick(); };
             addEventHandler(this.targetElement, 'click', onClick);
             this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, 'click', onClick); };
             var onDrag = function (e) { return _this.onDrag(e); };
             addEventHandler(this.targetElement, 'dragover', onDrag);
             this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, 'dragover', onDrag); };
+            var onDragLeave = function () { return _this.onDragLeave(); };
+            addEventHandler(this.targetElement, 'dragleave', onDragLeave);
+            this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, 'dragleave', onDragLeave); };
+            var onDragGlobal = function () { return _this.onDragGlobal(); };
+            addEventHandler(document.body, 'dragover', onDragGlobal);
+            this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, 'dragover', onDragGlobal); };
+            var onDragLeaveGlobal = function () { return _this.onDragLeaveGlobal(); };
+            addEventHandler(document.body, 'dragleave', onDragLeaveGlobal);
+            this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, 'dragleave', onDragLeaveGlobal); };
             var onDrop = function (e) { return _this.onDrop(e); };
             addEventHandler(this.targetElement, 'drop', onDrop);
             this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, 'drop', onDrop); };
-            // attach to body
-            document.body.appendChild(this.fileInput);
         };
         UploadArea.prototype.onChange = function (e) {
             this.selectFiles(e.target.files);
@@ -237,6 +253,7 @@ var pu;
         UploadArea.prototype.onDrag = function (e) {
             if (!getValueOrResult(this.options.allowDragDrop))
                 return;
+            this.addDragOverStyle(this.options.dragOverStyle);
             var efct = undefined;
             try {
                 efct = e.dataTransfer.effectAllowed;
@@ -247,6 +264,31 @@ var pu;
             e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
             this.stopEventPropagation(e);
         };
+        UploadArea.prototype.onDragLeave = function () {
+            if (!getValueOrResult(this.options.allowDragDrop))
+                return;
+            this.removeDragOverStyle(this.options.dragOverStyle);
+        };
+        UploadArea.prototype.onDragGlobal = function () {
+            if (!getValueOrResult(this.options.allowDragDrop))
+                return;
+            this.addDragOverStyle(this.options.dragOverGlobalStyle);
+        };
+        UploadArea.prototype.onDragLeaveGlobal = function () {
+            if (!getValueOrResult(this.options.allowDragDrop))
+                return;
+            this.removeDragOverStyle(this.options.dragOverGlobalStyle);
+        };
+        UploadArea.prototype.removeDragOverStyle = function (style) {
+            if (!style)
+                return;
+            this.targetElement.classList.remove(style);
+        };
+        UploadArea.prototype.addDragOverStyle = function (style) {
+            if (!style)
+                return;
+            this.targetElement.classList.add(style);
+        };
         UploadArea.prototype.onDrop = function (e) {
             if (!getValueOrResult(this.options.allowDragDrop))
                 return;
@@ -254,6 +296,7 @@ var pu;
             if (!e.dataTransfer) {
                 return;
             }
+            this.removeDragOverStyle(this.options.dragOverStyle);
             var files = e.dataTransfer.files;
             if (files.length) {
                 if (!this.options.multiple)
@@ -340,7 +383,7 @@ var pu;
         };
         UploadArea.prototype.isFileSizeValid = function (file) {
             var maxFileSize = this.options.maxFileSize * 1024 * 1024; // max file size in bytes
-            if (file.size > maxFileSize || file.size === 0)
+            if (file.size > maxFileSize || (!this.options.allowEmptyFile && file.size === 0))
                 return false;
             return true;
         };
