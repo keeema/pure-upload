@@ -12,12 +12,12 @@ describe('functions', () => {
         });
 
         it('lets undefined lose', () => {
-            let result = applyDefaults({ a: undefined }, { a: 2 });
+            let result = applyDefaults({ a: <number | undefined>undefined }, { a: <number | undefined>2 });
             expect(result.a).toBe(2);
         });
 
         it('lets null lose', () => {
-            let result = applyDefaults({ a: null }, { a: 2 });
+            let result = applyDefaults({ a: <number | null>null }, { a: <number | null>2 });
             expect(result.a).toBe(2);
         });
 

@@ -8,6 +8,9 @@ class UploadArea {
     private unregisterOnClick: () => void;
     private unregisterOnDrop: () => void;
     private unregisterOnDragOver: () => void;
+    private unregisterOnDragLeave: () => void;
+    private unregisterOnDragOverGlobal: () => void;
+    private unregisterOnDragLeaveGlobal: () => void;
     private unregisterOnChange: () => void;
 
     constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader) {
@@ -47,8 +50,14 @@ class UploadArea {
         if (this.unregisterOnDragOver)
             this.unregisterOnDragOver();
 
-        this.targetElement.removeEventListener('dragover', this.onDrag);
-        this.targetElement.removeEventListener('drop', this.onDrop);
+        if (this.unregisterOnDragLeave)
+            this.unregisterOnDragLeave();
+
+        if (this.unregisterOnDragOverGlobal)
+            this.unregisterOnDragOverGlobal();
+
+        if (this.unregisterOnDragLeaveGlobal)
+            this.unregisterOnDragLeaveGlobal();
 
         document.body.removeChild(this.fileInput);
     }
@@ -133,6 +142,13 @@ class UploadArea {
             this.fileInput.setAttribute('multiple', '');
         }
 
+        this.registerEvents();
+
+        // attach to body
+        document.body.appendChild(this.fileInput);
+    }
+
+    private registerEvents() {
         const onClick = () => this.onClick();
         addEventHandler(this.targetElement, 'click', onClick);
         this.unregisterOnClick = () => removeEventHandler(this.targetElement, 'click', onClick);
@@ -141,12 +157,21 @@ class UploadArea {
         addEventHandler(this.targetElement, 'dragover', onDrag);
         this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, 'dragover', onDrag);
 
+        const onDragLeave = () => this.onDragLeave();
+        addEventHandler(this.targetElement, 'dragleave', onDragLeave);
+        this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, 'dragleave', onDragLeave);
+
+        const onDragGlobal = () => this.onDragGlobal();
+        addEventHandler(document.body, 'dragover', onDragGlobal);
+        this.unregisterOnDragOverGlobal = () => removeEventHandler(document.body, 'dragover', onDragGlobal);
+
+        const onDragLeaveGlobal = () => this.onDragLeaveGlobal();
+        addEventHandler(document.body, 'dragleave', onDragLeaveGlobal);
+        this.unregisterOnDragOverGlobal = () => removeEventHandler(document.body, 'dragleave', onDragLeaveGlobal);
+
         const onDrop = (e: DragEvent) => this.onDrop(e);
         addEventHandler(this.targetElement, 'drop', onDrop);
         this.unregisterOnDrop = () => removeEventHandler(this.targetElement, 'drop', onDrop);
-
-        // attach to body
-        document.body.appendChild(this.fileInput);
     }
 
     private onChange(e: Event): void {
@@ -157,12 +182,48 @@ class UploadArea {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
 
+        this.addDragOverStyle(this.options.dragOverStyle);
         let efct: string | undefined = undefined;
         try {
             efct = e.dataTransfer.effectAllowed;
         } catch (err) { ; }
         e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
         this.stopEventPropagation(e);
+    }
+
+    private onDragLeave(): void {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
+
+        this.removeDragOverStyle(this.options.dragOverStyle);
+    }
+
+    private onDragGlobal(): void {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
+
+        this.addDragOverStyle(this.options.dragOverGlobalStyle);
+    }
+
+    private onDragLeaveGlobal(): void {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
+
+        this.removeDragOverStyle(this.options.dragOverGlobalStyle);
+    }
+
+    private removeDragOverStyle(style?: string) {
+        if (!style)
+            return;
+
+        this.targetElement.classList.remove(style);
+    }
+
+    private addDragOverStyle(style?: string) {
+        if (!style)
+            return;
+
+        this.targetElement.classList.add(style);
     }
 
     private onDrop(e: DragEvent): void {
@@ -173,6 +234,9 @@ class UploadArea {
         if (!e.dataTransfer) {
             return;
         }
+
+        this.removeDragOverStyle(this.options.dragOverStyle);
+
         let files: FileList | File[] = e.dataTransfer.files;
         if (files.length) {
             if (!this.options.multiple)

@@ -9,7 +9,9 @@ window.onload = function () {
         allowDragDrop: true,
         clickable: true,
         accept: '*.*',
-        multiple: true
+        multiple: true,
+        dragOverStyle: 'dnd-area-over',
+        dragOverGlobalStyle: 'dnd-area-global'
     };
     var queueUploadSettings = {
         url: '/api/test',
@@ -18,7 +20,9 @@ window.onload = function () {
         allowDragDrop: true,
         clickable: false,
         accept: '*.*',
-        multiple: true
+        multiple: true,
+        dragOverStyle: 'dnd-area-over',
+        dragOverGlobalStyle: 'dnd-area-global'
     };
     uploaderExample1.registerArea(document.getElementById('example-button'), uploadSettings);
     uploaderExample1.registerArea(document.getElementById('example-dnd-area'), uploadSettings);

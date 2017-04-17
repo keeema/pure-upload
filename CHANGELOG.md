@@ -1,5 +1,9 @@
 CHANGELOG
 ===
+4.2.0
+--
+Added highlighting on dnd.
+
 4.1.0
 --
 Added option to allow upload of empty files

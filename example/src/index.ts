@@ -10,8 +10,11 @@ window.onload = () => {
         allowDragDrop: true,
         clickable: true,
         accept: '*.*',
-        multiple: true
+        multiple: true,
+        dragOverStyle: 'dnd-area-over',
+        dragOverGlobalStyle: 'dnd-area-global'
     };
+
     let queueUploadSettings = {
         url: '/api/test',
         method: 'POST',
@@ -19,7 +22,9 @@ window.onload = () => {
         allowDragDrop: true,
         clickable: false,
         accept: '*.*',
-        multiple: true
+        multiple: true,
+        dragOverStyle: 'dnd-area-over',
+        dragOverGlobalStyle: 'dnd-area-global'
     };
 
     uploaderExample1.registerArea(<HTMLElement>document.getElementById('example-button'), uploadSettings);

@@ -54,6 +54,8 @@ declare module pu {
         validateExtension?: boolean;
         manualStart?: boolean;
         allowEmptyFile?: boolean;
+        dragOverStyle?: string;
+        dragOverGlobalStyle?: string;
         onFileAdded?: (file: IUploadFile) => void;
         onFileSelected?: (file: IUploadFile) => void;
         onFileError?: (file: IUploadFile) => void;
@@ -121,6 +123,9 @@ declare module pu {
         private unregisterOnClick;
         private unregisterOnDrop;
         private unregisterOnDragOver;
+        private unregisterOnDragLeave;
+        private unregisterOnDragOverGlobal;
+        private unregisterOnDragLeaveGlobal;
         private unregisterOnChange;
         constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader);
         start(autoClear?: boolean): void;
@@ -131,8 +136,14 @@ declare module pu {
         private putFilesToQueue();
         private validateFile(file);
         private setupFileApiElements();
+        private registerEvents();
         private onChange(e);
         private onDrag(e);
+        private onDragLeave();
+        private onDragGlobal();
+        private onDragLeaveGlobal();
+        private removeDragOverStyle(style?);
+        private addDragOverStyle(style?);
         private onDrop(e);
         private isIeVersion(v);
         private onClick();

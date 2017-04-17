@@ -77,6 +77,8 @@ multiple?: boolean;
 validateExtension?: boolean;
 manualStart?: boolean;
 allowEmptyFile?: boolean;
+dragOverStyle?: string;
+dragOverGlobalStyle?: string;
 onFileAdded?: (file: IUploadFile) => void;
 onFileSelected?: (file: IUploadFile) => void;
 onFileError?: (file: IUploadFile) => void;
