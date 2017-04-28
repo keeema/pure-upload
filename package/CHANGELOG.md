@@ -1,5 +1,9 @@
 CHANGELOG
 ===
+4.2.1
+--
+Improved internal type definitions and casting
+
 4.2.0
 --
 Added highlighting on dnd.

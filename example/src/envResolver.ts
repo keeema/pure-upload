@@ -1,4 +1,4 @@
-let http = (url: string, success?: (result: string) => void, failure?: (status: number, statusText: string) => void) => {
+function http(url: string, success?: (result: string) => void, failure?: (status: number, statusText: string) => void) {
     let request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.send(null);
@@ -15,14 +15,14 @@ let http = (url: string, success?: (result: string) => void, failure?: (status: 
     };
 };
 
-let mockXhr = () => {
+function mockXhr() {
     /* tslint:disable */
     XMLHttpRequest = <any>XhrMock;
     /* tslint:enable */
     FormData = FormDataMock;
 };
 
-let resolveEnvironment = (): void => {
+function resolveEnvironment(): void {
     if (window.location.href.toString().toLowerCase().indexOf('file://') >= 0) {
         mockXhr();
         return;
@@ -43,7 +43,12 @@ class FormDataMock {
     data: { [key: string]: { data: File, additional: string | undefined } } = {};
     append(key: string, data: File, additional?: string) {
         this.data[key] = { data, additional };
-    }
+    };
+    delete() { ; }
+    get(key: string) { return this.data[key].data; }
+    getAll() { return []; }
+    has(key: string) { return this.data[key] !== undefined; }
+    set(_key: string, _value: File) { ; }
 }
 
 class XhrMock {

@@ -113,7 +113,7 @@ export interface IFullUploadAreaOptions extends IUploadAreaOptions {
 export interface IFullUploadOptions extends IUploadOptions {
     withCredentials: boolean;
     headers: { [key: string]: string | number | boolean };
-    params: { [key: string]: string | number | boolean };
+    params: { [key: string]: string | number | boolean | Blob };
     localizer: ILocalizer;
 }
 
@@ -187,7 +187,7 @@ export interface IUploadOptions {
     method: string;
     withCredentials?: boolean;
     headers?: { [key: string]: string | number | boolean };
-    params?: { [key: string]: string | number | boolean };
+    params?: { [key: string]: string | number | boolean | Blob };
     localizer?: ILocalizer;
 }
 
@@ -682,12 +682,24 @@ export class UploadCore {
                     return;
                 let paramValue = this.options.params[paramName];
                 if (paramValue !== undefined && paramValue !== null)
-                    formData.append(paramName, paramValue);
+                    formData.append(paramName, this.castParamType(paramValue));
             });
         }
 
         formData.append('file', file, file.name);
         return formData;
+    }
+
+    private castParamType(param: string | number | boolean | Blob): string | Blob {
+        return this.isBoolean(param) || this.isNumber(param) ? param.toString() : param;
+    }
+
+    private isNumber(param: string | number | boolean | Blob): param is number {
+        return typeof param === 'number';
+    }
+
+    private isBoolean(param: string | number | boolean | Blob): param is boolean {
+        return typeof param === 'number';
     }
 
     private handleError(file: IUploadFile, xhr: XMLHttpRequest): void {
@@ -756,13 +768,13 @@ export class UploadCore {
             : '' || this.options.localizer.invalidResponseFromServer());
     }
 
-    private getDefaultOptions() {
+    private getDefaultOptions(): IFullUploadOptions {
         return {
             headers: {},
             params: {},
             withCredentials: false,
             localizer: getDefaultLocalizer()
-        };
+        } as IFullUploadOptions;
     }
 
     private setFullCallbacks(callbacks: IUploadCallbacksExt) {

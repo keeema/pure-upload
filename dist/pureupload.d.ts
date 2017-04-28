@@ -32,7 +32,7 @@ declare module pu {
             [key: string]: string | number | boolean;
         };
         params: {
-            [key: string]: string | number | boolean;
+            [key: string]: string | number | boolean | Blob;
         };
         localizer: ILocalizer;
     }
@@ -94,7 +94,7 @@ declare module pu {
             [key: string]: string | number | boolean;
         };
         params?: {
-            [key: string]: string | number | boolean;
+            [key: string]: string | number | boolean | Blob;
         };
         localizer?: ILocalizer;
     }
@@ -166,6 +166,9 @@ declare module pu {
         private setCallbacks(xhr, file);
         private send(xhr, file);
         private createFormData(file);
+        private castParamType(param);
+        private isNumber(param);
+        private isBoolean(param);
         private handleError(file, xhr);
         private updateProgress(file, e?);
         private onload(file, xhr);

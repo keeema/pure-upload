@@ -501,11 +501,20 @@ var pu;
                         return;
                     var paramValue = _this.options.params[paramName];
                     if (paramValue !== undefined && paramValue !== null)
-                        formData.append(paramName, paramValue);
+                        formData.append(paramName, _this.castParamType(paramValue));
                 });
             }
             formData.append('file', file, file.name);
             return formData;
+        };
+        UploadCore.prototype.castParamType = function (param) {
+            return this.isBoolean(param) || this.isNumber(param) ? param.toString() : param;
+        };
+        UploadCore.prototype.isNumber = function (param) {
+            return typeof param === 'number';
+        };
+        UploadCore.prototype.isBoolean = function (param) {
+            return typeof param === 'number';
         };
         UploadCore.prototype.handleError = function (file, xhr) {
             file.uploadStatus = UploadStatus.failed;

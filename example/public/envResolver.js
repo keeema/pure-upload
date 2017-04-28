@@ -1,4 +1,4 @@
-var http = function (url, success, failure) {
+function http(url, success, failure) {
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.send(null);
@@ -13,14 +13,16 @@ var http = function (url, success, failure) {
             }
         }
     };
-};
-var mockXhr = function () {
+}
+;
+function mockXhr() {
     /* tslint:disable */
     XMLHttpRequest = XhrMock;
     /* tslint:enable */
     FormData = FormDataMock;
-};
-var resolveEnvironment = function () {
+}
+;
+function resolveEnvironment() {
     if (window.location.href.toString().toLowerCase().indexOf('file://') >= 0) {
         mockXhr();
         return;
@@ -31,7 +33,8 @@ var resolveEnvironment = function () {
     }, function () {
         mockXhr();
     });
-};
+}
+;
 var FormDataMock = (function () {
     function FormDataMock() {
         this.data = {};
@@ -39,6 +42,12 @@ var FormDataMock = (function () {
     FormDataMock.prototype.append = function (key, data, additional) {
         this.data[key] = { data: data, additional: additional };
     };
+    ;
+    FormDataMock.prototype.delete = function () { ; };
+    FormDataMock.prototype.get = function (key) { return this.data[key].data; };
+    FormDataMock.prototype.getAll = function () { return []; };
+    FormDataMock.prototype.has = function (key) { return this.data[key] !== undefined; };
+    FormDataMock.prototype.set = function (_key, _value) { ; };
     return FormDataMock;
 }());
 var XhrMock = (function () {
