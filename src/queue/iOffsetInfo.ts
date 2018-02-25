@@ -1,4 +1,4 @@
 interface IOffsetInfo {
-    running: boolean;
-    fileCount: number;
+  running: boolean;
+  fileCount: number;
 }

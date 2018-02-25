@@ -1,12 +1,4 @@
 declare module pu {
-    function addEventHandler(el: Element | HTMLElement, event: string, handler: (ev: UIEvent) => void): void;
-    const isFileApi: boolean;
-    function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
-    function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-    function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
-    function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
-    function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
-    function newGuid(): string;
     interface IFileExt extends File {
         kind: string;
         webkitGetAsEntry: () => File;
@@ -17,6 +9,14 @@ declare module pu {
         isDirectory: boolean;
         fullPath: string;
     }
+    function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject): void;
+    const isFileApi: boolean;
+    function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
+    function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+    function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
+    function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
+    function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
+    function newGuid(): string;
     interface IFullUploadAreaOptions extends IUploadAreaOptions {
         maxFileSize: number;
         allowDragDrop: boolean | (() => boolean);
@@ -112,21 +112,21 @@ declare module pu {
         autoStart?: boolean;
         autoRemove?: boolean;
     }
-    function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: (ev: UIEvent) => void): void;
+    function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: EventListenerOrEventListenerObject): void;
     class UploadArea {
         targetElement: HTMLElement;
         uploader: Uploader;
         options: IFullUploadAreaOptions;
         private uploadCore;
-        private fileInput;
+        private fileInput?;
         private fileList?;
-        private unregisterOnClick;
-        private unregisterOnDrop;
-        private unregisterOnDragOver;
-        private unregisterOnDragLeave;
-        private unregisterOnDragOverGlobal;
-        private unregisterOnDragLeaveGlobal;
-        private unregisterOnChange;
+        private unregisterOnClick?;
+        private unregisterOnDrop?;
+        private unregisterOnDragOver?;
+        private unregisterOnDragLeave?;
+        private unregisterOnDragOverGlobal?;
+        private unregisterOnDragLeaveGlobal?;
+        private unregisterOnChange?;
         constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader);
         start(autoClear?: boolean): void;
         clear(): void;
@@ -177,15 +177,6 @@ declare module pu {
         private getDefaultOptions();
         private setFullCallbacks(callbacks);
     }
-    class Uploader {
-        uploadAreas: UploadArea[];
-        queue: UploadQueue;
-        options: IUploadQueueOptions;
-        constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
-        setOptions(options: IUploadQueueOptions): void;
-        registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
-        unregisterArea(area: UploadArea): void;
-    }
     class UploadQueue {
         offset: IOffsetInfo;
         options: IUploadQueueOptions;
@@ -212,5 +203,13 @@ declare module pu {
         failed = 3,
         canceled = 4,
         removed = 5,
+    }
+    class Uploader {
+        uploadAreas: UploadArea[];
+        queue: UploadQueue;
+        options: IUploadQueueOptions;
+        constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
+        registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
+        unregisterArea(area: UploadArea): void;
     }
 }

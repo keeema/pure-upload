@@ -1,2 +1,3 @@
-interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
-}
+interface IUploadQueueCallbacksExt
+  extends IUploadQueueCallbacks,
+    IUploadCallbacksExt {}

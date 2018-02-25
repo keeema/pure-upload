@@ -7,7 +7,7 @@ function addEventHandler(el, event, handler) {
     else {
         var elem = el;
         if (elem.attachEvent) {
-            elem.attachEvent('on' + event, handler);
+            elem.attachEvent("on" + event, handler);
         }
         else {
             elem[event] = handler;
@@ -18,9 +18,9 @@ exports.addEventHandler = addEventHandler;
 exports.isFileApi = !!(window.File && window.FormData);
 function castFiles(fileList, status) {
     var files;
-    if (typeof fileList === 'object') {
+    if (typeof fileList === "object") {
         files = Object.keys(fileList)
-            .filter(function (key) { return key !== 'length'; })
+            .filter(function (key) { return key !== "length"; })
             .map(function (key) { return fileList[key]; });
     }
     else {
@@ -29,10 +29,14 @@ function castFiles(fileList, status) {
     files.forEach(function (file) {
         file.uploadStatus = status || file.uploadStatus;
         file.responseCode = file.responseCode || 0;
-        file.responseText = file.responseText || '';
+        file.responseText = file.responseText || "";
         file.progress = file.progress || 0;
         file.sentBytes = file.sentBytes || 0;
-        file.cancel = file.cancel || (function () { return; });
+        file.cancel =
+            file.cancel ||
+                (function () {
+                    return;
+                });
     });
     return files;
 }
@@ -42,55 +46,65 @@ function decorateSimpleFunction(origFn, newFn, newFirst) {
     if (!origFn)
         return newFn;
     return newFirst
-        ? function () { newFn(); origFn(); }
-        : function () { origFn(); newFn(); };
+        ? function () {
+            newFn();
+            origFn();
+        }
+        : function () {
+            origFn();
+            newFn();
+        };
 }
 exports.decorateSimpleFunction = decorateSimpleFunction;
 function applyDefaults(target, source) {
     var to = Object(target);
     for (var nextKey in source) {
-        if (Object.prototype.hasOwnProperty.call(source, nextKey) && (to[nextKey] === undefined || to[nextKey] === null)) {
+        if (Object.prototype.hasOwnProperty.call(source, nextKey) &&
+            (to[nextKey] === undefined || to[nextKey] === null)) {
             to[nextKey] = source[nextKey];
         }
     }
     return to;
 }
-;
 function getUploadCore(options, callbacks) {
     return new UploadCore(options, callbacks);
 }
 exports.getUploadCore = getUploadCore;
-;
 function getUploader(options, callbacks) {
     return new Uploader(options, callbacks);
 }
 exports.getUploader = getUploader;
-;
 function getValueOrResult(valueOrGetter) {
-    if (typeof valueOrGetter === 'function')
+    if (typeof valueOrGetter === "function")
         return valueOrGetter();
     return valueOrGetter;
 }
 exports.getValueOrResult = getValueOrResult;
 function newGuid() {
     var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
         /* tslint:disable */
-        var r = (d + Math.random() * 16) % 16 | 0;
+        var r = ((d + Math.random() * 16) % 16) | 0;
         d = Math.floor(d / 16);
-        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
         /* tslint:enable */
     });
     return uuid;
 }
 exports.newGuid = newGuid;
-;
 function getDefaultLocalizer() {
     return {
-        fileSizeInvalid: function (maxFileSize) { return 'The selected file exceeds the allowed size of ' + maxFileSize
-            + ' or its size is 0 MB. Please choose another file.'; },
-        fileTypeInvalid: function (accept) { return 'File format is not allowed. Only ' + (accept ? accept : '') + ' files are allowed.'; },
-        invalidResponseFromServer: function () { return 'Invalid response from server'; }
+        fileSizeInvalid: function (maxFileSize) {
+            return "The selected file exceeds the allowed size of " +
+                maxFileSize +
+                " or its size is 0 MB. Please choose another file.";
+        },
+        fileTypeInvalid: function (accept) {
+            return "File format is not allowed. Only " +
+                (accept ? accept : "") +
+                " files are allowed.";
+        },
+        invalidResponseFromServer: function () { return "Invalid response from server"; }
     };
 }
 function removeEventHandler(el, event, handler) {
@@ -100,7 +114,7 @@ function removeEventHandler(el, event, handler) {
     else {
         var elem = el;
         if (elem.detachEvent) {
-            elem.detachEvent('on' + event, handler);
+            elem.detachEvent("on" + event, handler);
         }
         else {
             elem[event] = null;
@@ -108,7 +122,7 @@ function removeEventHandler(el, event, handler) {
     }
 }
 exports.removeEventHandler = removeEventHandler;
-var UploadArea = (function () {
+var UploadArea = /** @class */ (function () {
     function UploadArea(targetElement, options, uploader) {
         this.targetElement = targetElement;
         this.options = applyDefaults(options, this.defaultOptions());
@@ -118,7 +132,7 @@ var UploadArea = (function () {
             this.setupFileApiElements();
         }
         else {
-            throw 'Only browsers with FileAPI supported.';
+            throw "Only browsers with FileAPI supported.";
         }
     }
     UploadArea.prototype.start = function (autoClear) {
@@ -147,7 +161,8 @@ var UploadArea = (function () {
             this.unregisterOnDragOverGlobal();
         if (this.unregisterOnDragLeaveGlobal)
             this.unregisterOnDragLeaveGlobal();
-        document.body.removeChild(this.fileInput);
+        if (this.fileInput)
+            document.body.removeChild(this.fileInput);
     };
     UploadArea.prototype.defaultOptions = function () {
         return {
@@ -155,7 +170,7 @@ var UploadArea = (function () {
             maxFileSize: 1024,
             allowDragDrop: true,
             clickable: true,
-            accept: '*.*',
+            accept: "*.*",
             validateExtension: false,
             multiple: true,
             allowEmptyFile: false
@@ -180,15 +195,17 @@ var UploadArea = (function () {
             file.guid = newGuid();
             delete file.uploadStatus;
             file.url = _this.uploadCore.getUrl(file);
-            file.onError = _this.options.onFileError || (function () { ; });
-            file.onCancel = _this.options.onFileCanceled || (function () { ; });
+            file.onError = _this.options.onFileError || (function () { });
+            file.onCancel = _this.options.onFileCanceled || (function () { });
             if (_this.validateFile(file)) {
                 file.start = function () {
                     _this.uploadCore.upload([file]);
                     if (_this.options.onFileAdded) {
                         _this.options.onFileAdded(file);
                     }
-                    file.start = function () { return; };
+                    file.start = function () {
+                        return;
+                    };
                 };
             }
             else {
@@ -212,15 +229,18 @@ var UploadArea = (function () {
     };
     UploadArea.prototype.setupFileApiElements = function () {
         var _this = this;
-        this.fileInput = document.createElement('input');
-        this.fileInput.setAttribute('type', 'file');
-        this.fileInput.setAttribute('accept', this.options.accept ? this.options.accept : '');
-        this.fileInput.style.display = 'none';
+        this.fileInput = document.createElement("input");
+        this.fileInput.setAttribute("type", "file");
+        this.fileInput.setAttribute("accept", this.options.accept ? this.options.accept : "");
+        this.fileInput.style.display = "none";
         var onChange = function (e) { return _this.onChange(e); };
-        addEventHandler(this.fileInput, 'change', onChange);
-        this.unregisterOnChange = function () { return removeEventHandler(_this.fileInput, 'change', onchange); };
+        addEventHandler(this.fileInput, "change", onChange);
+        this.unregisterOnChange = function () {
+            if (_this.fileInput)
+                removeEventHandler(_this.fileInput, "change", onchange);
+        };
         if (this.options.multiple) {
-            this.fileInput.setAttribute('multiple', '');
+            this.fileInput.setAttribute("multiple", "");
         }
         this.registerEvents();
         // attach to body
@@ -229,23 +249,39 @@ var UploadArea = (function () {
     UploadArea.prototype.registerEvents = function () {
         var _this = this;
         var onClick = function () { return _this.onClick(); };
-        addEventHandler(this.targetElement, 'click', onClick);
-        this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, 'click', onClick); };
-        var onDrag = function (e) { return _this.onDrag(e); };
-        addEventHandler(this.targetElement, 'dragover', onDrag);
-        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, 'dragover', onDrag); };
+        addEventHandler(this.targetElement, "click", onClick);
+        this.unregisterOnClick = function () {
+            return removeEventHandler(_this.targetElement, "click", onClick);
+        };
+        var onDrag = (function (e) {
+            return _this.onDrag(e);
+        });
+        addEventHandler(this.targetElement, "dragover", onDrag);
+        this.unregisterOnDragOver = function () {
+            return removeEventHandler(_this.targetElement, "dragover", onDrag);
+        };
         var onDragLeave = function () { return _this.onDragLeave(); };
-        addEventHandler(this.targetElement, 'dragleave', onDragLeave);
-        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, 'dragleave', onDragLeave); };
+        addEventHandler(this.targetElement, "dragleave", onDragLeave);
+        this.unregisterOnDragOver = function () {
+            return removeEventHandler(_this.targetElement, "dragleave", onDragLeave);
+        };
         var onDragGlobal = function () { return _this.onDragGlobal(); };
-        addEventHandler(document.body, 'dragover', onDragGlobal);
-        this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, 'dragover', onDragGlobal); };
+        addEventHandler(document.body, "dragover", onDragGlobal);
+        this.unregisterOnDragOverGlobal = function () {
+            return removeEventHandler(document.body, "dragover", onDragGlobal);
+        };
         var onDragLeaveGlobal = function () { return _this.onDragLeaveGlobal(); };
-        addEventHandler(document.body, 'dragleave', onDragLeaveGlobal);
-        this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, 'dragleave', onDragLeaveGlobal); };
-        var onDrop = function (e) { return _this.onDrop(e); };
-        addEventHandler(this.targetElement, 'drop', onDrop);
-        this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, 'drop', onDrop); };
+        addEventHandler(document.body, "dragleave", onDragLeaveGlobal);
+        this.unregisterOnDragOverGlobal = function () {
+            return removeEventHandler(document.body, "dragleave", onDragLeaveGlobal);
+        };
+        var onDrop = (function (e) {
+            return _this.onDrop(e);
+        });
+        addEventHandler(this.targetElement, "drop", onDrop);
+        this.unregisterOnDrop = function () {
+            return removeEventHandler(_this.targetElement, "drop", onDrop);
+        };
     };
     UploadArea.prototype.onChange = function (e) {
         this.selectFiles(e.target.files);
@@ -258,10 +294,9 @@ var UploadArea = (function () {
         try {
             efct = e.dataTransfer.effectAllowed;
         }
-        catch (err) {
-            ;
-        }
-        e.dataTransfer.dropEffect = 'move' === efct || 'linkMove' === efct ? 'move' : 'copy';
+        catch (err) { }
+        e.dataTransfer.dropEffect =
+            "move" === efct || "linkMove" === efct ? "move" : "copy";
         this.stopEventPropagation(e);
     };
     UploadArea.prototype.onDragLeave = function () {
@@ -302,7 +337,9 @@ var UploadArea = (function () {
             if (!this.options.multiple)
                 files = [files[0]];
             var items = e.dataTransfer.items;
-            if (items && items.length && (items[0].webkitGetAsEntry !== null)) {
+            if (items &&
+                items.length &&
+                items[0].webkitGetAsEntry !== null) {
                 if (!this.options.multiple) {
                     var newItems = [items[0]];
                     this.addFilesFromItems(newItems);
@@ -317,15 +354,18 @@ var UploadArea = (function () {
         }
     };
     UploadArea.prototype.isIeVersion = function (v) {
-        return RegExp('msie' + (!isNaN(v) ? ('\\s' + v.toString()) : ''), 'i').test(navigator.userAgent);
+        return RegExp("msie" + (!isNaN(v) ? "\\s" + v.toString() : ""), "i").test(navigator.userAgent);
     };
     UploadArea.prototype.onClick = function () {
         var _this = this;
-        if (!getValueOrResult(this.options.clickable))
+        if (!getValueOrResult(this.options.clickable) || !this.fileInput)
             return;
-        this.fileInput.value = '';
+        this.fileInput.value = "";
         if (this.isIeVersion(10)) {
-            setTimeout(function () { _this.fileInput.click(); }, 200);
+            setTimeout(function () {
+                if (_this.fileInput)
+                    _this.fileInput.click();
+            }, 200);
         }
         else {
             this.fileInput.click();
@@ -335,7 +375,8 @@ var UploadArea = (function () {
         var entry;
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
-            if ((item.webkitGetAsEntry) && (entry = item.webkitGetAsEntry())) {
+            if (item.webkitGetAsEntry &&
+                (entry = item.webkitGetAsEntry())) {
                 if (entry.isFile) {
                     this.selectFiles([item.getAsFile()]);
                 }
@@ -344,7 +385,7 @@ var UploadArea = (function () {
                 }
             }
             else if (item.getAsFile) {
-                if (!item.kind || item.kind === 'file') {
+                if (!item.kind || item.kind === "file") {
                     this.selectFiles([item.getAsFile()]);
                 }
             }
@@ -358,21 +399,21 @@ var UploadArea = (function () {
                 var entry = entries[i];
                 if (entry.isFile) {
                     entry.file(function (file) {
-                        if (file.name.substring(0, 1) === '.') {
+                        if (file.name.substring(0, 1) === ".") {
                             return;
                         }
-                        file.fullPath = '' + path + '/' + file.name;
+                        file.fullPath = "" + path + "/" + file.name;
                         self.selectFiles([file]);
                     });
                 }
                 else if (entry.isDirectory) {
-                    self.processDirectory(entry, '' + path + '/' + entry.name);
+                    self.processDirectory(entry, "" + path + "/" + entry.name);
                 }
             }
         };
         dirReader.readEntries(entryReader, function (error) {
-            return typeof console !== 'undefined' && console !== null
-                ? typeof console.log === 'function' ? console.log(error) : void 0
+            return typeof console !== "undefined" && console !== null
+                ? typeof console.log === "function" ? console.log(error) : void 0
                 : void 0;
         });
     };
@@ -383,20 +424,26 @@ var UploadArea = (function () {
     };
     UploadArea.prototype.isFileSizeValid = function (file) {
         var maxFileSize = this.options.maxFileSize * 1024 * 1024; // max file size in bytes
-        if (file.size > maxFileSize || (!this.options.allowEmptyFile && file.size === 0))
+        if (file.size > maxFileSize ||
+            (!this.options.allowEmptyFile && file.size === 0))
             return false;
         return true;
     };
     UploadArea.prototype.isFileTypeInvalid = function (file) {
-        if (file.name && this.options.accept && (this.options.accept.trim() !== '*' || this.options.accept.trim() !== '*.*') &&
-            this.options.validateExtension && this.options.accept.indexOf('/') === -1) {
-            var acceptedExtensions = this.options.accept.split(',');
-            var fileExtension = file.name.substring(file.name.lastIndexOf('.'), file.name.length);
-            if (fileExtension.indexOf('.') === -1)
+        if (file.name &&
+            this.options.accept &&
+            (this.options.accept.trim() !== "*" ||
+                this.options.accept.trim() !== "*.*") &&
+            this.options.validateExtension &&
+            this.options.accept.indexOf("/") === -1) {
+            var acceptedExtensions = this.options.accept.split(",");
+            var fileExtension = file.name.substring(file.name.lastIndexOf("."), file.name.length);
+            if (fileExtension.indexOf(".") === -1)
                 return true;
             var isFileExtensionExisted = true;
             for (var i = 0; i < acceptedExtensions.length; i++) {
-                if (acceptedExtensions[i].toUpperCase().trim() === fileExtension.toUpperCase()) {
+                if (acceptedExtensions[i].toUpperCase().trim() ===
+                    fileExtension.toUpperCase()) {
                     isFileExtensionExisted = false;
                 }
             }
@@ -416,7 +463,7 @@ var UploadArea = (function () {
     return UploadArea;
 }());
 exports.UploadArea = UploadArea;
-var UploadCore = (function () {
+var UploadCore = /** @class */ (function () {
     function UploadCore(options, callbacks) {
         if (callbacks === void 0) { callbacks = {}; }
         this.callbacks = callbacks;
@@ -431,7 +478,7 @@ var UploadCore = (function () {
         files.forEach(function (file) { return _this.processFile(file); });
     };
     UploadCore.prototype.getUrl = function (file) {
-        return typeof this.options.url === 'function'
+        return typeof this.options.url === "function"
             ? this.options.url(file)
             : this.options.url;
     };
@@ -452,18 +499,18 @@ var UploadCore = (function () {
         var _this = this;
         if (!this.options.headers)
             return;
-        if (!this.options.headers['Accept'])
-            xhr.setRequestHeader('Accept', 'application/json');
-        if (!this.options.headers['Cache-Control'])
-            xhr.setRequestHeader('Cache-Control', 'no-cache');
-        if (!this.options.headers['X-Requested-With'])
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        if (!this.options.headers["Accept"])
+            xhr.setRequestHeader("Accept", "application/json");
+        if (!this.options.headers["Cache-Control"])
+            xhr.setRequestHeader("Cache-Control", "no-cache");
+        if (!this.options.headers["X-Requested-With"])
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
         Object.keys(this.options.headers).forEach(function (headerName) {
             if (!_this.options.headers)
                 return;
             var headerValue = _this.options.headers[headerName];
             if (headerValue !== undefined && headerValue !== null)
-                xhr.setRequestHeader(headerName, (headerValue || '').toString());
+                xhr.setRequestHeader(headerName, (headerValue || "").toString());
         });
     };
     UploadCore.prototype.setCallbacks = function (xhr, file) {
@@ -504,17 +551,19 @@ var UploadCore = (function () {
                     formData.append(paramName, _this.castParamType(paramValue));
             });
         }
-        formData.append('file', file, file.name);
+        formData.append("file", file, file.name);
         return formData;
     };
     UploadCore.prototype.castParamType = function (param) {
-        return this.isBoolean(param) || this.isNumber(param) ? param.toString() : param;
+        return this.isBoolean(param) || this.isNumber(param)
+            ? param.toString()
+            : param;
     };
     UploadCore.prototype.isNumber = function (param) {
-        return typeof param === 'number';
+        return typeof param === "number";
     };
     UploadCore.prototype.isBoolean = function (param) {
-        return typeof param === 'number';
+        return typeof param === "number";
     };
     UploadCore.prototype.handleError = function (file, xhr) {
         file.uploadStatus = UploadStatus.failed;
@@ -569,12 +618,14 @@ var UploadCore = (function () {
         if (this.callbacks.onFinishedCallback)
             this.callbacks.onFinishedCallback(file);
     };
-    ;
     UploadCore.prototype.setResponse = function (file, xhr) {
         file.responseCode = xhr.status;
-        file.responseText = xhr.responseText || xhr.statusText || (xhr.status
-            ? xhr.status.toString()
-            : '' || this.options.localizer.invalidResponseFromServer());
+        file.responseText =
+            xhr.responseText ||
+                xhr.statusText ||
+                (xhr.status
+                    ? xhr.status.toString()
+                    : "" || this.options.localizer.invalidResponseFromServer());
     };
     UploadCore.prototype.getDefaultOptions = function () {
         return {
@@ -585,44 +636,46 @@ var UploadCore = (function () {
         };
     };
     UploadCore.prototype.setFullCallbacks = function (callbacks) {
-        this.callbacks.onProgressCallback = callbacks.onProgressCallback || (function () { return; });
-        this.callbacks.onCancelledCallback = callbacks.onCancelledCallback || (function () { return; });
-        this.callbacks.onFinishedCallback = callbacks.onFinishedCallback || (function () { return; });
-        this.callbacks.onUploadedCallback = callbacks.onUploadedCallback || (function () { return; });
-        this.callbacks.onErrorCallback = callbacks.onErrorCallback || (function () { return; });
-        this.callbacks.onUploadStartedCallback = callbacks.onUploadStartedCallback || (function () { return; });
-        this.callbacks.onFileStateChangedCallback = callbacks.onFileStateChangedCallback || (function () { return; });
+        this.callbacks.onProgressCallback =
+            callbacks.onProgressCallback ||
+                (function () {
+                    return;
+                });
+        this.callbacks.onCancelledCallback =
+            callbacks.onCancelledCallback ||
+                (function () {
+                    return;
+                });
+        this.callbacks.onFinishedCallback =
+            callbacks.onFinishedCallback ||
+                (function () {
+                    return;
+                });
+        this.callbacks.onUploadedCallback =
+            callbacks.onUploadedCallback ||
+                (function () {
+                    return;
+                });
+        this.callbacks.onErrorCallback =
+            callbacks.onErrorCallback ||
+                (function () {
+                    return;
+                });
+        this.callbacks.onUploadStartedCallback =
+            callbacks.onUploadStartedCallback ||
+                (function () {
+                    return;
+                });
+        this.callbacks.onFileStateChangedCallback =
+            callbacks.onFileStateChangedCallback ||
+                (function () {
+                    return;
+                });
     };
     return UploadCore;
 }());
 exports.UploadCore = UploadCore;
-var Uploader = (function () {
-    function Uploader(options, callbacks) {
-        if (options === void 0) { options = {}; }
-        if (callbacks === void 0) { callbacks = {}; }
-        this.setOptions(options);
-        this.uploadAreas = [];
-        this.queue = new UploadQueue(options, callbacks);
-    }
-    Uploader.prototype.setOptions = function (options) {
-        this.options = options;
-    };
-    Uploader.prototype.registerArea = function (element, options) {
-        var uploadArea = new UploadArea(element, options, this);
-        this.uploadAreas.push(uploadArea);
-        return uploadArea;
-    };
-    Uploader.prototype.unregisterArea = function (area) {
-        var areaIndex = this.uploadAreas.indexOf(area);
-        if (areaIndex >= 0) {
-            this.uploadAreas[areaIndex].destroy();
-            this.uploadAreas.splice(areaIndex, 1);
-        }
-    };
-    return Uploader;
-}());
-exports.Uploader = Uploader;
-var UploadQueue = (function () {
+var UploadQueue = /** @class */ (function () {
     function UploadQueue(options, callbacks) {
         this.offset = { fileCount: 0, running: false };
         this.queuedFiles = [];
@@ -634,7 +687,10 @@ var UploadQueue = (function () {
     UploadQueue.prototype.addFiles = function (files) {
         var _this = this;
         files.forEach(function (file) {
-            if (!_this.queuedFiles.some(function (queuedFile) { return queuedFile === file || (!!queuedFile.guid && queuedFile.guid === file.guid); })) {
+            if (!_this.queuedFiles.some(function (queuedFile) {
+                return queuedFile === file ||
+                    (!!queuedFile.guid && queuedFile.guid === file.guid);
+            })) {
                 _this.queuedFiles.push(file);
                 file.remove = decorateSimpleFunction(file.remove, function () {
                     _this.removeFile(file);
@@ -670,7 +726,10 @@ var UploadQueue = (function () {
         if (excludeStatuses === void 0) { excludeStatuses = []; }
         if (cancelProcessing === void 0) { cancelProcessing = false; }
         if (!cancelProcessing)
-            excludeStatuses = excludeStatuses.concat([UploadStatus.queued, UploadStatus.uploading]);
+            excludeStatuses = excludeStatuses.concat([
+                UploadStatus.queued,
+                UploadStatus.uploading
+            ]);
         this.queuedFiles
             .filter(function (file) { return excludeStatuses.indexOf(file.uploadStatus) < 0; })
             .forEach(function (file) { return _this.removeFile(file, true); });
@@ -687,8 +746,9 @@ var UploadQueue = (function () {
         this.checkAllFinished();
     };
     UploadQueue.prototype.checkAllFinished = function () {
-        var unfinishedFiles = this.queuedFiles
-            .filter(function (file) { return [UploadStatus.queued, UploadStatus.uploading].indexOf(file.uploadStatus) >= 0; });
+        var unfinishedFiles = this.queuedFiles.filter(function (file) {
+            return [UploadStatus.queued, UploadStatus.uploading].indexOf(file.uploadStatus) >= 0;
+        });
         if (unfinishedFiles.length === 0 && this.callbacks.onAllFinishedCallback) {
             this.callbacks.onAllFinishedCallback();
         }
@@ -701,10 +761,26 @@ var UploadQueue = (function () {
     };
     UploadQueue.prototype.setFullCallbacks = function () {
         var _this = this;
-        this.callbacks.onFileAddedCallback = this.callbacks.onFileAddedCallback || (function () { return; });
-        this.callbacks.onFileRemovedCallback = this.callbacks.onFileRemovedCallback || (function () { return; });
-        this.callbacks.onAllFinishedCallback = this.callbacks.onAllFinishedCallback || (function () { return; });
-        this.callbacks.onQueueChangedCallback = this.callbacks.onQueueChangedCallback || (function () { return; });
+        this.callbacks.onFileAddedCallback =
+            this.callbacks.onFileAddedCallback ||
+                (function () {
+                    return;
+                });
+        this.callbacks.onFileRemovedCallback =
+            this.callbacks.onFileRemovedCallback ||
+                (function () {
+                    return;
+                });
+        this.callbacks.onAllFinishedCallback =
+            this.callbacks.onAllFinishedCallback ||
+                (function () {
+                    return;
+                });
+        this.callbacks.onQueueChangedCallback =
+            this.callbacks.onQueueChangedCallback ||
+                (function () {
+                    return;
+                });
         this.callbacks.onFileStateChangedCallback = function () { return _this.filesChanged(); };
     };
     UploadQueue.prototype.startWaitingFiles = function () {
@@ -713,16 +789,24 @@ var UploadQueue = (function () {
     UploadQueue.prototype.removeFinishedFiles = function () {
         var _this = this;
         this.queuedFiles
-            .filter(function (file) { return [UploadStatus.uploaded, UploadStatus.canceled].indexOf(file.uploadStatus) >= 0; })
+            .filter(function (file) {
+            return [UploadStatus.uploaded, UploadStatus.canceled].indexOf(file.uploadStatus) >= 0;
+        })
             .forEach(function (file) { return _this.removeFile(file, true); });
     };
     UploadQueue.prototype.deactivateFile = function (file) {
         if (file.uploadStatus === UploadStatus.uploading)
             file.cancel();
         file.uploadStatus = UploadStatus.removed;
-        file.cancel = function () { return; };
-        file.remove = function () { return; };
-        file.start = function () { return; };
+        file.cancel = function () {
+            return;
+        };
+        file.remove = function () {
+            return;
+        };
+        file.start = function () {
+            return;
+        };
     };
     UploadQueue.prototype.getWaitingFiles = function () {
         if (!this.options.autoStart)
@@ -738,7 +822,8 @@ var UploadQueue = (function () {
                 if (!this.offset.running) {
                     this.startOffset();
                 }
-                count = Math.min(this.offset.fileCount + count, this.options.maxParallelUploads) - this.offset.fileCount;
+                count =
+                    Math.min(this.offset.fileCount + count, this.options.maxParallelUploads) - this.offset.fileCount;
                 this.offset.fileCount += count;
             }
             result = result.slice(0, count);
@@ -767,3 +852,26 @@ var UploadStatus;
     UploadStatus[UploadStatus["canceled"] = 4] = "canceled";
     UploadStatus[UploadStatus["removed"] = 5] = "removed";
 })(UploadStatus = exports.UploadStatus || (exports.UploadStatus = {}));
+var Uploader = /** @class */ (function () {
+    function Uploader(options, callbacks) {
+        if (options === void 0) { options = {}; }
+        if (callbacks === void 0) { callbacks = {}; }
+        this.options = options;
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options, callbacks);
+    }
+    Uploader.prototype.registerArea = function (element, options) {
+        var uploadArea = new UploadArea(element, options, this);
+        this.uploadAreas.push(uploadArea);
+        return uploadArea;
+    };
+    Uploader.prototype.unregisterArea = function (area) {
+        var areaIndex = this.uploadAreas.indexOf(area);
+        if (areaIndex >= 0) {
+            this.uploadAreas[areaIndex].destroy();
+            this.uploadAreas.splice(areaIndex, 1);
+        }
+    };
+    return Uploader;
+}());
+exports.Uploader = Uploader;

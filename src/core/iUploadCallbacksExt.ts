@@ -1,3 +1,3 @@
 interface IUploadCallbacksExt extends IUploadCallbacks {
-    onFileStateChangedCallback?: (file: IUploadFile) => void;
+  onFileStateChangedCallback?: (file: IUploadFile) => void;
 }

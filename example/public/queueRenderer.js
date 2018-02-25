@@ -1,66 +1,66 @@
+"use strict";
 function getQueueRenderer() {
     return new QueueRenderer();
 }
-;
-var QueueRenderer = (function () {
+var QueueRenderer = /** @class */ (function () {
     function QueueRenderer() {
     }
     QueueRenderer.prototype.createTextDiv = function (className, value) {
-        var element = document.createElement('div');
+        var element = document.createElement("div");
         element.className = className;
         element.innerHTML = value;
         return element;
     };
     QueueRenderer.prototype.createButton = function (value, callback) {
-        var element = document.createElement('button');
-        element.className = 'table-row-button';
+        var element = document.createElement("button");
+        element.className = "table-row-button";
         element.innerHTML = value;
-        pu.addEventHandler(element, 'click', callback);
+        pu.addEventHandler(element, "click", callback);
         return element;
     };
     QueueRenderer.prototype.createQueueRow = function (file, queueSettings) {
-        var itemRow = document.createElement('div');
+        var itemRow = document.createElement("div");
         itemRow.id = file.guid;
-        itemRow.className = 'table-row-item';
+        itemRow.className = "table-row-item";
         this.renderQueueRowContent(itemRow, file, queueSettings);
         return itemRow;
     };
     QueueRenderer.prototype.translateFileStatus = function (file) {
         switch (file.uploadStatus) {
             case pu.UploadStatus.queued:
-                return 'Queued';
+                return "Queued";
             case pu.UploadStatus.uploading:
-                return 'Uploading';
+                return "Uploading";
             case pu.UploadStatus.uploaded:
-                return 'Uploaded';
+                return "Uploaded";
             case pu.UploadStatus.failed:
-                return 'Failed';
+                return "Failed";
             case pu.UploadStatus.canceled:
-                return 'Canceled';
+                return "Canceled";
         }
-        return 'Unknown';
+        return "Unknown";
     };
     QueueRenderer.prototype.renderQueueRowContent = function (itemRow, file, queueSettings) {
         while (itemRow.firstChild)
             itemRow.removeChild(itemRow.firstChild);
-        itemRow.appendChild(this.createTextDiv('table-row-item-status', this.translateFileStatus(file)));
-        itemRow.appendChild(this.createTextDiv('table-row-item-name', file.name));
-        itemRow.appendChild(this.createTextDiv('table-row-item-progress', file.progress.toString() + '%'));
+        itemRow.appendChild(this.createTextDiv("table-row-item-status", this.translateFileStatus(file)));
+        itemRow.appendChild(this.createTextDiv("table-row-item-name", file.name));
+        itemRow.appendChild(this.createTextDiv("table-row-item-progress", file.progress.toString() + "%"));
         switch (file.uploadStatus) {
             case pu.UploadStatus.queued:
                 if (!queueSettings.autoStart) {
-                    itemRow.appendChild(this.createButton('Start', function () { return file.start(); }));
+                    itemRow.appendChild(this.createButton("Start", function () { return file.start(); }));
                     break;
                 }
-                itemRow.appendChild(this.createButton('Cancel', function () { return file.cancel(); }));
+                itemRow.appendChild(this.createButton("Cancel", function () { return file.cancel(); }));
                 break;
             case pu.UploadStatus.uploading:
-                itemRow.appendChild(this.createButton('Cancel', function () { return file.cancel(); }));
+                itemRow.appendChild(this.createButton("Cancel", function () { return file.cancel(); }));
                 break;
             case pu.UploadStatus.uploaded:
             case pu.UploadStatus.failed:
             case pu.UploadStatus.canceled:
-                itemRow.appendChild(this.createButton('Delete', function () { return file.remove(); }));
+                itemRow.appendChild(this.createButton("Delete", function () { return file.remove(); }));
                 break;
         }
     };
@@ -70,8 +70,9 @@ var QueueRenderer = (function () {
             return;
         for (var i = 0; i < itemRow.childNodes.length; i++) {
             var node = itemRow.childNodes[i];
-            if (node.attributes.getNamedItem('class').value === 'table-row-item-progress') {
-                node.textContent = file.progress.toString() + '%';
+            if (node.attributes.getNamedItem("class").value ===
+                "table-row-item-progress") {
+                node.textContent = file.progress.toString() + "%";
                 break;
             }
         }
@@ -83,7 +84,7 @@ var QueueRenderer = (function () {
             return;
         while (queue.firstChild)
             queue.removeChild(queue.firstChild);
-        queue.appendChild(this.createTextDiv('table-header-title', queueTitle));
+        queue.appendChild(this.createTextDiv("table-header-title", queueTitle));
         files.forEach(function (file) {
             if (queue)
                 queue.appendChild(_this.createQueueRow(file, queueSettings));

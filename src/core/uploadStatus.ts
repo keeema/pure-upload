@@ -1,8 +1,8 @@
 enum UploadStatus {
-    queued,
-    uploading,
-    uploaded,
-    failed,
-    canceled,
-    removed
+  queued,
+  uploading,
+  uploaded,
+  failed,
+  canceled,
+  removed
 }

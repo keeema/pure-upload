@@ -1,6 +1,6 @@
 {
   "name": "pure-upload",
-  "version": "4.2.1",
+  "version": "5.0.0",
   "description": "The pure upload library without dependencies",
   "author": {
     "name": "t.rut"
@@ -10,10 +10,6 @@
     {
       "name": "Tomáš Růt",
       "email": "trut.cz@gmail.com"
-    },
-    {
-      "name": "Marek Horyna",
-      "email": "marek.horyna@outlook.com"
     }
   ],
   "repository": {
@@ -34,12 +30,11 @@
   ],
   "devDependencies": {
     "@types/cors": "^2.8.0",
-    "@types/jasmine": "^2.5.43",
-    "@types/karma": "^0.13.33",
+    "@types/jasmine": "^2.8.6",
     "@types/multer": "0.0.33",
     "cors": "^2.8.1",
     "express": "^4.14.1",
-    "gulp": "^3.9.0",
+    "gulp": "^3.9.1",
     "gulp-clean": "^0.3.1",
     "gulp-concat": "^2.6.0",
     "gulp-copy": "0.0.2",
@@ -62,6 +57,7 @@
     "multer": "^1.3.0",
     "phantomjs": "^2.1.7",
     "run-sequence": "^1.1.2",
-    "typescript": "^2.3.1"
-  }
+    "typescript": "^2.7.2"
+  },
+  "dependencies": {}
 }
