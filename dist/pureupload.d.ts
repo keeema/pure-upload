@@ -1,4 +1,12 @@
 declare module pu {
+    function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject): void;
+    const isFileApi: boolean;
+    function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
+    function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+    function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
+    function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
+    function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
+    function newGuid(): string;
     interface IFileExt extends File {
         kind: string;
         webkitGetAsEntry: () => File;
@@ -9,14 +17,6 @@ declare module pu {
         isDirectory: boolean;
         fullPath: string;
     }
-    function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject): void;
-    const isFileApi: boolean;
-    function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
-    function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-    function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
-    function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
-    function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
-    function newGuid(): string;
     interface IFullUploadAreaOptions extends IUploadAreaOptions {
         maxFileSize: number;
         allowDragDrop: boolean | (() => boolean);
@@ -177,6 +177,14 @@ declare module pu {
         private getDefaultOptions();
         private setFullCallbacks(callbacks);
     }
+    class Uploader {
+        uploadAreas: UploadArea[];
+        queue: UploadQueue;
+        options: IUploadQueueOptions;
+        constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
+        registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
+        unregisterArea(area: UploadArea): void;
+    }
     class UploadQueue {
         offset: IOffsetInfo;
         options: IUploadQueueOptions;
@@ -203,13 +211,5 @@ declare module pu {
         failed = 3,
         canceled = 4,
         removed = 5,
-    }
-    class Uploader {
-        uploadAreas: UploadArea[];
-        queue: UploadQueue;
-        options: IUploadQueueOptions;
-        constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
-        registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
-        unregisterArea(area: UploadArea): void;
     }
 }

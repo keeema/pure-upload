@@ -1,14 +1,3 @@
-export interface IFileExt extends File {
-  kind: string;
-  webkitGetAsEntry: () => File;
-  getAsFile: () => File;
-  file: (callback: (file: IFileExt) => void) => void;
-  createReader: Function;
-  isFile: boolean;
-  isDirectory: boolean;
-  fullPath: string;
-}
-
 export function addEventHandler(
   el: Element | HTMLElement,
   event: string,
@@ -133,6 +122,17 @@ export function newGuid(): string {
     /* tslint:enable */
   });
   return uuid;
+}
+
+export interface IFileExt extends File {
+  kind: string;
+  webkitGetAsEntry: () => File;
+  getAsFile: () => File;
+  file: (callback: (file: IFileExt) => void) => void;
+  createReader: Function;
+  isFile: boolean;
+  isDirectory: boolean;
+  fullPath: string;
 }
 
 export interface IFullUploadAreaOptions extends IUploadAreaOptions {
@@ -419,7 +419,7 @@ export class UploadArea {
     addEventHandler(this.fileInput, "change", onChange);
     this.unregisterOnChange = () => {
       if (this.fileInput)
-        removeEventHandler(this.fileInput, "change", onchange);
+        removeEventHandler(this.fileInput, "change", onchange as EventListener);
     };
 
     if (this.options.multiple) {
@@ -907,6 +907,35 @@ export class UploadCore {
   }
 }
 
+export class Uploader {
+  uploadAreas: UploadArea[];
+  queue: UploadQueue;
+  options: IUploadQueueOptions;
+
+  constructor(
+    options: IUploadQueueOptions = {},
+    callbacks: IUploadQueueCallbacks = {}
+  ) {
+    this.options = options;
+    this.uploadAreas = [];
+    this.queue = new UploadQueue(options, callbacks);
+  }
+
+  registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea {
+    const uploadArea = new UploadArea(element, options, this);
+    this.uploadAreas.push(uploadArea);
+    return uploadArea;
+  }
+
+  unregisterArea(area: UploadArea): void {
+    const areaIndex = this.uploadAreas.indexOf(area);
+    if (areaIndex >= 0) {
+      this.uploadAreas[areaIndex].destroy();
+      this.uploadAreas.splice(areaIndex, 1);
+    }
+  }
+}
+
 export class UploadQueue {
   offset: IOffsetInfo = { fileCount: 0, running: false };
   options: IUploadQueueOptions;
@@ -1133,33 +1162,4 @@ export enum UploadStatus {
   failed,
   canceled,
   removed
-}
-
-export class Uploader {
-  uploadAreas: UploadArea[];
-  queue: UploadQueue;
-  options: IUploadQueueOptions;
-
-  constructor(
-    options: IUploadQueueOptions = {},
-    callbacks: IUploadQueueCallbacks = {}
-  ) {
-    this.options = options;
-    this.uploadAreas = [];
-    this.queue = new UploadQueue(options, callbacks);
-  }
-
-  registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea {
-    const uploadArea = new UploadArea(element, options, this);
-    this.uploadAreas.push(uploadArea);
-    return uploadArea;
-  }
-
-  unregisterArea(area: UploadArea): void {
-    const areaIndex = this.uploadAreas.indexOf(area);
-    if (areaIndex >= 0) {
-      this.uploadAreas[areaIndex].destroy();
-      this.uploadAreas.splice(areaIndex, 1);
-    }
-  }
 }

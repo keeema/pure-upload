@@ -1,4 +1,12 @@
 declare module "pure-upload" {
+export function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject): void;
+export const isFileApi: boolean;
+export function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
+export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+export function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
+export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
+export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
+export function newGuid(): string;
 export interface IFileExt extends File {
     kind: string;
     webkitGetAsEntry: () => File;
@@ -9,14 +17,6 @@ export interface IFileExt extends File {
     isDirectory: boolean;
     fullPath: string;
 }
-export function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject): void;
-export const isFileApi: boolean;
-export function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
-export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-export function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
-export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
-export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
-export function newGuid(): string;
 export interface IFullUploadAreaOptions extends IUploadAreaOptions {
     maxFileSize: number;
     allowDragDrop: boolean | (() => boolean);
@@ -177,6 +177,14 @@ export class UploadCore {
     private getDefaultOptions();
     private setFullCallbacks(callbacks);
 }
+export class Uploader {
+    uploadAreas: UploadArea[];
+    queue: UploadQueue;
+    options: IUploadQueueOptions;
+    constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
+    registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
+    unregisterArea(area: UploadArea): void;
+}
 export class UploadQueue {
     offset: IOffsetInfo;
     options: IUploadQueueOptions;
@@ -203,13 +211,5 @@ export enum UploadStatus {
     failed = 3,
     canceled = 4,
     removed = 5,
-}
-export class Uploader {
-    uploadAreas: UploadArea[];
-    queue: UploadQueue;
-    options: IUploadQueueOptions;
-    constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
-    registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
-    unregisterArea(area: UploadArea): void;
 }
 }

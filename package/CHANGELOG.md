@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.0.1
+
+Updated TS to 2.8.1.
+
 ## 5.0.0
 
 Updated environment.

@@ -676,6 +676,29 @@ var pu;
         return UploadCore;
     }());
     pu.UploadCore = UploadCore;
+    var Uploader = /** @class */ (function () {
+        function Uploader(options, callbacks) {
+            if (options === void 0) { options = {}; }
+            if (callbacks === void 0) { callbacks = {}; }
+            this.options = options;
+            this.uploadAreas = [];
+            this.queue = new UploadQueue(options, callbacks);
+        }
+        Uploader.prototype.registerArea = function (element, options) {
+            var uploadArea = new UploadArea(element, options, this);
+            this.uploadAreas.push(uploadArea);
+            return uploadArea;
+        };
+        Uploader.prototype.unregisterArea = function (area) {
+            var areaIndex = this.uploadAreas.indexOf(area);
+            if (areaIndex >= 0) {
+                this.uploadAreas[areaIndex].destroy();
+                this.uploadAreas.splice(areaIndex, 1);
+            }
+        };
+        return Uploader;
+    }());
+    pu.Uploader = Uploader;
     var UploadQueue = /** @class */ (function () {
         function UploadQueue(options, callbacks) {
             this.offset = { fileCount: 0, running: false };
@@ -853,27 +876,4 @@ var pu;
         UploadStatus[UploadStatus["canceled"] = 4] = "canceled";
         UploadStatus[UploadStatus["removed"] = 5] = "removed";
     })(UploadStatus = pu.UploadStatus || (pu.UploadStatus = {}));
-    var Uploader = /** @class */ (function () {
-        function Uploader(options, callbacks) {
-            if (options === void 0) { options = {}; }
-            if (callbacks === void 0) { callbacks = {}; }
-            this.options = options;
-            this.uploadAreas = [];
-            this.queue = new UploadQueue(options, callbacks);
-        }
-        Uploader.prototype.registerArea = function (element, options) {
-            var uploadArea = new UploadArea(element, options, this);
-            this.uploadAreas.push(uploadArea);
-            return uploadArea;
-        };
-        Uploader.prototype.unregisterArea = function (area) {
-            var areaIndex = this.uploadAreas.indexOf(area);
-            if (areaIndex >= 0) {
-                this.uploadAreas[areaIndex].destroy();
-                this.uploadAreas.splice(areaIndex, 1);
-            }
-        };
-        return Uploader;
-    }());
-    pu.Uploader = Uploader;
 })(pu || (pu = {}));

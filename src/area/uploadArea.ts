@@ -143,7 +143,7 @@ class UploadArea {
     addEventHandler(this.fileInput, "change", onChange);
     this.unregisterOnChange = () => {
       if (this.fileInput)
-        removeEventHandler(this.fileInput, "change", onchange);
+        removeEventHandler(this.fileInput, "change", onchange as EventListener);
     };
 
     if (this.options.multiple) {

@@ -89,9 +89,9 @@ class QueueRenderer {
     let itemRow = document.getElementById(file.guid);
     if (!itemRow) return;
     for (let i = 0; i < itemRow.childNodes.length; i++) {
-      let node = itemRow.childNodes[i];
+      let node = itemRow.childNodes[i] as HTMLElement;
       if (
-        node.attributes.getNamedItem("class").value ===
+        node.attributes.getNamedItem("class")!.value ===
         "table-row-item-progress"
       ) {
         node.textContent = file.progress.toString() + "%";
