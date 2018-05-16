@@ -82,7 +82,9 @@ function getValueOrResult(valueOrGetter) {
 exports.getValueOrResult = getValueOrResult;
 function newGuid() {
     var d = new Date().getTime();
+    /* cSpell:disable*/
     var uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+        /* cSpell:enable*/
         /* tslint:disable */
         var r = ((d + Math.random() * 16) % 16) | 0;
         d = Math.floor(d / 16);
@@ -195,8 +197,16 @@ var UploadArea = /** @class */ (function () {
             file.guid = newGuid();
             delete file.uploadStatus;
             file.url = _this.uploadCore.getUrl(file);
-            file.onError = _this.options.onFileError || (function () { });
-            file.onCancel = _this.options.onFileCanceled || (function () { });
+            file.onError =
+                _this.options.onFileError ||
+                    (function () {
+                        return;
+                    });
+            file.onCancel =
+                _this.options.onFileCanceled ||
+                    (function () {
+                        return;
+                    });
             if (_this.validateFile(file)) {
                 file.start = function () {
                     _this.uploadCore.upload([file]);
@@ -290,13 +300,15 @@ var UploadArea = /** @class */ (function () {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
         this.addDragOverStyle(this.options.dragOverStyle);
-        var efct = undefined;
+        var effect = undefined;
         try {
-            efct = e.dataTransfer.effectAllowed;
+            effect = e.dataTransfer.effectAllowed;
         }
-        catch (err) { }
+        catch (_a) {
+            true;
+        }
         e.dataTransfer.dropEffect =
-            "move" === efct || "linkMove" === efct ? "move" : "copy";
+            "move" === effect || "linkMove" === effect ? "move" : "copy";
         this.stopEventPropagation(e);
     };
     UploadArea.prototype.onDragLeave = function () {
@@ -413,7 +425,9 @@ var UploadArea = /** @class */ (function () {
         };
         dirReader.readEntries(entryReader, function (error) {
             return typeof console !== "undefined" && console !== null
-                ? typeof console.log === "function" ? console.log(error) : void 0
+                ? typeof console.log === "function"
+                    ? console.log(error)
+                    : void 0
                 : void 0;
         });
     };

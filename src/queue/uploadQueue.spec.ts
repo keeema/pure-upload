@@ -113,7 +113,7 @@ describe("uploadQueue", () => {
       expect(queueChangedCallbackSpy.calls.count()).toEqual(3);
     });
 
-    it("clears file queue according to the specifed scale", () => {
+    it("clears file queue according to the specified scale", () => {
       let file1: IUploadFile = <IUploadFile>{
         uploadStatus: UploadStatus.queued,
         cancel: () => {
@@ -207,20 +207,54 @@ describe("uploadQueue", () => {
 
       beforeEach(() => {
         files = [
-          <IUploadFile>{ uploadStatus: UploadStatus.queued, start: () => {} },
-          <IUploadFile>{ uploadStatus: UploadStatus.queued, start: () => {} },
-          <IUploadFile>{ uploadStatus: UploadStatus.queued, start: () => {} },
           <IUploadFile>{
-            uploadStatus: UploadStatus.uploading,
-            start: () => {}
+            uploadStatus: UploadStatus.queued,
+            start: () => {
+              return;
+            }
+          },
+          <IUploadFile>{
+            uploadStatus: UploadStatus.queued,
+            start: () => {
+              return;
+            }
+          },
+          <IUploadFile>{
+            uploadStatus: UploadStatus.queued,
+            start: () => {
+              return;
+            }
           },
           <IUploadFile>{
             uploadStatus: UploadStatus.uploading,
-            start: () => {}
+            start: () => {
+              return;
+            }
           },
-          <IUploadFile>{ uploadStatus: UploadStatus.uploaded, start: () => {} },
-          <IUploadFile>{ uploadStatus: UploadStatus.failed, start: () => {} },
-          <IUploadFile>{ uploadStatus: UploadStatus.canceled, start: () => {} }
+          <IUploadFile>{
+            uploadStatus: UploadStatus.uploading,
+            start: () => {
+              return;
+            }
+          },
+          <IUploadFile>{
+            uploadStatus: UploadStatus.uploaded,
+            start: () => {
+              return;
+            }
+          },
+          <IUploadFile>{
+            uploadStatus: UploadStatus.failed,
+            start: () => {
+              return;
+            }
+          },
+          <IUploadFile>{
+            uploadStatus: UploadStatus.canceled,
+            start: () => {
+              return;
+            }
+          }
         ];
         files.forEach(
           item =>

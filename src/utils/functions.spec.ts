@@ -27,7 +27,7 @@ describe("functions", () => {
       expect(result.a).toBe(2);
     });
 
-    it("keeps original referrence", () => {
+    it("keeps original reference", () => {
       let orig = { a: 1 };
       let result = applyDefaults(orig, { b: 2 });
       orig.a = 3;

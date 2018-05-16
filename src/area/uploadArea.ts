@@ -92,8 +92,16 @@ class UploadArea {
       file.guid = newGuid();
       delete file.uploadStatus;
       file.url = this.uploadCore.getUrl(file);
-      file.onError = this.options.onFileError || (() => {});
-      file.onCancel = this.options.onFileCanceled || (() => {});
+      file.onError =
+        this.options.onFileError ||
+        (() => {
+          return;
+        });
+      file.onCancel =
+        this.options.onFileCanceled ||
+        (() => {
+          return;
+        });
       if (this.validateFile(file)) {
         file.start = () => {
           this.uploadCore.upload([file]);
@@ -198,12 +206,14 @@ class UploadArea {
     if (!getValueOrResult(this.options.allowDragDrop)) return;
 
     this.addDragOverStyle(this.options.dragOverStyle);
-    let efct: string | undefined = undefined;
+    let effect: string | undefined = undefined;
     try {
-      efct = e.dataTransfer.effectAllowed;
-    } catch (err) {}
+      effect = e.dataTransfer.effectAllowed;
+    } catch {
+      true;
+    }
     e.dataTransfer.dropEffect =
-      "move" === efct || "linkMove" === efct ? "move" : "copy";
+      "move" === effect || "linkMove" === effect ? "move" : "copy";
     this.stopEventPropagation(e);
   }
 
@@ -336,7 +346,9 @@ class UploadArea {
     };
     dirReader.readEntries(entryReader, function(error: string) {
       return typeof console !== "undefined" && console !== null
-        ? typeof console.log === "function" ? console.log(error) : void 0
+        ? typeof console.log === "function"
+          ? console.log(error)
+          : void 0
         : void 0;
     });
   }

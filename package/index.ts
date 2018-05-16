@@ -112,9 +112,11 @@ export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefine
 
 export function newGuid(): string {
   let d = new Date().getTime();
+  /* cSpell:disable*/
   let uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(
     c
   ) {
+    /* cSpell:enable*/
     /* tslint:disable */
     let r = ((d + Math.random() * 16) % 16) | 0;
     d = Math.floor(d / 16);
@@ -260,7 +262,7 @@ export function removeEventHandler(
   if (el.removeEventListener) {
     el.removeEventListener(event, handler);
   } else {
-    let elem = <IElementWithDettachEvent>el;
+    let elem = <IElementWithDetachEvent>el;
     if (elem.detachEvent) {
       elem.detachEvent("on" + event, handler as EventListener);
     } else {
@@ -269,7 +271,7 @@ export function removeEventHandler(
   }
 }
 
-interface IElementWithDettachEvent extends HTMLElement {
+interface IElementWithDetachEvent extends HTMLElement {
   [key: string]: Function | Object | string | void | null | number | boolean;
   detachEvent: (event: string, handler: (ev: UIEvent) => void) => void;
 }
@@ -368,8 +370,16 @@ export class UploadArea {
       file.guid = newGuid();
       delete file.uploadStatus;
       file.url = this.uploadCore.getUrl(file);
-      file.onError = this.options.onFileError || (() => {});
-      file.onCancel = this.options.onFileCanceled || (() => {});
+      file.onError =
+        this.options.onFileError ||
+        (() => {
+          return;
+        });
+      file.onCancel =
+        this.options.onFileCanceled ||
+        (() => {
+          return;
+        });
       if (this.validateFile(file)) {
         file.start = () => {
           this.uploadCore.upload([file]);
@@ -474,12 +484,14 @@ export class UploadArea {
     if (!getValueOrResult(this.options.allowDragDrop)) return;
 
     this.addDragOverStyle(this.options.dragOverStyle);
-    let efct: string | undefined = undefined;
+    let effect: string | undefined = undefined;
     try {
-      efct = e.dataTransfer.effectAllowed;
-    } catch (err) {}
+      effect = e.dataTransfer.effectAllowed;
+    } catch {
+      true;
+    }
     e.dataTransfer.dropEffect =
-      "move" === efct || "linkMove" === efct ? "move" : "copy";
+      "move" === effect || "linkMove" === effect ? "move" : "copy";
     this.stopEventPropagation(e);
   }
 
@@ -612,7 +624,9 @@ export class UploadArea {
     };
     dirReader.readEntries(entryReader, function(error: string) {
       return typeof console !== "undefined" && console !== null
-        ? typeof console.log === "function" ? console.log(error) : void 0
+        ? typeof console.log === "function"
+          ? console.log(error)
+          : void 0
         : void 0;
     });
   }

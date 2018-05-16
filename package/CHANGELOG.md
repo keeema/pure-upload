@@ -2,6 +2,12 @@
 
 ## 5.0.1
 
+Updated TS to 2.8.3.
+Fixed potential vulnerability in devDependencies (hoex).
+Fixed typos and lints.
+
+## 5.0.1
+
 Updated TS to 2.8.1.
 
 ## 5.0.0
