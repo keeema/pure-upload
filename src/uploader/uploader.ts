@@ -25,4 +25,8 @@ class Uploader {
       this.uploadAreas.splice(areaIndex, 1);
     }
   }
+
+  get firstUploadArea(): UploadArea | undefined {
+    return this.uploadAreas[0];
+  }
 }
