@@ -281,7 +281,7 @@ export class UploadArea {
   public uploader: Uploader;
   public options: IFullUploadAreaOptions;
   private uploadCore: UploadCore;
-  private fileInput?: HTMLInputElement;
+  private _fileInput?: HTMLInputElement;
   private fileList?: IUploadFile[] | null;
   private unregisterOnClick?: () => void;
   private unregisterOnDrop?: () => void;
@@ -336,7 +336,11 @@ export class UploadArea {
 
     if (this.unregisterOnDragLeaveGlobal) this.unregisterOnDragLeaveGlobal();
 
-    if (this.fileInput) document.body.removeChild(this.fileInput);
+    if (this._fileInput) document.body.removeChild(this._fileInput);
+  }
+
+  get fileInput(): HTMLInputElement | undefined {
+    return this._fileInput;
   }
 
   private defaultOptions() {
@@ -417,29 +421,29 @@ export class UploadArea {
   }
 
   private setupFileApiElements(): void {
-    this.fileInput = document.createElement("input");
-    this.fileInput.setAttribute("type", "file");
-    this.fileInput.setAttribute(
+    this._fileInput = document.createElement("input");
+    this._fileInput.setAttribute("type", "file");
+    this._fileInput.setAttribute(
       "accept",
       this.options.accept ? this.options.accept : ""
     );
-    this.fileInput.style.display = "none";
+    this._fileInput.style.display = "none";
 
     const onChange = (e: Event) => this.onChange(e);
-    addEventHandler(this.fileInput, "change", onChange);
+    addEventHandler(this._fileInput, "change", onChange);
     this.unregisterOnChange = () => {
-      if (this.fileInput)
-        removeEventHandler(this.fileInput, "change", onchange as EventListener);
+      if (this._fileInput)
+        removeEventHandler(this._fileInput, "change", onchange as EventListener);
     };
 
     if (this.options.multiple) {
-      this.fileInput.setAttribute("multiple", "");
+      this._fileInput.setAttribute("multiple", "");
     }
 
     this.registerEvents();
 
     // attach to body
-    document.body.appendChild(this.fileInput);
+    document.body.appendChild(this._fileInput);
   }
 
   private registerEvents() {
@@ -564,16 +568,16 @@ export class UploadArea {
   }
 
   private onClick(): void {
-    if (!getValueOrResult(this.options.clickable) || !this.fileInput) return;
+    if (!getValueOrResult(this.options.clickable) || !this._fileInput) return;
 
-    this.fileInput.value = "";
+    this._fileInput.value = "";
 
     if (this.isIeVersion(10)) {
       setTimeout(() => {
-        if (this.fileInput) this.fileInput.click();
+        if (this._fileInput) this._fileInput.click();
       }, 200);
     } else {
-      this.fileInput.click();
+      this._fileInput.click();
     }
   }
 
@@ -947,6 +951,10 @@ export class Uploader {
       this.uploadAreas[areaIndex].destroy();
       this.uploadAreas.splice(areaIndex, 1);
     }
+  }
+
+  get firstUploadArea(): UploadArea | undefined {
+    return this.uploadAreas[0];
   }
 }
 

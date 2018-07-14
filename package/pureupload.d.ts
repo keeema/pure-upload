@@ -118,7 +118,7 @@ export class UploadArea {
     uploader: Uploader;
     options: IFullUploadAreaOptions;
     private uploadCore;
-    private fileInput?;
+    private _fileInput?;
     private fileList?;
     private unregisterOnClick?;
     private unregisterOnDrop?;
@@ -131,28 +131,29 @@ export class UploadArea {
     start(autoClear?: boolean): void;
     clear(): void;
     destroy(): void;
-    private defaultOptions();
-    private selectFiles(fileList);
-    private putFilesToQueue();
-    private validateFile(file);
-    private setupFileApiElements();
-    private registerEvents();
-    private onChange(e);
-    private onDrag(e);
-    private onDragLeave();
-    private onDragGlobal();
-    private onDragLeaveGlobal();
-    private removeDragOverStyle(style?);
-    private addDragOverStyle(style?);
-    private onDrop(e);
-    private isIeVersion(v);
-    private onClick();
-    private addFilesFromItems(items);
-    private processDirectory(directory, path);
-    private handleFiles(files);
-    private isFileSizeValid(file);
-    private isFileTypeInvalid(file);
-    private stopEventPropagation(e);
+    readonly fileInput: HTMLInputElement | undefined;
+    private defaultOptions;
+    private selectFiles;
+    private putFilesToQueue;
+    private validateFile;
+    private setupFileApiElements;
+    private registerEvents;
+    private onChange;
+    private onDrag;
+    private onDragLeave;
+    private onDragGlobal;
+    private onDragLeaveGlobal;
+    private removeDragOverStyle;
+    private addDragOverStyle;
+    private onDrop;
+    private isIeVersion;
+    private onClick;
+    private addFilesFromItems;
+    private processDirectory;
+    private handleFiles;
+    private isFileSizeValid;
+    private isFileTypeInvalid;
+    private stopEventPropagation;
 }
 export class UploadCore {
     options: IFullUploadOptions;
@@ -160,22 +161,22 @@ export class UploadCore {
     constructor(options: IUploadOptions, callbacks?: IUploadCallbacksExt);
     upload(fileList: File[] | Object): void;
     getUrl(file: IUploadFile): string;
-    private processFile(file);
-    private createRequest(file);
-    private setHeaders(xhr);
-    private setCallbacks(xhr, file);
-    private send(xhr, file);
-    private createFormData(file);
-    private castParamType(param);
-    private isNumber(param);
-    private isBoolean(param);
-    private handleError(file, xhr);
-    private updateProgress(file, e?);
-    private onload(file, xhr);
-    private finished(file, xhr);
-    private setResponse(file, xhr);
-    private getDefaultOptions();
-    private setFullCallbacks(callbacks);
+    private processFile;
+    private createRequest;
+    private setHeaders;
+    private setCallbacks;
+    private send;
+    private createFormData;
+    private castParamType;
+    private isNumber;
+    private isBoolean;
+    private handleError;
+    private updateProgress;
+    private onload;
+    private finished;
+    private setResponse;
+    private getDefaultOptions;
+    private setFullCallbacks;
 }
 export class Uploader {
     uploadAreas: UploadArea[];
@@ -184,6 +185,7 @@ export class Uploader {
     constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
     registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
     unregisterArea(area: UploadArea): void;
+    readonly firstUploadArea: UploadArea | undefined;
 }
 export class UploadQueue {
     offset: IOffsetInfo;
@@ -194,15 +196,15 @@ export class UploadQueue {
     addFiles(files: IUploadFile[]): void;
     removeFile(file: IUploadFile, blockRecursive?: boolean): void;
     clearFiles(excludeStatuses?: UploadStatus[], cancelProcessing?: boolean): void;
-    private filesChanged();
-    private checkAllFinished();
-    private setFullOptions();
-    private setFullCallbacks();
-    private startWaitingFiles();
-    private removeFinishedFiles();
-    private deactivateFile(file);
-    private getWaitingFiles();
-    private startOffset();
+    private filesChanged;
+    private checkAllFinished;
+    private setFullOptions;
+    private setFullCallbacks;
+    private startWaitingFiles;
+    private removeFinishedFiles;
+    private deactivateFile;
+    private getWaitingFiles;
+    private startOffset;
 }
 export enum UploadStatus {
     queued = 0,
@@ -210,6 +212,6 @@ export enum UploadStatus {
     uploaded = 2,
     failed = 3,
     canceled = 4,
-    removed = 5,
+    removed = 5
 }
 }

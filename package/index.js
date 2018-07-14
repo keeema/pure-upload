@@ -163,9 +163,16 @@ var UploadArea = /** @class */ (function () {
             this.unregisterOnDragOverGlobal();
         if (this.unregisterOnDragLeaveGlobal)
             this.unregisterOnDragLeaveGlobal();
-        if (this.fileInput)
-            document.body.removeChild(this.fileInput);
+        if (this._fileInput)
+            document.body.removeChild(this._fileInput);
     };
+    Object.defineProperty(UploadArea.prototype, "fileInput", {
+        get: function () {
+            return this._fileInput;
+        },
+        enumerable: true,
+        configurable: true
+    });
     UploadArea.prototype.defaultOptions = function () {
         return {
             localizer: getDefaultLocalizer(),
@@ -239,22 +246,22 @@ var UploadArea = /** @class */ (function () {
     };
     UploadArea.prototype.setupFileApiElements = function () {
         var _this = this;
-        this.fileInput = document.createElement("input");
-        this.fileInput.setAttribute("type", "file");
-        this.fileInput.setAttribute("accept", this.options.accept ? this.options.accept : "");
-        this.fileInput.style.display = "none";
+        this._fileInput = document.createElement("input");
+        this._fileInput.setAttribute("type", "file");
+        this._fileInput.setAttribute("accept", this.options.accept ? this.options.accept : "");
+        this._fileInput.style.display = "none";
         var onChange = function (e) { return _this.onChange(e); };
-        addEventHandler(this.fileInput, "change", onChange);
+        addEventHandler(this._fileInput, "change", onChange);
         this.unregisterOnChange = function () {
-            if (_this.fileInput)
-                removeEventHandler(_this.fileInput, "change", onchange);
+            if (_this._fileInput)
+                removeEventHandler(_this._fileInput, "change", onchange);
         };
         if (this.options.multiple) {
-            this.fileInput.setAttribute("multiple", "");
+            this._fileInput.setAttribute("multiple", "");
         }
         this.registerEvents();
         // attach to body
-        document.body.appendChild(this.fileInput);
+        document.body.appendChild(this._fileInput);
     };
     UploadArea.prototype.registerEvents = function () {
         var _this = this;
@@ -370,17 +377,17 @@ var UploadArea = /** @class */ (function () {
     };
     UploadArea.prototype.onClick = function () {
         var _this = this;
-        if (!getValueOrResult(this.options.clickable) || !this.fileInput)
+        if (!getValueOrResult(this.options.clickable) || !this._fileInput)
             return;
-        this.fileInput.value = "";
+        this._fileInput.value = "";
         if (this.isIeVersion(10)) {
             setTimeout(function () {
-                if (_this.fileInput)
-                    _this.fileInput.click();
+                if (_this._fileInput)
+                    _this._fileInput.click();
             }, 200);
         }
         else {
-            this.fileInput.click();
+            this._fileInput.click();
         }
     };
     UploadArea.prototype.addFilesFromItems = function (items) {
@@ -709,6 +716,13 @@ var Uploader = /** @class */ (function () {
             this.uploadAreas.splice(areaIndex, 1);
         }
     };
+    Object.defineProperty(Uploader.prototype, "firstUploadArea", {
+        get: function () {
+            return this.uploadAreas[0];
+        },
+        enumerable: true,
+        configurable: true
+    });
     return Uploader;
 }());
 exports.Uploader = Uploader;

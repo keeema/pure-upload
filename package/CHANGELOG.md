@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## 5.0.1
+## 5.0.3
+
+Updated TS to 2.9.2.
+FileInput made public for reading on Area.
+
+## 5.0.2
 
 Updated TS to 2.8.3.
 Fixed potential vulnerability in devDependencies (hoex).
