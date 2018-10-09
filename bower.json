@@ -1,19 +1,13 @@
 {
   "name": "pure-upload",
-  "version": "1.0.13",
+  "version": "5.0.3",
   "homepage": "https://github.com/keeema/pure-upload",
   "authors": [
-    "keeema <rut.tomas@hotmail.com>",
+    "keeema <trut.cz@gmail.com>",
     "marekhoryna <rut.tomas@hotmail.com>"
   ],
   "description": "Pure JS file upload library with no dependencies.",
   "main": "dist/pureupload.js",
   "license": "MIT",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ]
+  "ignore": ["**/.*", "node_modules", "bower_components", "test", "tests"]
 }

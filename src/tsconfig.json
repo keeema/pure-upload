@@ -1,15 +1,16 @@
 {
   "version": "2.9.2",
   "compilerOptions": {
+    "declaration": true,
     "target": "es5",
     "module": "commonjs",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true
   },
-  "filesGlob": ["./**/*.ts", "!./**/*.d.ts", "../decl/jasmine/**/*.d.ts"],
   "files": [
     "./area/IFileExt.ts",
     "./area/iFullUploadAreaOptions.ts",
@@ -39,7 +40,6 @@
     "./utils/functions.spec.ts",
     "./utils/functions.ts",
     "./utils/guidGenerator.ts",
-    "./utils/removeEventHandler.ts",
-    "../decl/jasmine/jasmine.d.ts"
+    "./utils/removeEventHandler.ts"
   ]
 }
