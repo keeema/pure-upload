@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.0.5
+
+Updated build tools, changed minfied version.
+
 ## 5.0.4
 
 Updated TS to 3.0.3.
