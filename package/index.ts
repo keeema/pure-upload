@@ -105,9 +105,15 @@ export function getUploader(
 }
 
 export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined {
-  if (typeof valueOrGetter === "function") return valueOrGetter();
+  if (isGetter(valueOrGetter)) return valueOrGetter();
 
   return valueOrGetter;
+}
+
+function isGetter<T>(
+  valueOrGetter?: T | (() => T)
+): valueOrGetter is (() => T) {
+  return typeof valueOrGetter === "function";
 }
 
 export function newGuid(): string {
@@ -433,7 +439,11 @@ export class UploadArea {
     addEventHandler(this._fileInput, "change", onChange);
     this.unregisterOnChange = () => {
       if (this._fileInput)
-        removeEventHandler(this._fileInput, "change", onchange as EventListener);
+        removeEventHandler(
+          this._fileInput,
+          "change",
+          onchange as EventListener
+        );
     };
 
     if (this.options.multiple) {
@@ -489,13 +499,15 @@ export class UploadArea {
 
     this.addDragOverStyle(this.options.dragOverStyle);
     let effect: string | undefined = undefined;
-    try {
-      effect = e.dataTransfer.effectAllowed;
-    } catch {
-      true;
+    if (e.dataTransfer) {
+      try {
+        effect = e.dataTransfer.effectAllowed;
+      } catch {
+        true;
+      }
+      e.dataTransfer.dropEffect =
+        "move" === effect || "linkMove" === effect ? "move" : "copy";
     }
-    e.dataTransfer.dropEffect =
-      "move" === effect || "linkMove" === effect ? "move" : "copy";
     this.stopEventPropagation(e);
   }
 

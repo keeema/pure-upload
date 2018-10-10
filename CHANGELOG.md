@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.0.4
+
+Updated TS to 3.0.3.
+
 ## 5.0.3
 
 Updated TS to 2.9.2.

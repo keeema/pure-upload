@@ -75,11 +75,14 @@ function getUploader(options, callbacks) {
 }
 exports.getUploader = getUploader;
 function getValueOrResult(valueOrGetter) {
-    if (typeof valueOrGetter === "function")
+    if (isGetter(valueOrGetter))
         return valueOrGetter();
     return valueOrGetter;
 }
 exports.getValueOrResult = getValueOrResult;
+function isGetter(valueOrGetter) {
+    return typeof valueOrGetter === "function";
+}
 function newGuid() {
     var d = new Date().getTime();
     /* cSpell:disable*/
@@ -308,14 +311,16 @@ var UploadArea = /** @class */ (function () {
             return;
         this.addDragOverStyle(this.options.dragOverStyle);
         var effect = undefined;
-        try {
-            effect = e.dataTransfer.effectAllowed;
+        if (e.dataTransfer) {
+            try {
+                effect = e.dataTransfer.effectAllowed;
+            }
+            catch (_a) {
+                true;
+            }
+            e.dataTransfer.dropEffect =
+                "move" === effect || "linkMove" === effect ? "move" : "copy";
         }
-        catch (_a) {
-            true;
-        }
-        e.dataTransfer.dropEffect =
-            "move" === effect || "linkMove" === effect ? "move" : "copy";
         this.stopEventPropagation(e);
     };
     UploadArea.prototype.onDragLeave = function () {

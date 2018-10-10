@@ -54,6 +54,9 @@ var FormDataMock = /** @class */ (function () {
         return this.data[key] !== undefined;
     };
     FormDataMock.prototype.set = function (_key, _value) { };
+    FormDataMock.prototype.forEach = function (_callbackfn) {
+        return;
+    };
     return FormDataMock;
 }());
 var XhrMock = /** @class */ (function () {

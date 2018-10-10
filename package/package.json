@@ -1,6 +1,6 @@
 {
   "name": "pure-upload",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "description": "The pure upload library without dependencies",
   "author": {
     "name": "t.rut"
@@ -58,7 +58,7 @@
     "phantomjs": "^2.1.7",
     "hoek": "^5.0.3",
     "run-sequence": "^1.1.2",
-    "typescript": "^2.9.2"
+    "typescript": "^3.0.3"
   },
   "dependencies": {}
 }

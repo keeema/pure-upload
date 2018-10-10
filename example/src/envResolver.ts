@@ -63,6 +63,15 @@ class FormDataMock {
     return this.data[key] !== undefined;
   }
   set(_key: string, _value: File) {}
+  forEach(
+    _callbackfn: (
+      value: FormDataEntryValue,
+      key: string,
+      parent: FormData
+    ) => void
+  ) {
+    return;
+  }
 }
 
 class XhrMock {
