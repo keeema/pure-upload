@@ -197,6 +197,13 @@ var pu;
                     if (_this.options.onFileSelected)
                         _this.options.onFileSelected(file);
                 });
+            if (this.options.onFilesSelected) {
+                var files_1 = [];
+                this.fileList.forEach(function (file) {
+                    files_1.push(file);
+                });
+                this.options.onFilesSelected(files_1);
+            }
             if (!this.options.manualStart)
                 this.putFilesToQueue();
         };

@@ -81,6 +81,7 @@ dragOverStyle?: string;
 dragOverGlobalStyle?: string;
 onFileAdded?: (file: IUploadFile) => void;
 onFileSelected?: (file: IUploadFile) => void;
+onFilesSelected?: (file: IUploadFile[]) => void;
 onFileError?: (file: IUploadFile) => void;
 onFileCanceled?: (file: IUploadFile) => void;
 ```

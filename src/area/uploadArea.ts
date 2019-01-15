@@ -86,6 +86,16 @@ class UploadArea {
         if (this.options.onFileSelected) this.options.onFileSelected(file);
       });
 
+    if (this.options.onFilesSelected) {
+      const files: IUploadFile[] = [];
+
+      this.fileList.forEach((file: IUploadFile) => {
+        files.push(file);
+      });
+
+      this.options.onFilesSelected(files);
+    }
+
     if (!this.options.manualStart) this.putFilesToQueue();
   }
 
