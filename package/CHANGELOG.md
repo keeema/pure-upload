@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.0.6
+
+Added onFilesSelected for UploadArea.
+
 ## 5.0.5
 
 Updated build tools, changed minfied version.
