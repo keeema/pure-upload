@@ -129,8 +129,8 @@ declare module pu {
         private unregisterOnDragLeaveGlobal?;
         private unregisterOnChange?;
         constructor(targetElement: HTMLElement, options: IUploadAreaOptions, uploader: Uploader);
-        start(autoClear?: boolean): void;
-        clear(): void;
+        start(autoClear?: boolean, files?: IUploadFile[]): void;
+        clear(files?: IUploadFile[]): void;
         destroy(): void;
         readonly fileInput: HTMLInputElement | undefined;
         private defaultOptions;

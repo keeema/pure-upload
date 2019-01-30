@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.1.0
+
+Added files to start and clear for UploadArea.
+
 ## 5.0.6
 
 Added onFilesSelected for UploadArea.

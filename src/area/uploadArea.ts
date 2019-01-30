@@ -32,15 +32,32 @@ class UploadArea {
     }
   }
 
-  start(autoClear: boolean = false) {
-    if (this.options.manualStart && this.fileList) {
-      this.putFilesToQueue();
-      if (autoClear) this.clear();
+  start(autoClear: boolean = false, files?: IUploadFile[]) {
+    if (this.options.manualStart && (files || this.fileList)) {
+      this.putFilesToQueue(files);
+      if (autoClear) this.clear(files);
     }
   }
 
-  clear() {
-    this.fileList = null;
+  clear(files?: IUploadFile[]) {
+    if (this.fileList && files !== undefined) {
+      const fileList: IUploadFile[] = [];
+
+      for (let i = 0; i < this.fileList.length; ++i) {
+        let exists = false;
+
+        for (let j = 0; j < files.length; ++j) {
+          exists = this.fileList[i] === files[j];
+          if (exists) break;
+        }
+
+        if (!exists) fileList.push(this.fileList[i]);
+      }
+
+      this.fileList = fileList;
+    } else {
+      this.fileList = null;
+    }
   }
 
   destroy(): void {
@@ -99,10 +116,12 @@ class UploadArea {
     if (!this.options.manualStart) this.putFilesToQueue();
   }
 
-  private putFilesToQueue(): void {
-    if (!this.fileList) return;
+  private putFilesToQueue(files?: IUploadFile[]): void {
+    files = files ? files : (this.fileList ? this.fileList : undefined);
 
-    this.fileList.forEach((file: IUploadFile) => {
+    if (!files) return;
+
+    files.forEach((file: IUploadFile) => {
       file.guid = newGuid();
       delete file.uploadStatus;
       file.url = this.uploadCore.getUrl(file);
@@ -131,7 +150,7 @@ class UploadArea {
         file.onError(file);
       }
     });
-    this.uploader.queue.addFiles(this.fileList);
+    this.uploader.queue.addFiles(files);
   }
 
   private validateFile(file: IUploadFile): boolean {
