@@ -1,38 +1,43 @@
 describe("uploadArea", () => {
   describe("clear", () => {
-    let htmlElement: HTMLElement;
     let uploadArea: UploadArea;
-    let uploadAreaOptions: IUploadAreaOptions;
-    let uploader: Uploader;
-    let uploadQueue: UploadQueue;
+    const file1 = { name: "1" } as IUploadFile;
+    const file2 = { name: "2" } as IUploadFile;
+    const file3 = { name: "3" } as IUploadFile;
+    const file4 = { name: "4" } as IUploadFile;
 
     beforeEach(() => {
-      htmlElement = {} as HTMLElement;
-      uploadAreaOptions = {} as IUploadAreaOptions;
-      uploadQueue = {} as UploadQueue;
-      uploader = {queue: uploadQueue} as Uploader;
-      uploadArea = new UploadArea(htmlElement, uploadAreaOptions, uploader);
-      uploadArea["fileList"] = [{name: "1"}, {name: "2"}, {name: "3"}] as IUploadFile[];
+      uploadArea = new UploadArea(
+        document.createElement("div"),
+        { method: "", url: "" },
+        jasmine.createSpyObj("uploader", { queue: { callbacks: {} } })
+      );
+      uploadArea["fileList"] = [file1, file2, file3];
     });
 
-    it("clears all files", () => {
+    it("clears all files when no array of files specified", () => {
       uploadArea.clear();
       expect(uploadArea["fileList"]).toBeNull();
     });
 
-    it("clears 0 files", () => {
-      uploadArea.clear!([]);
-      expect(uploadArea["fileList"]).toEqual([{name: "1"}, {name: "2"}, {name: "3"}] as IUploadFile[]);
+    it("clears no file when no file specified in given array", () => {
+      uploadArea.clear([]);
+      expect(uploadArea["fileList"]).toEqual([file1, file2, file3]);
     });
 
-    it("clears 1 files", () => {
-      uploadArea.clear!([uploadArea["fileList"]![1]]);
-      expect(uploadArea["fileList"]).toEqual([{name: "1"}, {name: "3"}] as IUploadFile[]);
+    it("clears files specified in given array", () => {
+      uploadArea.clear([file2]);
+      expect(uploadArea["fileList"]).toEqual([file1, file3]);
     });
 
-    it("clears n files", () => {
-      uploadArea.clear([uploadArea["fileList"]![2], uploadArea["fileList"]![0], uploadArea["fileList"]![2]]);
-      expect(uploadArea["fileList"]).toEqual([{name: "2"}] as IUploadFile[]);
+    it("clears files specified in given array files multiple times", () => {
+      uploadArea.clear([file3, file1, file3]);
+      expect(uploadArea["fileList"]).toEqual([file2]);
+    });
+
+    it("clears only contained files", () => {
+      uploadArea.clear([file1, file4]);
+      expect(uploadArea["fileList"]).toEqual([file2, file3]);
     });
   });
 });

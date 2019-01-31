@@ -61,7 +61,7 @@
     "multer": "^1.4.0",
     "phantomjs": "^2.1.7",
     "run-sequence": "^2.2.1",
-    "typescript": "^3.1.1"
+    "typescript": "^3.2.4"
   },
   "dependencies": {}
 }

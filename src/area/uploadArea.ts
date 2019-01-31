@@ -40,24 +40,10 @@ class UploadArea {
   }
 
   clear(files?: IUploadFile[]) {
-    if (this.fileList && files !== undefined) {
-      const fileList: IUploadFile[] = [];
-
-      for (let i = 0; i < this.fileList.length; ++i) {
-        let exists = false;
-
-        for (let j = 0; j < files.length; ++j) {
-          exists = this.fileList[i] === files[j];
-          if (exists) break;
-        }
-
-        if (!exists) fileList.push(this.fileList[i]);
-      }
-
-      this.fileList = fileList;
-    } else {
-      this.fileList = null;
-    }
+    this.fileList =
+      this.fileList && files
+        ? this.fileList.filter(file => files.indexOf(file) < 0)
+        : null;
   }
 
   destroy(): void {
@@ -117,7 +103,10 @@ class UploadArea {
   }
 
   private putFilesToQueue(files?: IUploadFile[]): void {
-    files = files ? files : (this.fileList ? this.fileList : undefined);
+    files =
+      this.fileList && files
+        ? this.fileList.filter(file => files && files.indexOf(file) >= 0)
+        : this.fileList || undefined;
 
     if (!files) return;
 

@@ -149,23 +149,10 @@ var UploadArea = /** @class */ (function () {
         }
     };
     UploadArea.prototype.clear = function (files) {
-        if (this.fileList && files !== undefined) {
-            var fileList = [];
-            for (var i = 0; i < this.fileList.length; ++i) {
-                var exists = false;
-                for (var j = 0; j < files.length; ++j) {
-                    exists = this.fileList[i] === files[j];
-                    if (exists)
-                        break;
-                }
-                if (!exists)
-                    fileList.push(this.fileList[i]);
-            }
-            this.fileList = fileList;
-        }
-        else {
-            this.fileList = null;
-        }
+        this.fileList =
+            this.fileList && files
+                ? this.fileList.filter(function (file) { return files.indexOf(file) < 0; })
+                : null;
     };
     UploadArea.prototype.destroy = function () {
         if (this.unregisterOnClick)
@@ -224,7 +211,10 @@ var UploadArea = /** @class */ (function () {
     };
     UploadArea.prototype.putFilesToQueue = function (files) {
         var _this = this;
-        files = files ? files : (this.fileList ? this.fileList : undefined);
+        files =
+            this.fileList && files
+                ? this.fileList.filter(function (file) { return files && files.indexOf(file) >= 0; })
+                : this.fileList || undefined;
         if (!files)
             return;
         files.forEach(function (file) {
