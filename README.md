@@ -87,8 +87,8 @@ onFileCanceled?: (file: IUploadFile) => void;
 ```
 ### Upload area - manual starting
 ```typescript
-start(autoClear?: boolean): void;
-clear(): void;
+start(autoClear?: boolean, files?: IUploadFile[]): void;
+clear(files?: IUploadFile[]): void;
 ```
 ### Localizer
 ```typescript
