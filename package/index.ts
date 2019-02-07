@@ -132,17 +132,37 @@ export function newGuid(): string {
   return uuid;
 }
 
-export interface IFileExt extends File {
-  kind: string;
-  webkitGetAsEntry: () => File;
-  getAsFile: () => File;
-  file: (callback: (file: IFileExt) => void) => void;
-  createReader: Function;
-  isFile: boolean;
-  isDirectory: boolean;
-  fullPath: string;
-}
+export // See: https://wicg.github.io/entries-api
 
+type ErrorCallback = (err: DOMException) => void;
+
+type FileCallback = (file: File) => void;
+
+type FileSystemEntriesCallback = (entries: FileSystemEntry[]) => void;
+
+interface FileSystemEntry {
+    readonly isDirectory: boolean;
+    readonly isFile: boolean;
+    readonly name: string;
+};
+
+interface FileSystemDirectoryEntry extends FileSystemEntry {
+    createReader(): FileSystemDirectoryReader;
+};
+
+interface FileSystemDirectoryReader {
+    readEntries(successCallback: FileSystemEntriesCallback, errorCallback?: ErrorCallback): void;
+};
+
+interface FileSystemFileEntry extends FileSystemEntry {
+    getAsFile(): File | null;
+    file(successCallback: FileCallback, errorCallback?: ErrorCallback): void;
+};
+
+interface IFileExt extends File {
+    fullPath: string;
+    kind: string;
+};
 export interface IFullUploadAreaOptions extends IUploadAreaOptions {
   maxFileSize: number;
   allowDragDrop: boolean | (() => boolean);
@@ -186,6 +206,61 @@ export interface IOffsetInfo {
   fileCount: number;
 }
 
+export class ItemProcessor {
+    errors: Error[] = [];
+    files: File[] = [];
+
+    processItems(items: DataTransferItem[] | DataTransferItemList, callback?: Function): void {
+        callback = callbackAfter(items.length, callback);
+        toValidItems(items).forEach(item => this.processEntry(item.webkitGetAsEntry(), "", callback));
+    }
+
+    private processEntries(entries: FileSystemEntry[], path: string = "", callback?: Function): void {
+        callback = callbackAfter(entries.length, callback)
+        entries.forEach((entry) => this.processEntry(entry, path, callback));
+    }
+
+    private processEntry(entry: FileSystemEntry, path: string = "", callback?: Function): void {
+        if (entry.isDirectory) this.processDirectoryEntry(entry as FileSystemDirectoryEntry, path, callback);
+        else if (entry.isFile) this.processFileEntry(entry as FileSystemFileEntry, path, callback);
+        else if (callback !== undefined) callback(); // this.errors.push(new Error('...'))?
+    }
+
+    private processDirectoryEntry(entry: FileSystemDirectoryEntry, path: string = "", callback?: Function): void {
+        entry.createReader().readEntries(
+            (entries) => this.processEntries(entries, path + "/" + entry.name, callback),
+            pushAndCallback(this.errors, callback));
+    }
+
+    private processFileEntry(entry: FileSystemFileEntry, path: string = "", callback?: Function): void {
+        entry.file((file) => this.processFile(file, path, callback), pushAndCallback(this.errors, callback));
+    }
+
+    private processFile(file: File, path: string = "", callback?: Function): void {
+        (file as IFileExt).fullPath = path + "/" + file.name;
+        pushAndCallback(this.files, callback)(file);
+    }
+}
+
+function callbackAfter(i: number, callback?: Function) {
+    return () => --i === 0 && callback !== undefined ? callback() : i;
+}
+
+function pushAndCallback<T>(array: T[], callback?: Function) {
+    return (item: T) => { array.push(item); if (callback !== undefined) callback(); };
+}
+
+function toValidItems(items: DataTransferItem[] | DataTransferItemList): DataTransferItem[] {
+    const validItems = [];
+
+    for (let i = 0; i < items.length; ++i) {
+        if (items[i].webkitGetAsEntry) {
+            validItems.push(items[i]);
+        }
+    }
+
+    return validItems;
+}
 export interface IUploadAreaOptions extends IUploadOptions {
   maxFileSize?: number;
   allowDragDrop?: boolean | (() => boolean);
@@ -580,14 +655,11 @@ export class UploadArea {
         items.length &&
         (<{ webkitGetAsEntry?: Object }>items[0]).webkitGetAsEntry !== null
       ) {
-        if (!this.options.multiple) {
-          let newItems = [items[0]];
-          this.addFilesFromItems(newItems);
-        } else {
-          this.addFilesFromItems(items);
-        }
+        const itemProcessor = new ItemProcessor();
+        const itemsToProcess = this.options.multiple ? items : [items[0]];
+        itemProcessor.processItems(itemsToProcess, () => this.selectFiles(itemProcessor.files));
       } else {
-        this.handleFiles(files);
+        this.selectFiles(files);
       }
     }
   }
@@ -609,66 +681,6 @@ export class UploadArea {
       }, 200);
     } else {
       this._fileInput.click();
-    }
-  }
-
-  private addFilesFromItems(
-    items: FileList | File[] | DataTransferItemList | DataTransferItem[]
-  ): void {
-    let entry: IFileExt;
-    for (let i = 0; i < items.length; i++) {
-      let item: IFileExt = <IFileExt>items[i];
-      if (
-        item.webkitGetAsEntry &&
-        (entry = <IFileExt>item.webkitGetAsEntry())
-      ) {
-        if (entry.isFile) {
-          this.selectFiles([item.getAsFile()]);
-        } else if (entry.isDirectory) {
-          this.processDirectory(entry, entry.name);
-        }
-      } else if (item.getAsFile) {
-        if (!item.kind || item.kind === "file") {
-          this.selectFiles([item.getAsFile()]);
-        }
-      }
-    }
-  }
-
-  private processDirectory(
-    directory: { createReader: Function },
-    path: string
-  ): void {
-    let dirReader = directory.createReader();
-    let self = this;
-    let entryReader = (entries: (IFileExt & { createReader: Function })[]) => {
-      for (let i = 0; i < entries.length; i++) {
-        let entry = entries[i];
-        if (entry.isFile) {
-          entry.file((file: IFileExt) => {
-            if (file.name.substring(0, 1) === ".") {
-              return;
-            }
-            file.fullPath = "" + path + "/" + file.name;
-            self.selectFiles([file]);
-          });
-        } else if (entry.isDirectory) {
-          self.processDirectory(entry, "" + path + "/" + entry.name);
-        }
-      }
-    };
-    dirReader.readEntries(entryReader, function(error: string) {
-      return typeof console !== "undefined" && console !== null
-        ? typeof console.log === "function"
-          ? console.log(error)
-          : void 0
-        : void 0;
-    });
-  }
-
-  private handleFiles(files: FileList | File[]): void {
-    for (let i = 0; i < files.length; i++) {
-      this.selectFiles([files[i]]);
     }
   }
 

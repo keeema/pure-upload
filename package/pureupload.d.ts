@@ -7,16 +7,7 @@ export function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbac
 export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
 export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
 export function newGuid(): string;
-export interface IFileExt extends File {
-    kind: string;
-    webkitGetAsEntry: () => File;
-    getAsFile: () => File;
-    file: (callback: (file: IFileExt) => void) => void;
-    createReader: Function;
-    isFile: boolean;
-    isDirectory: boolean;
-    fullPath: string;
-}
+export type ErrorCallback = (err: DOMException) => void;
 export interface IFullUploadAreaOptions extends IUploadAreaOptions {
     maxFileSize: number;
     allowDragDrop: boolean | (() => boolean);
@@ -44,6 +35,16 @@ export interface ILocalizer {
 export interface IOffsetInfo {
     running: boolean;
     fileCount: number;
+}
+export class ItemProcessor {
+    errors: Error[];
+    files: File[];
+    processItems(items: DataTransferItem[] | DataTransferItemList, callback?: Function): void;
+    private processEntries;
+    private processEntry;
+    private processDirectoryEntry;
+    private processFileEntry;
+    private processFile;
 }
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
@@ -149,9 +150,6 @@ export class UploadArea {
     private onDrop;
     private isIeVersion;
     private onClick;
-    private addFilesFromItems;
-    private processDirectory;
-    private handleFiles;
     private isFileSizeValid;
     private isFileTypeInvalid;
     private stopEventPropagation;

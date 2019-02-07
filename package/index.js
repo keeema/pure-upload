@@ -97,6 +97,11 @@ function newGuid() {
     return uuid;
 }
 exports.newGuid = newGuid;
+;
+;
+;
+;
+;
 function getDefaultLocalizer() {
     return {
         fileSizeInvalid: function (maxFileSize) {
@@ -111,6 +116,65 @@ function getDefaultLocalizer() {
         },
         invalidResponseFromServer: function () { return "Invalid response from server"; }
     };
+}
+var ItemProcessor = /** @class */ (function () {
+    function ItemProcessor() {
+        this.errors = [];
+        this.files = [];
+    }
+    ItemProcessor.prototype.processItems = function (items, callback) {
+        var _this = this;
+        callback = callbackAfter(items.length, callback);
+        toValidItems(items).forEach(function (item) { return _this.processEntry(item.webkitGetAsEntry(), "", callback); });
+    };
+    ItemProcessor.prototype.processEntries = function (entries, path, callback) {
+        var _this = this;
+        if (path === void 0) { path = ""; }
+        callback = callbackAfter(entries.length, callback);
+        entries.forEach(function (entry) { return _this.processEntry(entry, path, callback); });
+    };
+    ItemProcessor.prototype.processEntry = function (entry, path, callback) {
+        if (path === void 0) { path = ""; }
+        if (entry.isDirectory)
+            this.processDirectoryEntry(entry, path, callback);
+        else if (entry.isFile)
+            this.processFileEntry(entry, path, callback);
+        else if (callback !== undefined)
+            callback(); // this.errors.push(new Error('...'))?
+    };
+    ItemProcessor.prototype.processDirectoryEntry = function (entry, path, callback) {
+        var _this = this;
+        if (path === void 0) { path = ""; }
+        entry.createReader().readEntries(function (entries) { return _this.processEntries(entries, path + "/" + entry.name, callback); }, pushAndCallback(this.errors, callback));
+    };
+    ItemProcessor.prototype.processFileEntry = function (entry, path, callback) {
+        var _this = this;
+        if (path === void 0) { path = ""; }
+        entry.file(function (file) { return _this.processFile(file, path, callback); }, pushAndCallback(this.errors, callback));
+    };
+    ItemProcessor.prototype.processFile = function (file, path, callback) {
+        if (path === void 0) { path = ""; }
+        file.fullPath = path + "/" + file.name;
+        pushAndCallback(this.files, callback)(file);
+    };
+    return ItemProcessor;
+}());
+exports.ItemProcessor = ItemProcessor;
+function callbackAfter(i, callback) {
+    return function () { return --i === 0 && callback !== undefined ? callback() : i; };
+}
+function pushAndCallback(array, callback) {
+    return function (item) { array.push(item); if (callback !== undefined)
+        callback(); };
+}
+function toValidItems(items) {
+    var validItems = [];
+    for (var i = 0; i < items.length; ++i) {
+        if (items[i].webkitGetAsEntry) {
+            validItems.push(items[i]);
+        }
+    }
+    return validItems;
 }
 function removeEventHandler(el, event, handler) {
     if (el.removeEventListener) {
@@ -363,6 +427,7 @@ var UploadArea = /** @class */ (function () {
         this.targetElement.classList.add(style);
     };
     UploadArea.prototype.onDrop = function (e) {
+        var _this = this;
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
         this.stopEventPropagation(e);
@@ -378,16 +443,12 @@ var UploadArea = /** @class */ (function () {
             if (items &&
                 items.length &&
                 items[0].webkitGetAsEntry !== null) {
-                if (!this.options.multiple) {
-                    var newItems = [items[0]];
-                    this.addFilesFromItems(newItems);
-                }
-                else {
-                    this.addFilesFromItems(items);
-                }
+                var itemProcessor_1 = new ItemProcessor();
+                var itemsToProcess = this.options.multiple ? items : [items[0]];
+                itemProcessor_1.processItems(itemsToProcess, function () { return _this.selectFiles(itemProcessor_1.files); });
             }
             else {
-                this.handleFiles(files);
+                this.selectFiles(files);
             }
         }
     };
@@ -407,59 +468,6 @@ var UploadArea = /** @class */ (function () {
         }
         else {
             this._fileInput.click();
-        }
-    };
-    UploadArea.prototype.addFilesFromItems = function (items) {
-        var entry;
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            if (item.webkitGetAsEntry &&
-                (entry = item.webkitGetAsEntry())) {
-                if (entry.isFile) {
-                    this.selectFiles([item.getAsFile()]);
-                }
-                else if (entry.isDirectory) {
-                    this.processDirectory(entry, entry.name);
-                }
-            }
-            else if (item.getAsFile) {
-                if (!item.kind || item.kind === "file") {
-                    this.selectFiles([item.getAsFile()]);
-                }
-            }
-        }
-    };
-    UploadArea.prototype.processDirectory = function (directory, path) {
-        var dirReader = directory.createReader();
-        var self = this;
-        var entryReader = function (entries) {
-            for (var i = 0; i < entries.length; i++) {
-                var entry = entries[i];
-                if (entry.isFile) {
-                    entry.file(function (file) {
-                        if (file.name.substring(0, 1) === ".") {
-                            return;
-                        }
-                        file.fullPath = "" + path + "/" + file.name;
-                        self.selectFiles([file]);
-                    });
-                }
-                else if (entry.isDirectory) {
-                    self.processDirectory(entry, "" + path + "/" + entry.name);
-                }
-            }
-        };
-        dirReader.readEntries(entryReader, function (error) {
-            return typeof console !== "undefined" && console !== null
-                ? typeof console.log === "function"
-                    ? console.log(error)
-                    : void 0
-                : void 0;
-        });
-    };
-    UploadArea.prototype.handleFiles = function (files) {
-        for (var i = 0; i < files.length; i++) {
-            this.selectFiles([files[i]]);
         }
     };
     UploadArea.prototype.isFileSizeValid = function (file) {

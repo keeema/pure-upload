@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.2.0
+
+Changed UploadArea to collect all files before firing onFileSelected and onFilesSelected.
+
 ## 5.1.0
 
 Added files to start and clear for UploadArea.

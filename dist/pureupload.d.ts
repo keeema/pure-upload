@@ -7,16 +7,7 @@ declare module pu {
     function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
     function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
     function newGuid(): string;
-    interface IFileExt extends File {
-        kind: string;
-        webkitGetAsEntry: () => File;
-        getAsFile: () => File;
-        file: (callback: (file: IFileExt) => void) => void;
-        createReader: Function;
-        isFile: boolean;
-        isDirectory: boolean;
-        fullPath: string;
-    }
+    type ErrorCallback = (err: DOMException) => void;
     interface IFullUploadAreaOptions extends IUploadAreaOptions {
         maxFileSize: number;
         allowDragDrop: boolean | (() => boolean);
@@ -44,6 +35,16 @@ declare module pu {
     interface IOffsetInfo {
         running: boolean;
         fileCount: number;
+    }
+    class ItemProcessor {
+        errors: Error[];
+        files: File[];
+        processItems(items: DataTransferItem[] | DataTransferItemList, callback?: Function): void;
+        private processEntries;
+        private processEntry;
+        private processDirectoryEntry;
+        private processFileEntry;
+        private processFile;
     }
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
@@ -149,9 +150,6 @@ declare module pu {
         private onDrop;
         private isIeVersion;
         private onClick;
-        private addFilesFromItems;
-        private processDirectory;
-        private handleFiles;
         private isFileSizeValid;
         private isFileTypeInvalid;
         private stopEventPropagation;
