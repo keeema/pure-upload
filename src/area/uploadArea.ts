@@ -295,14 +295,11 @@ class UploadArea {
         items.length &&
         (<{ webkitGetAsEntry?: Object }>items[0]).webkitGetAsEntry !== null
       ) {
-        if (!this.options.multiple) {
-          let newItems = [items[0]];
-          this.addFilesFromItems(newItems);
-        } else {
-          this.addFilesFromItems(items);
-        }
+        const itemProcessor = new ItemProcessor();
+        const itemsToProcess = this.options.multiple ? items : [items[0]];
+        itemProcessor.processItems(itemsToProcess, () => this.selectFiles(itemProcessor.files));
       } else {
-        this.handleFiles(files);
+        this.selectFiles(files);
       }
     }
   }
@@ -324,66 +321,6 @@ class UploadArea {
       }, 200);
     } else {
       this._fileInput.click();
-    }
-  }
-
-  private addFilesFromItems(
-    items: FileList | File[] | DataTransferItemList | DataTransferItem[]
-  ): void {
-    let entry: IFileExt;
-    for (let i = 0; i < items.length; i++) {
-      let item: IFileExt = <IFileExt>items[i];
-      if (
-        item.webkitGetAsEntry &&
-        (entry = <IFileExt>item.webkitGetAsEntry())
-      ) {
-        if (entry.isFile) {
-          this.selectFiles([item.getAsFile()]);
-        } else if (entry.isDirectory) {
-          this.processDirectory(entry, entry.name);
-        }
-      } else if (item.getAsFile) {
-        if (!item.kind || item.kind === "file") {
-          this.selectFiles([item.getAsFile()]);
-        }
-      }
-    }
-  }
-
-  private processDirectory(
-    directory: { createReader: Function },
-    path: string
-  ): void {
-    let dirReader = directory.createReader();
-    let self = this;
-    let entryReader = (entries: (IFileExt & { createReader: Function })[]) => {
-      for (let i = 0; i < entries.length; i++) {
-        let entry = entries[i];
-        if (entry.isFile) {
-          entry.file((file: IFileExt) => {
-            if (file.name.substring(0, 1) === ".") {
-              return;
-            }
-            file.fullPath = "" + path + "/" + file.name;
-            self.selectFiles([file]);
-          });
-        } else if (entry.isDirectory) {
-          self.processDirectory(entry, "" + path + "/" + entry.name);
-        }
-      }
-    };
-    dirReader.readEntries(entryReader, function(error: string) {
-      return typeof console !== "undefined" && console !== null
-        ? typeof console.log === "function"
-          ? console.log(error)
-          : void 0
-        : void 0;
-    });
-  }
-
-  private handleFiles(files: FileList | File[]): void {
-    for (let i = 0; i < files.length; i++) {
-      this.selectFiles([files[i]]);
     }
   }
 
