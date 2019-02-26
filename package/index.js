@@ -97,11 +97,6 @@ function newGuid() {
     return uuid;
 }
 exports.newGuid = newGuid;
-;
-;
-;
-;
-;
 function getDefaultLocalizer() {
     return {
         fileSizeInvalid: function (maxFileSize) {
@@ -122,22 +117,26 @@ var ItemProcessor = /** @class */ (function () {
         this.errors = [];
         this.files = [];
     }
+    ItemProcessor.processItems = function (items, callback) {
+        var processor = new ItemProcessor();
+        processor.processItems(items, function () { return callback && callback(processor.files); });
+    };
     ItemProcessor.prototype.processItems = function (items, callback) {
         var _this = this;
-        callback = callbackAfter(items.length, callback);
-        toValidItems(items).forEach(function (item) { return _this.processEntry(item.webkitGetAsEntry(), "", callback); });
+        callback = this.callbackAfter(items.length, callback);
+        this.toValidItems(items).forEach(function (item) { return _this.processEntry(item.webkitGetAsEntry(), "", callback); });
     };
     ItemProcessor.prototype.processEntries = function (entries, path, callback) {
         var _this = this;
         if (path === void 0) { path = ""; }
-        callback = callbackAfter(entries.length, callback);
+        callback = this.callbackAfter(entries.length, callback);
         entries.forEach(function (entry) { return _this.processEntry(entry, path, callback); });
     };
     ItemProcessor.prototype.processEntry = function (entry, path, callback) {
         if (path === void 0) { path = ""; }
-        if (entry.isDirectory)
+        if (this.isFileSystemDirectoryEntry(entry))
             this.processDirectoryEntry(entry, path, callback);
-        else if (entry.isFile)
+        else if (this.isFileSystemFileEntry(entry))
             this.processFileEntry(entry, path, callback);
         else if (callback !== undefined)
             callback(); // this.errors.push(new Error('...'))?
@@ -145,37 +144,48 @@ var ItemProcessor = /** @class */ (function () {
     ItemProcessor.prototype.processDirectoryEntry = function (entry, path, callback) {
         var _this = this;
         if (path === void 0) { path = ""; }
-        entry.createReader().readEntries(function (entries) { return _this.processEntries(entries, path + "/" + entry.name, callback); }, pushAndCallback(this.errors, callback));
+        entry
+            .createReader()
+            .readEntries(function (entries) { return _this.processEntries(entries, path + "/" + entry.name, callback); }, this.pushAndCallback(this.errors, callback));
     };
     ItemProcessor.prototype.processFileEntry = function (entry, path, callback) {
         var _this = this;
         if (path === void 0) { path = ""; }
-        entry.file(function (file) { return _this.processFile(file, path, callback); }, pushAndCallback(this.errors, callback));
+        entry.file(function (file) { return _this.processFile(file, path, callback); }, this.pushAndCallback(this.errors, callback));
     };
     ItemProcessor.prototype.processFile = function (file, path, callback) {
         if (path === void 0) { path = ""; }
         file.fullPath = path + "/" + file.name;
-        pushAndCallback(this.files, callback)(file);
+        this.pushAndCallback(this.files, callback)(file);
+    };
+    ItemProcessor.prototype.callbackAfter = function (i, callback) {
+        return function () { return (--i === 0 && callback !== undefined ? callback() : i); };
+    };
+    ItemProcessor.prototype.pushAndCallback = function (array, callback) {
+        return function (item) {
+            array.push(item);
+            if (callback !== undefined)
+                callback();
+        };
+    };
+    ItemProcessor.prototype.toValidItems = function (items) {
+        var validItems = [];
+        for (var i = 0; i < items.length; ++i) {
+            if (items[i].webkitGetAsEntry) {
+                validItems.push(items[i]);
+            }
+        }
+        return validItems;
+    };
+    ItemProcessor.prototype.isFileSystemFileEntry = function (entry) {
+        return entry.isFile;
+    };
+    ItemProcessor.prototype.isFileSystemDirectoryEntry = function (entry) {
+        return entry.isDirectory;
     };
     return ItemProcessor;
 }());
 exports.ItemProcessor = ItemProcessor;
-function callbackAfter(i, callback) {
-    return function () { return --i === 0 && callback !== undefined ? callback() : i; };
-}
-function pushAndCallback(array, callback) {
-    return function (item) { array.push(item); if (callback !== undefined)
-        callback(); };
-}
-function toValidItems(items) {
-    var validItems = [];
-    for (var i = 0; i < items.length; ++i) {
-        if (items[i].webkitGetAsEntry) {
-            validItems.push(items[i]);
-        }
-    }
-    return validItems;
-}
 function removeEventHandler(el, event, handler) {
     if (el.removeEventListener) {
         el.removeEventListener(event, handler);
@@ -213,10 +223,7 @@ var UploadArea = /** @class */ (function () {
         }
     };
     UploadArea.prototype.clear = function (files) {
-        this.fileList =
-            this.fileList && files
-                ? this.fileList.filter(function (file) { return files.indexOf(file) < 0; })
-                : null;
+        this.fileList = this.fileList && files ? this.fileList.filter(function (file) { return files.indexOf(file) < 0; }) : null;
     };
     UploadArea.prototype.destroy = function () {
         if (this.unregisterOnClick)
@@ -275,10 +282,7 @@ var UploadArea = /** @class */ (function () {
     };
     UploadArea.prototype.putFilesToQueue = function (files) {
         var _this = this;
-        files =
-            this.fileList && files
-                ? this.fileList.filter(function (file) { return files && files.indexOf(file) >= 0; })
-                : this.fileList || undefined;
+        files = this.fileList && files ? this.fileList.filter(function (file) { return files && files.indexOf(file) >= 0; }) : this.fileList || undefined;
         if (!files)
             return;
         files.forEach(function (file) {
@@ -348,38 +352,22 @@ var UploadArea = /** @class */ (function () {
         var _this = this;
         var onClick = function () { return _this.onClick(); };
         addEventHandler(this.targetElement, "click", onClick);
-        this.unregisterOnClick = function () {
-            return removeEventHandler(_this.targetElement, "click", onClick);
-        };
-        var onDrag = (function (e) {
-            return _this.onDrag(e);
-        });
+        this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, "click", onClick); };
+        var onDrag = (function (e) { return _this.onDrag(e); });
         addEventHandler(this.targetElement, "dragover", onDrag);
-        this.unregisterOnDragOver = function () {
-            return removeEventHandler(_this.targetElement, "dragover", onDrag);
-        };
+        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, "dragover", onDrag); };
         var onDragLeave = function () { return _this.onDragLeave(); };
         addEventHandler(this.targetElement, "dragleave", onDragLeave);
-        this.unregisterOnDragOver = function () {
-            return removeEventHandler(_this.targetElement, "dragleave", onDragLeave);
-        };
+        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, "dragleave", onDragLeave); };
         var onDragGlobal = function () { return _this.onDragGlobal(); };
         addEventHandler(document.body, "dragover", onDragGlobal);
-        this.unregisterOnDragOverGlobal = function () {
-            return removeEventHandler(document.body, "dragover", onDragGlobal);
-        };
+        this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, "dragover", onDragGlobal); };
         var onDragLeaveGlobal = function () { return _this.onDragLeaveGlobal(); };
         addEventHandler(document.body, "dragleave", onDragLeaveGlobal);
-        this.unregisterOnDragOverGlobal = function () {
-            return removeEventHandler(document.body, "dragleave", onDragLeaveGlobal);
-        };
-        var onDrop = (function (e) {
-            return _this.onDrop(e);
-        });
+        this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, "dragleave", onDragLeaveGlobal); };
+        var onDrop = (function (e) { return _this.onDrop(e); });
         addEventHandler(this.targetElement, "drop", onDrop);
-        this.unregisterOnDrop = function () {
-            return removeEventHandler(_this.targetElement, "drop", onDrop);
-        };
+        this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, "drop", onDrop); };
     };
     UploadArea.prototype.onChange = function (e) {
         this.selectFiles(e.target.files);
@@ -396,8 +384,7 @@ var UploadArea = /** @class */ (function () {
             catch (_a) {
                 true;
             }
-            e.dataTransfer.dropEffect =
-                "move" === effect || "linkMove" === effect ? "move" : "copy";
+            e.dataTransfer.dropEffect = "move" === effect || "linkMove" === effect ? "move" : "copy";
         }
         this.stopEventPropagation(e);
     };
@@ -440,12 +427,9 @@ var UploadArea = /** @class */ (function () {
             if (!this.options.multiple)
                 files = [files[0]];
             var items = e.dataTransfer.items;
-            if (items &&
-                items.length &&
-                items[0].webkitGetAsEntry !== null) {
-                var itemProcessor_1 = new ItemProcessor();
+            if (items && items.length && items[0].webkitGetAsEntry !== null) {
                 var itemsToProcess = this.options.multiple ? items : [items[0]];
-                itemProcessor_1.processItems(itemsToProcess, function () { return _this.selectFiles(itemProcessor_1.files); });
+                ItemProcessor.processItems(itemsToProcess, function (files) { return _this.selectFiles(files); });
             }
             else {
                 this.selectFiles(files);
@@ -472,16 +456,14 @@ var UploadArea = /** @class */ (function () {
     };
     UploadArea.prototype.isFileSizeValid = function (file) {
         var maxFileSize = this.options.maxFileSize * 1024 * 1024; // max file size in bytes
-        if (file.size > maxFileSize ||
-            (!this.options.allowEmptyFile && file.size === 0))
+        if (file.size > maxFileSize || (!this.options.allowEmptyFile && file.size === 0))
             return false;
         return true;
     };
     UploadArea.prototype.isFileTypeInvalid = function (file) {
         if (file.name &&
             this.options.accept &&
-            (this.options.accept.trim() !== "*" ||
-                this.options.accept.trim() !== "*.*") &&
+            (this.options.accept.trim() !== "*" || this.options.accept.trim() !== "*.*") &&
             this.options.validateExtension &&
             this.options.accept.indexOf("/") === -1) {
             var acceptedExtensions = this.options.accept.split(",");
@@ -490,8 +472,7 @@ var UploadArea = /** @class */ (function () {
                 return true;
             var isFileExtensionExisted = true;
             for (var i = 0; i < acceptedExtensions.length; i++) {
-                if (acceptedExtensions[i].toUpperCase().trim() ===
-                    fileExtension.toUpperCase()) {
+                if (acceptedExtensions[i].toUpperCase().trim() === fileExtension.toUpperCase()) {
                     isFileExtensionExisted = false;
                 }
             }

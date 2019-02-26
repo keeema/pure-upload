@@ -1,4 +1,7 @@
 "use strict";
+var dndArea = null;
+var buttonArea = null;
+var manualStart = false;
 window.onload = function () {
     resolveEnvironment();
     var queueRenderer = getQueueRenderer();
@@ -12,7 +15,8 @@ window.onload = function () {
         accept: "*.*",
         multiple: true,
         dragOverStyle: "dnd-area-over",
-        dragOverGlobalStyle: "dnd-area-global"
+        dragOverGlobalStyle: "dnd-area-global",
+        manualStart: manualStart
     };
     var queueUploadSettings = {
         url: "/api/test",
@@ -25,9 +29,13 @@ window.onload = function () {
         dragOverStyle: "dnd-area-over",
         dragOverGlobalStyle: "dnd-area-global"
     };
-    uploaderExample1.registerArea(document.getElementById("example-button"), uploadSettings);
-    uploaderExample1.registerArea(document.getElementById("example-dnd-area"), uploadSettings);
+    buttonArea = uploaderExample1.registerArea(document.getElementById("example-button"), uploadSettings);
+    dndArea = uploaderExample1.registerArea(document.getElementById("example-dnd-area"), uploadSettings);
     uploaderExample1.registerArea(document.getElementById("example-queue"), queueUploadSettings);
+    if (!manualStart) {
+        document.getElementById("example-button-manual-start").style.display = "none";
+        document.getElementById("example-button-manual-dnd-start").style.display = "none";
+    }
     uploaderExample1.queue.callbacks.onQueueChangedCallback = function (result) {
         queueRenderer.renderQueue("example-queue", "Example Queue", result, uploaderExample1.queue.options);
     };

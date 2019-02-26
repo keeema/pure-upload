@@ -8,6 +8,7 @@ export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueu
 export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
 export function newGuid(): string;
 export type ErrorCallback = (err: DOMException) => void;
+type FilesCallback = (file: File[]) => void;
 export interface IFullUploadAreaOptions extends IUploadAreaOptions {
     maxFileSize: number;
     allowDragDrop: boolean | (() => boolean);
@@ -39,12 +40,19 @@ export interface IOffsetInfo {
 export class ItemProcessor {
     errors: Error[];
     files: File[];
-    processItems(items: DataTransferItem[] | DataTransferItemList, callback?: Function): void;
+    private constructor();
+    static processItems(items: DataTransferItem[] | DataTransferItemList, callback?: FilesCallback): void;
+    processItems(items: DataTransferItem[] | DataTransferItemList, callback?: () => void): void;
     private processEntries;
     private processEntry;
     private processDirectoryEntry;
     private processFileEntry;
     private processFile;
+    private callbackAfter;
+    private pushAndCallback;
+    private toValidItems;
+    private isFileSystemFileEntry;
+    private isFileSystemDirectoryEntry;
 }
 export interface IUploadAreaOptions extends IUploadOptions {
     maxFileSize?: number;
@@ -213,4 +221,5 @@ export enum UploadStatus {
     canceled = 4,
     removed = 5
 }
+export {};
 }
