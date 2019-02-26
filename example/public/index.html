@@ -1,35 +1,66 @@
 <html>
+  <head>
+    <script
+      language="javascript"
+      type="text/javascript"
+      src="./pureupload.js"
+    ></script>
+    <script
+      language="javascript"
+      type="text/javascript"
+      src="./envResolver.js"
+    ></script>
+    <script
+      language="javascript"
+      type="text/javascript"
+      src="./queueRenderer.js"
+    ></script>
+    <script
+      language="javascript"
+      type="text/javascript"
+      src="./index.js"
+    ></script>
+    <link rel="stylesheet" href="./index.css" />
+    <link
+      href="http://fonts.googleapis.com/css?family=Roboto:400,300,700"
+      rel="stylesheet"
+      type="text/css"
+    />
+  </head>
 
-<head>
-  <script language="javascript" type="text/javascript" src="./pureupload.js"></script>
-  <script language="javascript" type="text/javascript" src="./envResolver.js"></script>
-  <script language="javascript" type="text/javascript" src="./queueRenderer.js"></script>
-  <script language="javascript" type="text/javascript" src="./index.js"></script>
-  <link rel="stylesheet" href="./index.css">
-  <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700' rel='stylesheet' type='text/css'>
-</head>
+  <body>
+    <h1>Pure-Upload Example</h1>
 
-<body>
-  <h1>Pure-Upload Example</h1>
+    <button id="example-button" class="upload-button">
+      Upload your file here!
+    </button>
+    <button
+      id="example-button-manual-start"
+      class="upload-button"
+      onclick="buttonArea.start(true)"
+    >
+      Add selected files to queue manually
+    </button>
 
-  <button id="example-button" class="upload-button">
-    Upload your file here!
-  </button>
-
-  <div id="example-dnd-area" class="dnd-area">
-    <div class="dnd-caption">
-      ..or use this beautiful drag and drop!
+    <div id="example-dnd-area" class="dnd-area">
+      <div class="dnd-caption">
+        ..or use this beautiful drag and drop!
+      </div>
     </div>
-  </div>
-  <p>
-    You can also drag and drop to queue area!
-  </p>
-  <div id="example-queue" class="table-queue">
 
-  </div>
-  <button id="example-clear-button" class="upload-button">
-    Remove finished files
-  </button>
-</body>
-
+    <button
+      id="example-button-manual-dnd-start"
+      class="upload-button"
+      onclick="dndArea.start(true)"
+    >
+      Add DnD files to queue manually
+    </button>
+    <p>
+      You can also drag and drop to queue area!
+    </p>
+    <div id="example-queue" class="table-queue"></div>
+    <button id="example-clear-button" class="upload-button">
+      Remove finished files
+    </button>
+  </body>
 </html>

@@ -8,6 +8,7 @@ declare module pu {
     function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
     function newGuid(): string;
     type ErrorCallback = (err: DOMException) => void;
+    type FilesCallback = (file: File[]) => void;
     interface IFullUploadAreaOptions extends IUploadAreaOptions {
         maxFileSize: number;
         allowDragDrop: boolean | (() => boolean);
@@ -39,12 +40,19 @@ declare module pu {
     class ItemProcessor {
         errors: Error[];
         files: File[];
-        processItems(items: DataTransferItem[] | DataTransferItemList, callback?: Function): void;
+        private constructor();
+        static processItems(items: DataTransferItem[] | DataTransferItemList, callback?: FilesCallback): void;
+        processItems(items: DataTransferItem[] | DataTransferItemList, callback?: () => void): void;
         private processEntries;
         private processEntry;
         private processDirectoryEntry;
         private processFileEntry;
         private processFile;
+        private callbackAfter;
+        private pushAndCallback;
+        private toValidItems;
+        private isFileSystemFileEntry;
+        private isFileSystemDirectoryEntry;
     }
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;

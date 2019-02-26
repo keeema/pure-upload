@@ -28,6 +28,11 @@
     "file",
     "api"
   ],
+  "prettier": {
+    "printWidth": 140,
+    "tabWidth": 4,
+    "parser": "typescript"
+  },
   "devDependencies": {
     "@types/cors": "^2.8.4",
     "@types/jasmine": "^2.8.9",
