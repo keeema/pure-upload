@@ -1,5 +1,5 @@
 declare module pu {
-    function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject): void;
+    function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject, useCapture: boolean): void;
     const isFileApi: boolean;
     function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
     function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
@@ -16,6 +16,7 @@ declare module pu {
         accept: string;
         multiple: boolean;
         validateExtension: boolean;
+        useCapture: boolean;
         localizer: ILocalizer;
     }
     interface IFullUploadOptions extends IUploadOptions {
@@ -65,6 +66,7 @@ declare module pu {
         allowEmptyFile?: boolean;
         dragOverStyle?: string;
         dragOverGlobalStyle?: string;
+        useCapture?: boolean;
         onFileAdded?: (file: IUploadFile) => void;
         onFileSelected?: (file: IUploadFile) => void;
         onFilesSelected?: (file: IUploadFile[]) => void;

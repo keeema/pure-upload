@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.3.0
+
+Enable event binding in capturing mode
+
 ## 5.2.0
 
 Changed UploadArea to collect all files before firing onFileSelected and onFilesSelected.

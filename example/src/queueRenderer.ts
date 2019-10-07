@@ -14,7 +14,7 @@ class QueueRenderer {
     let element = document.createElement("button");
     element.className = "table-row-button";
     element.innerHTML = value;
-    pu.addEventHandler(element, "click", callback);
+    pu.addEventHandler(element, "click", callback, false);
     return element;
   }
 

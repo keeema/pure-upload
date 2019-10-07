@@ -79,6 +79,7 @@ manualStart?: boolean;
 allowEmptyFile?: boolean;
 dragOverStyle?: string;
 dragOverGlobalStyle?: string;
+useCapture?: boolean;
 onFileAdded?: (file: IUploadFile) => void;
 onFileSelected?: (file: IUploadFile) => void;
 onFilesSelected?: (file: IUploadFile[]) => void;

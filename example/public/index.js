@@ -42,5 +42,5 @@ window.onload = function () {
     uploaderExample1.queue.callbacks.onProgressCallback = function (file) {
         queueRenderer.renderItemProgress(file);
     };
-    pu.addEventHandler(document.getElementById("example-clear-button"), "click", function () { return uploaderExample1.queue.clearFiles(); });
+    pu.addEventHandler(document.getElementById("example-clear-button"), "click", function () { return uploaderExample1.queue.clearFiles(); }, false);
 };
