@@ -9,6 +9,7 @@ interface IUploadAreaOptions extends IUploadOptions {
   allowEmptyFile?: boolean;
   dragOverStyle?: string;
   dragOverGlobalStyle?: string;
+  useCapture?: boolean;
 
   onFileAdded?: (file: IUploadFile) => void;
   onFileSelected?: (file: IUploadFile) => void;

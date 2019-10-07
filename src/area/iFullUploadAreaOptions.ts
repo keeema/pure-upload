@@ -5,6 +5,7 @@ interface IFullUploadAreaOptions extends IUploadAreaOptions {
   accept: string;
   multiple: boolean;
   validateExtension: boolean;
+  useCapture: boolean;
 
   localizer: ILocalizer;
 }

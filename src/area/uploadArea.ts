@@ -67,7 +67,8 @@ class UploadArea {
             accept: "*.*",
             validateExtension: false,
             multiple: true,
-            allowEmptyFile: false
+            allowEmptyFile: false,
+            useCapture: false
         };
     }
 
@@ -150,7 +151,7 @@ class UploadArea {
         this._fileInput.style.display = "none";
 
         const onChange = (e: Event) => this.onChange(e);
-        addEventHandler(this._fileInput, "change", onChange);
+        addEventHandler(this._fileInput, "change", onChange, this.options.useCapture);
         this.unregisterOnChange = () => {
             if (this._fileInput) removeEventHandler(this._fileInput, "change", onchange as EventListener);
         };
@@ -167,27 +168,28 @@ class UploadArea {
 
     private registerEvents() {
         const onClick = () => this.onClick();
-        addEventHandler(this.targetElement, "click", onClick);
+        let useCapture = this.options.useCapture;
+        addEventHandler(this.targetElement, "click", onClick, useCapture);
         this.unregisterOnClick = () => removeEventHandler(this.targetElement, "click", onClick);
 
         const onDrag = ((e: DragEvent) => this.onDrag(e)) as EventListenerOrEventListenerObject;
-        addEventHandler(this.targetElement, "dragover", onDrag);
+        addEventHandler(this.targetElement, "dragover", onDrag, useCapture);
         this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, "dragover", onDrag);
 
         const onDragLeave = () => this.onDragLeave();
-        addEventHandler(this.targetElement, "dragleave", onDragLeave);
+        addEventHandler(this.targetElement, "dragleave", onDragLeave, useCapture);
         this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, "dragleave", onDragLeave);
 
         const onDragGlobal = () => this.onDragGlobal();
-        addEventHandler(document.body, "dragover", onDragGlobal);
+        addEventHandler(document.body, "dragover", onDragGlobal, useCapture);
         this.unregisterOnDragOverGlobal = () => removeEventHandler(document.body, "dragover", onDragGlobal);
 
         const onDragLeaveGlobal = () => this.onDragLeaveGlobal();
-        addEventHandler(document.body, "dragleave", onDragLeaveGlobal);
+        addEventHandler(document.body, "dragleave", onDragLeaveGlobal, useCapture);
         this.unregisterOnDragOverGlobal = () => removeEventHandler(document.body, "dragleave", onDragLeaveGlobal);
 
         const onDrop = ((e: DragEvent) => this.onDrop(e)) as EventListenerOrEventListenerObject;
-        addEventHandler(this.targetElement, "drop", onDrop);
+        addEventHandler(this.targetElement, "drop", onDrop, useCapture);
         this.unregisterOnDrop = () => removeEventHandler(this.targetElement, "drop", onDrop);
     }
 

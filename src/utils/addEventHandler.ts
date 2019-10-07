@@ -1,10 +1,11 @@
 function addEventHandler(
   el: Element | HTMLElement,
   event: string,
-  handler: EventListenerOrEventListenerObject
+  handler: EventListenerOrEventListenerObject,
+  useCapture: boolean
 ) {
   if (el.addEventListener) {
-    el.addEventListener(event, handler);
+    el.addEventListener(event, handler, useCapture);
   } else {
     let elem = <IElementWithEvents>el;
     if (elem.attachEvent) {
