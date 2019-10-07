@@ -1,5 +1,5 @@
 declare module "pure-upload" {
-export function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject): void;
+export function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject, useCapture: boolean): void;
 export const isFileApi: boolean;
 export function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
 export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
@@ -16,6 +16,7 @@ export interface IFullUploadAreaOptions extends IUploadAreaOptions {
     accept: string;
     multiple: boolean;
     validateExtension: boolean;
+    useCapture: boolean;
     localizer: ILocalizer;
 }
 export interface IFullUploadOptions extends IUploadOptions {
@@ -65,6 +66,7 @@ export interface IUploadAreaOptions extends IUploadOptions {
     allowEmptyFile?: boolean;
     dragOverStyle?: string;
     dragOverGlobalStyle?: string;
+    useCapture?: boolean;
     onFileAdded?: (file: IUploadFile) => void;
     onFileSelected?: (file: IUploadFile) => void;
     onFilesSelected?: (file: IUploadFile[]) => void;

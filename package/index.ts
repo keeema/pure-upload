@@ -1,10 +1,11 @@
 export function addEventHandler(
   el: Element | HTMLElement,
   event: string,
-  handler: EventListenerOrEventListenerObject
+  handler: EventListenerOrEventListenerObject,
+  useCapture: boolean
 ) {
   if (el.addEventListener) {
-    el.addEventListener(event, handler);
+    el.addEventListener(event, handler, useCapture);
   } else {
     let elem = <IElementWithEvents>el;
     if (elem.attachEvent) {
@@ -173,6 +174,7 @@ export interface IFullUploadAreaOptions extends IUploadAreaOptions {
   accept: string;
   multiple: boolean;
   validateExtension: boolean;
+  useCapture: boolean;
 
   localizer: ILocalizer;
 }
@@ -297,6 +299,7 @@ export interface IUploadAreaOptions extends IUploadOptions {
   allowEmptyFile?: boolean;
   dragOverStyle?: string;
   dragOverGlobalStyle?: string;
+  useCapture?: boolean;
 
   onFileAdded?: (file: IUploadFile) => void;
   onFileSelected?: (file: IUploadFile) => void;
@@ -452,7 +455,8 @@ export class UploadArea {
             accept: "*.*",
             validateExtension: false,
             multiple: true,
-            allowEmptyFile: false
+            allowEmptyFile: false,
+            useCapture: false
         };
     }
 
@@ -535,7 +539,7 @@ export class UploadArea {
         this._fileInput.style.display = "none";
 
         const onChange = (e: Event) => this.onChange(e);
-        addEventHandler(this._fileInput, "change", onChange);
+        addEventHandler(this._fileInput, "change", onChange, this.options.useCapture);
         this.unregisterOnChange = () => {
             if (this._fileInput) removeEventHandler(this._fileInput, "change", onchange as EventListener);
         };
@@ -552,27 +556,28 @@ export class UploadArea {
 
     private registerEvents() {
         const onClick = () => this.onClick();
-        addEventHandler(this.targetElement, "click", onClick);
+        let useCapture = this.options.useCapture;
+        addEventHandler(this.targetElement, "click", onClick, useCapture);
         this.unregisterOnClick = () => removeEventHandler(this.targetElement, "click", onClick);
 
         const onDrag = ((e: DragEvent) => this.onDrag(e)) as EventListenerOrEventListenerObject;
-        addEventHandler(this.targetElement, "dragover", onDrag);
+        addEventHandler(this.targetElement, "dragover", onDrag, useCapture);
         this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, "dragover", onDrag);
 
         const onDragLeave = () => this.onDragLeave();
-        addEventHandler(this.targetElement, "dragleave", onDragLeave);
+        addEventHandler(this.targetElement, "dragleave", onDragLeave, useCapture);
         this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, "dragleave", onDragLeave);
 
         const onDragGlobal = () => this.onDragGlobal();
-        addEventHandler(document.body, "dragover", onDragGlobal);
+        addEventHandler(document.body, "dragover", onDragGlobal, useCapture);
         this.unregisterOnDragOverGlobal = () => removeEventHandler(document.body, "dragover", onDragGlobal);
 
         const onDragLeaveGlobal = () => this.onDragLeaveGlobal();
-        addEventHandler(document.body, "dragleave", onDragLeaveGlobal);
+        addEventHandler(document.body, "dragleave", onDragLeaveGlobal, useCapture);
         this.unregisterOnDragOverGlobal = () => removeEventHandler(document.body, "dragleave", onDragLeaveGlobal);
 
         const onDrop = ((e: DragEvent) => this.onDrop(e)) as EventListenerOrEventListenerObject;
-        addEventHandler(this.targetElement, "drop", onDrop);
+        addEventHandler(this.targetElement, "drop", onDrop, useCapture);
         this.unregisterOnDrop = () => removeEventHandler(this.targetElement, "drop", onDrop);
     }
 

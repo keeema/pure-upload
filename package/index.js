@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function addEventHandler(el, event, handler) {
+function addEventHandler(el, event, handler, useCapture) {
     if (el.addEventListener) {
-        el.addEventListener(event, handler);
+        el.addEventListener(event, handler, useCapture);
     }
     else {
         var elem = el;
@@ -259,7 +259,8 @@ var UploadArea = /** @class */ (function () {
             accept: "*.*",
             validateExtension: false,
             multiple: true,
-            allowEmptyFile: false
+            allowEmptyFile: false,
+            useCapture: false
         };
     };
     UploadArea.prototype.selectFiles = function (fileList) {
@@ -336,7 +337,7 @@ var UploadArea = /** @class */ (function () {
         this._fileInput.setAttribute("accept", this.options.accept ? this.options.accept : "");
         this._fileInput.style.display = "none";
         var onChange = function (e) { return _this.onChange(e); };
-        addEventHandler(this._fileInput, "change", onChange);
+        addEventHandler(this._fileInput, "change", onChange, this.options.useCapture);
         this.unregisterOnChange = function () {
             if (_this._fileInput)
                 removeEventHandler(_this._fileInput, "change", onchange);
@@ -351,22 +352,23 @@ var UploadArea = /** @class */ (function () {
     UploadArea.prototype.registerEvents = function () {
         var _this = this;
         var onClick = function () { return _this.onClick(); };
-        addEventHandler(this.targetElement, "click", onClick);
+        var useCapture = this.options.useCapture;
+        addEventHandler(this.targetElement, "click", onClick, useCapture);
         this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, "click", onClick); };
         var onDrag = (function (e) { return _this.onDrag(e); });
-        addEventHandler(this.targetElement, "dragover", onDrag);
+        addEventHandler(this.targetElement, "dragover", onDrag, useCapture);
         this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, "dragover", onDrag); };
         var onDragLeave = function () { return _this.onDragLeave(); };
-        addEventHandler(this.targetElement, "dragleave", onDragLeave);
+        addEventHandler(this.targetElement, "dragleave", onDragLeave, useCapture);
         this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, "dragleave", onDragLeave); };
         var onDragGlobal = function () { return _this.onDragGlobal(); };
-        addEventHandler(document.body, "dragover", onDragGlobal);
+        addEventHandler(document.body, "dragover", onDragGlobal, useCapture);
         this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, "dragover", onDragGlobal); };
         var onDragLeaveGlobal = function () { return _this.onDragLeaveGlobal(); };
-        addEventHandler(document.body, "dragleave", onDragLeaveGlobal);
+        addEventHandler(document.body, "dragleave", onDragLeaveGlobal, useCapture);
         this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, "dragleave", onDragLeaveGlobal); };
         var onDrop = (function (e) { return _this.onDrop(e); });
-        addEventHandler(this.targetElement, "drop", onDrop);
+        addEventHandler(this.targetElement, "drop", onDrop, useCapture);
         this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, "drop", onDrop); };
     };
     UploadArea.prototype.onChange = function (e) {
