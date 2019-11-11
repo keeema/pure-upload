@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.4.0
+
+Update to TS 3.7.2 and Gulp4 used
+
 ## 5.3.0
 
 Enable event binding in capturing mode

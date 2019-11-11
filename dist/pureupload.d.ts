@@ -1,15 +1,15 @@
 declare module pu {
-    function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject, useCapture: boolean): void;
-    const isFileApi: boolean;
-    function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
-    function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
-    function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
-    function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
-    function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
-    function newGuid(): string;
-    type ErrorCallback = (err: DOMException) => void;
+    export function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject, useCapture: boolean): void;
+    export const isFileApi: boolean;
+    export function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];
+    export function decorateSimpleFunction(origFn: () => void, newFn: () => void, newFirst?: boolean): () => void;
+    export function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbacks): UploadCore;
+    export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
+    export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
+    export function newGuid(): string;
+    export type ErrorCallback = (err: DOMException) => void;
     type FilesCallback = (file: File[]) => void;
-    interface IFullUploadAreaOptions extends IUploadAreaOptions {
+    export interface IFullUploadAreaOptions extends IUploadAreaOptions {
         maxFileSize: number;
         allowDragDrop: boolean | (() => boolean);
         clickable: boolean | (() => boolean);
@@ -19,7 +19,7 @@ declare module pu {
         useCapture: boolean;
         localizer: ILocalizer;
     }
-    interface IFullUploadOptions extends IUploadOptions {
+    export interface IFullUploadOptions extends IUploadOptions {
         withCredentials: boolean;
         headers: {
             [key: string]: string | number | boolean;
@@ -29,16 +29,16 @@ declare module pu {
         };
         localizer: ILocalizer;
     }
-    interface ILocalizer {
+    export interface ILocalizer {
         fileSizeInvalid: (maxFileSize: number) => string;
         fileTypeInvalid: (accept: string) => string;
         invalidResponseFromServer: () => string;
     }
-    interface IOffsetInfo {
+    export interface IOffsetInfo {
         running: boolean;
         fileCount: number;
     }
-    class ItemProcessor {
+    export class ItemProcessor {
         errors: Error[];
         files: File[];
         private constructor();
@@ -55,7 +55,7 @@ declare module pu {
         private isFileSystemFileEntry;
         private isFileSystemDirectoryEntry;
     }
-    interface IUploadAreaOptions extends IUploadOptions {
+    export interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
         allowDragDrop?: boolean | (() => boolean);
         clickable?: boolean | (() => boolean);
@@ -73,7 +73,7 @@ declare module pu {
         onFileError?: (file: IUploadFile) => void;
         onFileCanceled?: (file: IUploadFile) => void;
     }
-    interface IUploadCallbacks {
+    export interface IUploadCallbacks {
         onProgressCallback?: (file: IUploadFile) => void;
         onCancelledCallback?: (file: IUploadFile) => void;
         onFinishedCallback?: (file: IUploadFile) => void;
@@ -81,10 +81,10 @@ declare module pu {
         onErrorCallback?: (file: IUploadFile) => void;
         onUploadStartedCallback?: (file: IUploadFile) => void;
     }
-    interface IUploadCallbacksExt extends IUploadCallbacks {
+    export interface IUploadCallbacksExt extends IUploadCallbacks {
         onFileStateChangedCallback?: (file: IUploadFile) => void;
     }
-    interface IUploadFile extends File {
+    export interface IUploadFile extends File {
         guid: string;
         url: string;
         uploadStatus: UploadStatus;
@@ -98,7 +98,7 @@ declare module pu {
         onError: (file: IUploadFile) => void;
         onCancel: (file: IUploadFile) => void;
     }
-    interface IUploadOptions {
+    export interface IUploadOptions {
         url: string | ((file: IUploadFile) => string);
         method: string;
         withCredentials?: boolean;
@@ -110,22 +110,22 @@ declare module pu {
         };
         localizer?: ILocalizer;
     }
-    interface IUploadQueueCallbacks extends IUploadCallbacks {
+    export interface IUploadQueueCallbacks extends IUploadCallbacks {
         onFileAddedCallback?: (file: IUploadFile) => void;
         onFileRemovedCallback?: (file: IUploadFile) => void;
         onAllFinishedCallback?: () => void;
         onQueueChangedCallback?: (queue: IUploadFile[]) => void;
     }
-    interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
+    export interface IUploadQueueCallbacksExt extends IUploadQueueCallbacks, IUploadCallbacksExt {
     }
-    interface IUploadQueueOptions {
+    export interface IUploadQueueOptions {
         maxParallelUploads?: number;
         parallelBatchOffset?: number;
         autoStart?: boolean;
         autoRemove?: boolean;
     }
-    function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: EventListenerOrEventListenerObject): void;
-    class UploadArea {
+    export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: EventListenerOrEventListenerObject): void;
+    export class UploadArea {
         targetElement: HTMLElement;
         uploader: Uploader;
         options: IFullUploadAreaOptions;
@@ -143,7 +143,7 @@ declare module pu {
         start(autoClear?: boolean, files?: IUploadFile[]): void;
         clear(files?: IUploadFile[]): void;
         destroy(): void;
-        readonly fileInput: HTMLInputElement | undefined;
+        get fileInput(): HTMLInputElement | undefined;
         private defaultOptions;
         private selectFiles;
         private putFilesToQueue;
@@ -164,7 +164,7 @@ declare module pu {
         private isFileTypeInvalid;
         private stopEventPropagation;
     }
-    class UploadCore {
+    export class UploadCore {
         options: IFullUploadOptions;
         callbacks: IUploadCallbacksExt;
         constructor(options: IUploadOptions, callbacks?: IUploadCallbacksExt);
@@ -187,16 +187,16 @@ declare module pu {
         private getDefaultOptions;
         private setFullCallbacks;
     }
-    class Uploader {
+    export class Uploader {
         uploadAreas: UploadArea[];
         queue: UploadQueue;
         options: IUploadQueueOptions;
         constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
         registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
         unregisterArea(area: UploadArea): void;
-        readonly firstUploadArea: UploadArea | undefined;
+        get firstUploadArea(): UploadArea | undefined;
     }
-    class UploadQueue {
+    export class UploadQueue {
         offset: IOffsetInfo;
         options: IUploadQueueOptions;
         callbacks: IUploadQueueCallbacksExt;
@@ -215,7 +215,7 @@ declare module pu {
         private getWaitingFiles;
         private startOffset;
     }
-    enum UploadStatus {
+    export enum UploadStatus {
         queued = 0,
         uploading = 1,
         uploaded = 2,
@@ -223,4 +223,5 @@ declare module pu {
         canceled = 4,
         removed = 5
     }
+    export {};
 }

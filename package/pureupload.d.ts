@@ -143,7 +143,7 @@ export class UploadArea {
     start(autoClear?: boolean, files?: IUploadFile[]): void;
     clear(files?: IUploadFile[]): void;
     destroy(): void;
-    readonly fileInput: HTMLInputElement | undefined;
+    get fileInput(): HTMLInputElement | undefined;
     private defaultOptions;
     private selectFiles;
     private putFilesToQueue;
@@ -194,7 +194,7 @@ export class Uploader {
     constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
     registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
     unregisterArea(area: UploadArea): void;
-    readonly firstUploadArea: UploadArea | undefined;
+    get firstUploadArea(): UploadArea | undefined;
 }
 export class UploadQueue {
     offset: IOffsetInfo;
