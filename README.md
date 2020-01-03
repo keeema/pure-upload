@@ -114,8 +114,7 @@ start: () => void;
 ### Upload status
 File statuses accesible by `pu.uploadStatus`.
 
-Library used by [GMC Software Technology](http://www.gmchk.cz).
+Library used by [Quadient](https://quadient.cz/.
 
-[![npm version](https://media.licdn.com/mpr/mpr/shrink_200_200/AAEAAQAAAAAAAAKkAAAAJDA3MDA4ODRmLWM2ZjQtNDYyNi04NjY2LWFhZjk3NjU3NDg4MQ.png)](http://www.gmchk.cz)
 
 MIT, Copyright &copy; 2015 Tomáš Růt
