@@ -1,33 +1,17 @@
 {
-  "compilerOptions": {
-    "allowJs": false,
-    "checkJs": false,
-    "declaration": true,
-    "experimentalDecorators": true,
-    "jsx": "react",
-    "lib": [
-      "es5",
-      "dom",
-      "es2015.core",
-      "es2015.promise",
-      "es2015.iterable",
-      "es2015.collection"
-    ],
-    "module": "commonjs",
-    "noEmitHelpers": true,
-    "preserveConstEnums": false,
-    "reactNamespace": "React",
-    "removeComments": false,
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "sourceMap": true,
-    "target": "es5",
-    "types": []
-  },
-  "files": [
-    "C:/Users/t.rut/.bbcore/tools/jasmine.d.ts"
-  ],
-  "include": [
-    "**/*"
-  ]
+    "compilerOptions": {
+        "allowJs": false,
+        "checkJs": false,
+        "declaration": true,
+        "experimentalDecorators": true,
+        "lib": ["es5", "dom", "es2015.core", "es2015.promise", "es2015.iterable", "es2015.collection"],
+        "module": "commonjs",
+        "preserveConstEnums": false,
+        "reactNamespace": "React",
+        "removeComments": false,
+        "sourceMap": true,
+        "target": "es5",
+        "types": []
+    },
+    "include": ["**/*"]
 }

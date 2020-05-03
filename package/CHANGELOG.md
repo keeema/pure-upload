@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.5.0
+
+Update to TS 3.8.3 and other fixed dependencies
+
 ## 5.4.0
 
 Update to TS 3.7.2 and Gulp4 used

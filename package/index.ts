@@ -1,3 +1,37 @@
+export // See: https://wicg.github.io/entries-api
+
+type ErrorCallback = (err: DOMException) => void;
+
+type FileCallback = (file: File) => void;
+
+type FilesCallback = (file: File[]) => void;
+
+type FileSystemEntriesCallback = (entries: FileSystemEntry[]) => void;
+
+interface FileSystemEntry {
+    readonly isDirectory: boolean;
+    readonly isFile: boolean;
+    readonly name: string;
+}
+
+interface FileSystemDirectoryEntry extends FileSystemEntry {
+    createReader(): FileSystemDirectoryReader;
+}
+
+interface FileSystemDirectoryReader {
+    readEntries(successCallback: FileSystemEntriesCallback, errorCallback?: ErrorCallback): void;
+}
+
+interface FileSystemFileEntry extends FileSystemEntry {
+    getAsFile(): File | null;
+    file(successCallback: FileCallback, errorCallback?: ErrorCallback): void;
+}
+
+interface IFileExt extends File {
+    fullPath: string;
+    kind: string;
+}
+
 export function addEventHandler(
   el: Element | HTMLElement,
   event: string,
@@ -133,40 +167,6 @@ export function newGuid(): string {
   return uuid;
 }
 
-export // See: https://wicg.github.io/entries-api
-
-type ErrorCallback = (err: DOMException) => void;
-
-type FileCallback = (file: File) => void;
-
-type FilesCallback = (file: File[]) => void;
-
-type FileSystemEntriesCallback = (entries: FileSystemEntry[]) => void;
-
-interface FileSystemEntry {
-    readonly isDirectory: boolean;
-    readonly isFile: boolean;
-    readonly name: string;
-}
-
-interface FileSystemDirectoryEntry extends FileSystemEntry {
-    createReader(): FileSystemDirectoryReader;
-}
-
-interface FileSystemDirectoryReader {
-    readEntries(successCallback: FileSystemEntriesCallback, errorCallback?: ErrorCallback): void;
-}
-
-interface FileSystemFileEntry extends FileSystemEntry {
-    getAsFile(): File | null;
-    file(successCallback: FileCallback, errorCallback?: ErrorCallback): void;
-}
-
-interface IFileExt extends File {
-    fullPath: string;
-    kind: string;
-}
-
 export interface IFullUploadAreaOptions extends IUploadAreaOptions {
   maxFileSize: number;
   allowDragDrop: boolean | (() => boolean);
@@ -209,6 +209,82 @@ function getDefaultLocalizer(): ILocalizer {
 export interface IOffsetInfo {
   running: boolean;
   fileCount: number;
+}
+
+export interface IUploadAreaOptions extends IUploadOptions {
+  maxFileSize?: number;
+  allowDragDrop?: boolean | (() => boolean);
+  clickable?: boolean | (() => boolean);
+  accept?: string;
+  multiple?: boolean;
+  validateExtension?: boolean;
+  manualStart?: boolean;
+  allowEmptyFile?: boolean;
+  dragOverStyle?: string;
+  dragOverGlobalStyle?: string;
+  useCapture?: boolean;
+
+  onFileAdded?: (file: IUploadFile) => void;
+  onFileSelected?: (file: IUploadFile) => void;
+  onFilesSelected?: (file: IUploadFile[]) => void;
+  onFileError?: (file: IUploadFile) => void;
+  onFileCanceled?: (file: IUploadFile) => void;
+}
+
+export interface IUploadCallbacks {
+  onProgressCallback?: (file: IUploadFile) => void;
+  onCancelledCallback?: (file: IUploadFile) => void;
+  onFinishedCallback?: (file: IUploadFile) => void;
+  onUploadedCallback?: (file: IUploadFile) => void;
+  onErrorCallback?: (file: IUploadFile) => void;
+  onUploadStartedCallback?: (file: IUploadFile) => void;
+}
+
+export interface IUploadCallbacksExt extends IUploadCallbacks {
+  onFileStateChangedCallback?: (file: IUploadFile) => void;
+}
+
+export interface IUploadFile extends File {
+  guid: string;
+  url: string;
+  uploadStatus: UploadStatus;
+  responseCode: number;
+  responseText: string;
+  progress: number;
+  sentBytes: number;
+
+  cancel: () => void;
+  remove: () => void;
+  start: () => void;
+  onError: (file: IUploadFile) => void;
+  onCancel: (file: IUploadFile) => void;
+}
+
+export interface IUploadOptions {
+  url: string | ((file: IUploadFile) => string);
+  method: string;
+  withCredentials?: boolean;
+  headers?: { [key: string]: string | number | boolean };
+  params?: { [key: string]: string | number | boolean | Blob };
+  localizer?: ILocalizer;
+}
+
+export interface IUploadQueueCallbacks extends IUploadCallbacks {
+  onFileAddedCallback?: (file: IUploadFile) => void;
+  onFileRemovedCallback?: (file: IUploadFile) => void;
+  onAllFinishedCallback?: () => void;
+  onQueueChangedCallback?: (queue: IUploadFile[]) => void;
+}
+
+export interface IUploadQueueCallbacksExt
+  extends IUploadQueueCallbacks,
+    IUploadCallbacksExt {}
+
+export interface IUploadQueueOptions {
+  maxParallelUploads?: number;
+  parallelBatchOffset?: number;
+  autoStart?: boolean;
+  autoRemove?: boolean;
 }
 
 export class ItemProcessor {
@@ -286,82 +362,6 @@ export class ItemProcessor {
     private isFileSystemDirectoryEntry(entry: FileSystemEntry | FileSystemDirectoryEntry): entry is FileSystemDirectoryEntry {
         return entry.isDirectory;
     }
-}
-
-export interface IUploadAreaOptions extends IUploadOptions {
-  maxFileSize?: number;
-  allowDragDrop?: boolean | (() => boolean);
-  clickable?: boolean | (() => boolean);
-  accept?: string;
-  multiple?: boolean;
-  validateExtension?: boolean;
-  manualStart?: boolean;
-  allowEmptyFile?: boolean;
-  dragOverStyle?: string;
-  dragOverGlobalStyle?: string;
-  useCapture?: boolean;
-
-  onFileAdded?: (file: IUploadFile) => void;
-  onFileSelected?: (file: IUploadFile) => void;
-  onFilesSelected?: (file: IUploadFile[]) => void;
-  onFileError?: (file: IUploadFile) => void;
-  onFileCanceled?: (file: IUploadFile) => void;
-}
-
-export interface IUploadCallbacks {
-  onProgressCallback?: (file: IUploadFile) => void;
-  onCancelledCallback?: (file: IUploadFile) => void;
-  onFinishedCallback?: (file: IUploadFile) => void;
-  onUploadedCallback?: (file: IUploadFile) => void;
-  onErrorCallback?: (file: IUploadFile) => void;
-  onUploadStartedCallback?: (file: IUploadFile) => void;
-}
-
-export interface IUploadCallbacksExt extends IUploadCallbacks {
-  onFileStateChangedCallback?: (file: IUploadFile) => void;
-}
-
-export interface IUploadFile extends File {
-  guid: string;
-  url: string;
-  uploadStatus: UploadStatus;
-  responseCode: number;
-  responseText: string;
-  progress: number;
-  sentBytes: number;
-
-  cancel: () => void;
-  remove: () => void;
-  start: () => void;
-  onError: (file: IUploadFile) => void;
-  onCancel: (file: IUploadFile) => void;
-}
-
-export interface IUploadOptions {
-  url: string | ((file: IUploadFile) => string);
-  method: string;
-  withCredentials?: boolean;
-  headers?: { [key: string]: string | number | boolean };
-  params?: { [key: string]: string | number | boolean | Blob };
-  localizer?: ILocalizer;
-}
-
-export interface IUploadQueueCallbacks extends IUploadCallbacks {
-  onFileAddedCallback?: (file: IUploadFile) => void;
-  onFileRemovedCallback?: (file: IUploadFile) => void;
-  onAllFinishedCallback?: () => void;
-  onQueueChangedCallback?: (queue: IUploadFile[]) => void;
-}
-
-export interface IUploadQueueCallbacksExt
-  extends IUploadQueueCallbacks,
-    IUploadCallbacksExt {}
-
-export interface IUploadQueueOptions {
-  maxParallelUploads?: number;
-  parallelBatchOffset?: number;
-  autoStart?: boolean;
-  autoRemove?: boolean;
 }
 
 export function removeEventHandler(
@@ -946,39 +946,6 @@ export class UploadCore {
   }
 }
 
-export class Uploader {
-  uploadAreas: UploadArea[];
-  queue: UploadQueue;
-  options: IUploadQueueOptions;
-
-  constructor(
-    options: IUploadQueueOptions = {},
-    callbacks: IUploadQueueCallbacks = {}
-  ) {
-    this.options = options;
-    this.uploadAreas = [];
-    this.queue = new UploadQueue(options, callbacks);
-  }
-
-  registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea {
-    const uploadArea = new UploadArea(element, options, this);
-    this.uploadAreas.push(uploadArea);
-    return uploadArea;
-  }
-
-  unregisterArea(area: UploadArea): void {
-    const areaIndex = this.uploadAreas.indexOf(area);
-    if (areaIndex >= 0) {
-      this.uploadAreas[areaIndex].destroy();
-      this.uploadAreas.splice(areaIndex, 1);
-    }
-  }
-
-  get firstUploadArea(): UploadArea | undefined {
-    return this.uploadAreas[0];
-  }
-}
-
 export class UploadQueue {
   offset: IOffsetInfo = { fileCount: 0, running: false };
   options: IUploadQueueOptions;
@@ -1205,4 +1172,37 @@ export enum UploadStatus {
   failed,
   canceled,
   removed
+}
+
+export class Uploader {
+  uploadAreas: UploadArea[];
+  queue: UploadQueue;
+  options: IUploadQueueOptions;
+
+  constructor(
+    options: IUploadQueueOptions = {},
+    callbacks: IUploadQueueCallbacks = {}
+  ) {
+    this.options = options;
+    this.uploadAreas = [];
+    this.queue = new UploadQueue(options, callbacks);
+  }
+
+  registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea {
+    const uploadArea = new UploadArea(element, options, this);
+    this.uploadAreas.push(uploadArea);
+    return uploadArea;
+  }
+
+  unregisterArea(area: UploadArea): void {
+    const areaIndex = this.uploadAreas.indexOf(area);
+    if (areaIndex >= 0) {
+      this.uploadAreas[areaIndex].destroy();
+      this.uploadAreas.splice(areaIndex, 1);
+    }
+  }
+
+  get firstUploadArea(): UploadArea | undefined {
+    return this.uploadAreas[0];
+  }
 }
