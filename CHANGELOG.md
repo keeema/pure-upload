@@ -1,8 +1,12 @@
 # CHANGELOG
 
+## 5.5.1
+
+Fixed dependencies
+
 ## 5.5.0
 
-Update to TS 3.8.3 and other fixed dependencies
+Update to TS 3.8.3 and other dependencies fixed
 
 ## 5.4.0
 

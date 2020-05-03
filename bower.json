@@ -1,6 +1,6 @@
 {
     "name": "pure-upload",
-    "version": "5.5.0",
+    "version": "5.5.1",
     "homepage": "https://github.com/keeema/pure-upload",
     "authors": ["keeema <trut.cz@gmail.com>"],
     "description": "Pure JS file upload library with no dependencies.",
