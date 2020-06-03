@@ -106,6 +106,7 @@ responseCode: number;
 responseText: string;
 progress: number;
 sentBytes: number;
+errorCode: ErrorCode;
 cancel: () => void;
 remove: () => void;
 start: () => void;

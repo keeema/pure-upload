@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.6.0
+
+Added Enumerator ErrorCode to IUploadFile
+
 ## 5.5.1
 
 Fixed dependencies
