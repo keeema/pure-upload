@@ -6,6 +6,7 @@ interface IUploadFile extends File {
   responseText: string;
   progress: number;
   sentBytes: number;
+  errorCode: ErrorCode
 
   cancel: () => void;
   remove: () => void;

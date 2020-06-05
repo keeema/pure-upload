@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.UploadStatus = exports.UploadQueue = exports.Uploader = exports.UploadCore = exports.UploadArea = exports.removeEventHandler = exports.ItemProcessor = exports.newGuid = exports.getValueOrResult = exports.getUploader = exports.getUploadCore = exports.decorateSimpleFunction = exports.castFiles = exports.isFileApi = exports.ErrorCode = exports.addEventHandler = void 0;
 function addEventHandler(el, event, handler, useCapture) {
     if (el.addEventListener) {
         el.addEventListener(event, handler, useCapture);
@@ -15,6 +16,13 @@ function addEventHandler(el, event, handler, useCapture) {
     }
 }
 exports.addEventHandler = addEventHandler;
+var ErrorCode;
+(function (ErrorCode) {
+    ErrorCode[ErrorCode["NoError"] = 0] = "NoError";
+    ErrorCode[ErrorCode["FileSizeExceeded"] = 1] = "FileSizeExceeded";
+    ErrorCode[ErrorCode["UnsupportedFileFormat"] = 2] = "UnsupportedFileFormat";
+    ErrorCode[ErrorCode["XhrResponseError"] = 3] = "XhrResponseError";
+})(ErrorCode = exports.ErrorCode || (exports.ErrorCode = {}));
 exports.isFileApi = !!(window.File && window.FormData);
 function castFiles(fileList, status) {
     var files;
@@ -30,6 +38,7 @@ function castFiles(fileList, status) {
         file.uploadStatus = status || file.uploadStatus;
         file.responseCode = file.responseCode || 0;
         file.responseText = file.responseText || "";
+        file.errorCode = file.errorCode;
         file.progress = file.progress || 0;
         file.sentBytes = file.sentBytes || 0;
         file.cancel =
@@ -247,7 +256,7 @@ var UploadArea = /** @class */ (function () {
         get: function () {
             return this._fileInput;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     UploadArea.prototype.defaultOptions = function () {
@@ -321,13 +330,16 @@ var UploadArea = /** @class */ (function () {
         if (!this.isFileSizeValid(file)) {
             file.uploadStatus = UploadStatus.failed;
             file.responseText = this.options.localizer.fileSizeInvalid(this.options.maxFileSize);
+            file.errorCode = ErrorCode.FileSizeExceeded;
             return false;
         }
         if (this.isFileTypeInvalid(file)) {
             file.uploadStatus = UploadStatus.failed;
             file.responseText = this.options.localizer.fileTypeInvalid(this.options.accept);
+            file.errorCode = ErrorCode.UnsupportedFileFormat;
             return false;
         }
+        file.errorCode = ErrorCode.NoError;
         return true;
     };
     UploadArea.prototype.setupFileApiElements = function () {
@@ -597,6 +609,7 @@ var UploadCore = /** @class */ (function () {
         return typeof param === "number";
     };
     UploadCore.prototype.handleError = function (file, xhr) {
+        file.responseCode = ErrorCode.XhrResponseError;
         file.uploadStatus = UploadStatus.failed;
         this.setResponse(file, xhr);
         if (file.onError) {
@@ -706,6 +719,36 @@ var UploadCore = /** @class */ (function () {
     return UploadCore;
 }());
 exports.UploadCore = UploadCore;
+var Uploader = /** @class */ (function () {
+    function Uploader(options, callbacks) {
+        if (options === void 0) { options = {}; }
+        if (callbacks === void 0) { callbacks = {}; }
+        this.options = options;
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options, callbacks);
+    }
+    Uploader.prototype.registerArea = function (element, options) {
+        var uploadArea = new UploadArea(element, options, this);
+        this.uploadAreas.push(uploadArea);
+        return uploadArea;
+    };
+    Uploader.prototype.unregisterArea = function (area) {
+        var areaIndex = this.uploadAreas.indexOf(area);
+        if (areaIndex >= 0) {
+            this.uploadAreas[areaIndex].destroy();
+            this.uploadAreas.splice(areaIndex, 1);
+        }
+    };
+    Object.defineProperty(Uploader.prototype, "firstUploadArea", {
+        get: function () {
+            return this.uploadAreas[0];
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Uploader;
+}());
+exports.Uploader = Uploader;
 var UploadQueue = /** @class */ (function () {
     function UploadQueue(options, callbacks) {
         this.offset = { fileCount: 0, running: false };
@@ -883,33 +926,3 @@ var UploadStatus;
     UploadStatus[UploadStatus["canceled"] = 4] = "canceled";
     UploadStatus[UploadStatus["removed"] = 5] = "removed";
 })(UploadStatus = exports.UploadStatus || (exports.UploadStatus = {}));
-var Uploader = /** @class */ (function () {
-    function Uploader(options, callbacks) {
-        if (options === void 0) { options = {}; }
-        if (callbacks === void 0) { callbacks = {}; }
-        this.options = options;
-        this.uploadAreas = [];
-        this.queue = new UploadQueue(options, callbacks);
-    }
-    Uploader.prototype.registerArea = function (element, options) {
-        var uploadArea = new UploadArea(element, options, this);
-        this.uploadAreas.push(uploadArea);
-        return uploadArea;
-    };
-    Uploader.prototype.unregisterArea = function (area) {
-        var areaIndex = this.uploadAreas.indexOf(area);
-        if (areaIndex >= 0) {
-            this.uploadAreas[areaIndex].destroy();
-            this.uploadAreas.splice(areaIndex, 1);
-        }
-    };
-    Object.defineProperty(Uploader.prototype, "firstUploadArea", {
-        get: function () {
-            return this.uploadAreas[0];
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return Uploader;
-}());
-exports.Uploader = Uploader;

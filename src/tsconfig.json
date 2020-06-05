@@ -25,6 +25,7 @@
     "./core/iUploadOptions.ts",
     "./core/uploadCore.ts",
     "./core/uploadStatus.ts",
+    "./core/errorCode.ts",
     "./queue/iUploadQueueCallbacks.ts",
     "./queue/iUploadQueueCallbacksExt.ts",
     "./queue/iUploadQueueOptions.ts",

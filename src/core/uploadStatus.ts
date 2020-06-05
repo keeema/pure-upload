@@ -6,3 +6,4 @@ enum UploadStatus {
   canceled,
   removed
 }
+

@@ -134,13 +134,16 @@ class UploadArea {
         if (!this.isFileSizeValid(file)) {
             file.uploadStatus = UploadStatus.failed;
             file.responseText = this.options.localizer.fileSizeInvalid(this.options.maxFileSize);
+            file.errorCode = ErrorCode.FileSizeExceeded;
             return false;
         }
         if (this.isFileTypeInvalid(file)) {
             file.uploadStatus = UploadStatus.failed;
             file.responseText = this.options.localizer.fileTypeInvalid(this.options.accept);
+            file.errorCode = ErrorCode.UnsupportedFileFormat
             return false;
         }
+        file.errorCode = ErrorCode.NoError
         return true;
     }
 

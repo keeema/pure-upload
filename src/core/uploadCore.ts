@@ -120,6 +120,7 @@ class UploadCore {
   }
 
   private handleError(file: IUploadFile, xhr: XMLHttpRequest): void {
+    file.responseCode = ErrorCode.XhrResponseError
     file.uploadStatus = UploadStatus.failed;
     this.setResponse(file, xhr);
     if (file.onError) {
