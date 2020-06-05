@@ -21,6 +21,7 @@ var pu;
         ErrorCode[ErrorCode["NoError"] = 0] = "NoError";
         ErrorCode[ErrorCode["FileSizeExceeded"] = 1] = "FileSizeExceeded";
         ErrorCode[ErrorCode["UnsupportedFileFormat"] = 2] = "UnsupportedFileFormat";
+        ErrorCode[ErrorCode["XhrResponseError"] = 3] = "XhrResponseError";
     })(ErrorCode = pu.ErrorCode || (pu.ErrorCode = {}));
     pu.isFileApi = !!(window.File && window.FormData);
     function castFiles(fileList, status) {
@@ -608,6 +609,7 @@ var pu;
             return typeof param === "number";
         };
         UploadCore.prototype.handleError = function (file, xhr) {
+            file.responseCode = ErrorCode.XhrResponseError;
             file.uploadStatus = UploadStatus.failed;
             this.setResponse(file, xhr);
             if (file.onError) {

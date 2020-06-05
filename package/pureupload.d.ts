@@ -3,7 +3,8 @@ export function addEventHandler(el: Element | HTMLElement, event: string, handle
 export enum ErrorCode {
     NoError = 0,
     FileSizeExceeded = 1,
-    UnsupportedFileFormat = 2
+    UnsupportedFileFormat = 2,
+    XhrResponseError = 3
 }
 export const isFileApi: boolean;
 export function castFiles(fileList: File[] | Object, status?: UploadStatus): IUploadFile[];

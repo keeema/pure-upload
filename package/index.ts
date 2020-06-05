@@ -21,10 +21,11 @@ interface IElementWithEvents extends HTMLElement {
   attachEvent: (event: string, handler: (ev: UIEvent) => void) => void;
 }
 
-export enum ErrorCode{
-    NoError= 0,
-    FileSizeExceeded=1,
-    UnsupportedFileFormat=2
+export enum ErrorCode {
+    NoError = 0,
+    FileSizeExceeded = 1,
+    UnsupportedFileFormat = 2,
+    XhrResponseError = 3
 }
 export const isFileApi: boolean = !!(
   (<{ File?: Object }>window).File && (<{ FormData?: Object }>window).FormData
@@ -843,6 +844,7 @@ export class UploadCore {
   }
 
   private handleError(file: IUploadFile, xhr: XMLHttpRequest): void {
+    file.responseCode = ErrorCode.XhrResponseError
     file.uploadStatus = UploadStatus.failed;
     this.setResponse(file, xhr);
     if (file.onError) {
