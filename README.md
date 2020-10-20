@@ -101,7 +101,7 @@ invalidResponseFromServer: () => string;
 Standard *File* object extended with additional informations and methods to manage a file in queue.
 ```typescript
 guid: string;
-uploadStatus: UploadStatus;
+uploadStatus?: UploadStatus;
 responseCode: number;
 responseText: string;
 progress: number;

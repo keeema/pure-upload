@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 6.0.0
+
+Upgrade typescript@4.0.3.
+IUploadFile.uploadStatus change to be optional.
+
 ## 5.6.0
 
 Added Enumerator ErrorCode to IUploadFile

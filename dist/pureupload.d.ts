@@ -93,7 +93,7 @@ declare module pu {
     export interface IUploadFile extends File {
         guid: string;
         url: string;
-        uploadStatus: UploadStatus;
+        uploadStatus?: UploadStatus;
         responseCode: number;
         responseText: string;
         progress: number;
@@ -211,7 +211,7 @@ declare module pu {
         constructor(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacksExt);
         addFiles(files: IUploadFile[]): void;
         removeFile(file: IUploadFile, blockRecursive?: boolean): void;
-        clearFiles(excludeStatuses?: UploadStatus[], cancelProcessing?: boolean): void;
+        clearFiles(excludeStatuses?: Array<UploadStatus | undefined>, cancelProcessing?: boolean): void;
         private filesChanged;
         private checkAllFinished;
         private setFullOptions;

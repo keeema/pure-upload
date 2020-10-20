@@ -60,7 +60,7 @@ class UploadQueue {
   }
 
   clearFiles(
-    excludeStatuses: UploadStatus[] = [],
+    excludeStatuses: Array<UploadStatus | undefined> = [],
     cancelProcessing: boolean = false
   ) {
     if (!cancelProcessing)
@@ -93,7 +93,7 @@ class UploadQueue {
   private checkAllFinished(): void {
     const unfinishedFiles = this.queuedFiles.filter(
       file =>
-        [UploadStatus.queued, UploadStatus.uploading].indexOf(
+        ([UploadStatus.queued, UploadStatus.uploading] as Array<UploadStatus | undefined>).indexOf(
           file.uploadStatus
         ) >= 0
     );
@@ -143,7 +143,7 @@ class UploadQueue {
     this.queuedFiles
       .filter(
         file =>
-          [UploadStatus.uploaded, UploadStatus.canceled].indexOf(
+          ([UploadStatus.uploaded, UploadStatus.canceled] as Array<UploadStatus | undefined>).indexOf(
             file.uploadStatus
           ) >= 0
       )

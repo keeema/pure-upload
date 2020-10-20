@@ -331,7 +331,7 @@ export interface IUploadCallbacksExt extends IUploadCallbacks {
 export interface IUploadFile extends File {
   guid: string;
   url: string;
-  uploadStatus: UploadStatus;
+  uploadStatus?: UploadStatus;
   responseCode: number;
   responseText: string;
   progress: number;
@@ -1053,7 +1053,7 @@ export class UploadQueue {
   }
 
   clearFiles(
-    excludeStatuses: UploadStatus[] = [],
+    excludeStatuses: Array<UploadStatus | undefined> = [],
     cancelProcessing: boolean = false
   ) {
     if (!cancelProcessing)
@@ -1086,7 +1086,7 @@ export class UploadQueue {
   private checkAllFinished(): void {
     const unfinishedFiles = this.queuedFiles.filter(
       file =>
-        [UploadStatus.queued, UploadStatus.uploading].indexOf(
+        ([UploadStatus.queued, UploadStatus.uploading] as Array<UploadStatus | undefined>).indexOf(
           file.uploadStatus
         ) >= 0
     );
@@ -1136,7 +1136,7 @@ export class UploadQueue {
     this.queuedFiles
       .filter(
         file =>
-          [UploadStatus.uploaded, UploadStatus.canceled].indexOf(
+          ([UploadStatus.uploaded, UploadStatus.canceled] as Array<UploadStatus | undefined>).indexOf(
             file.uploadStatus
           ) >= 0
       )
