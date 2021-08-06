@@ -78,6 +78,10 @@ declare module pu {
         onFilesSelected?: (file: IUploadFile[]) => void;
         onFileError?: (file: IUploadFile) => void;
         onFileCanceled?: (file: IUploadFile) => void;
+        onDragEnter?: () => void;
+        onDragLeave?: () => void;
+        onDragGlobalEnter?: () => void;
+        onDragGlobalLeave?: () => void;
     }
     export interface IUploadCallbacks {
         onProgressCallback?: (file: IUploadFile) => void;

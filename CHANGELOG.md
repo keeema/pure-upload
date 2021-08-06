@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 6.1.0
+
+Added onDrag callback functions
+
 ## 6.0.0
 
 Upgrade typescript@4.0.3.
