@@ -313,6 +313,11 @@ export interface IUploadAreaOptions extends IUploadOptions {
   onFilesSelected?: (file: IUploadFile[]) => void;
   onFileError?: (file: IUploadFile) => void;
   onFileCanceled?: (file: IUploadFile) => void;
+  
+  onDragEnter?: () => void;
+  onDragLeave?: () => void;
+  onDragGlobalEnter?: () => void;
+  onDragGlobalLeave?: () => void;
 }
 
 export interface IUploadCallbacks {
@@ -599,6 +604,7 @@ export class UploadArea {
     private onDrag(e: DragEvent): void {
         if (!getValueOrResult(this.options.allowDragDrop)) return;
 
+        this.options.onDragEnter && this.options.onDragEnter();
         this.addDragOverStyle(this.options.dragOverStyle);
         let effect: string | undefined = undefined;
         if (e.dataTransfer) {
@@ -615,18 +621,21 @@ export class UploadArea {
     private onDragLeave(): void {
         if (!getValueOrResult(this.options.allowDragDrop)) return;
 
+        this.options.onDragLeave && this.options.onDragLeave();
         this.removeDragOverStyle(this.options.dragOverStyle);
     }
 
     private onDragGlobal(): void {
         if (!getValueOrResult(this.options.allowDragDrop)) return;
 
+        this.options.onDragGlobalEnter && this.options.onDragGlobalEnter();
         this.addDragOverStyle(this.options.dragOverGlobalStyle);
     }
 
     private onDragLeaveGlobal(): void {
         if (!getValueOrResult(this.options.allowDragDrop)) return;
 
+        this.options.onDragGlobalLeave && this.options.onDragGlobalLeave();
         this.removeDragOverStyle(this.options.dragOverGlobalStyle);
     }
 

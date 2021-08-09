@@ -389,6 +389,7 @@ var UploadArea = /** @class */ (function () {
     UploadArea.prototype.onDrag = function (e) {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
+        this.options.onDragEnter && this.options.onDragEnter();
         this.addDragOverStyle(this.options.dragOverStyle);
         var effect = undefined;
         if (e.dataTransfer) {
@@ -405,16 +406,19 @@ var UploadArea = /** @class */ (function () {
     UploadArea.prototype.onDragLeave = function () {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
+        this.options.onDragLeave && this.options.onDragLeave();
         this.removeDragOverStyle(this.options.dragOverStyle);
     };
     UploadArea.prototype.onDragGlobal = function () {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
+        this.options.onDragGlobalEnter && this.options.onDragGlobalEnter();
         this.addDragOverStyle(this.options.dragOverGlobalStyle);
     };
     UploadArea.prototype.onDragLeaveGlobal = function () {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
+        this.options.onDragGlobalLeave && this.options.onDragGlobalLeave();
         this.removeDragOverStyle(this.options.dragOverGlobalStyle);
     };
     UploadArea.prototype.removeDragOverStyle = function (style) {
