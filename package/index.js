@@ -241,10 +241,14 @@ var UploadArea = /** @class */ (function () {
             this.unregisterOnDrop();
         if (this.unregisterOnChange)
             this.unregisterOnChange();
+        if (this.unregisterOnDragEnter)
+            this.unregisterOnDragEnter();
         if (this.unregisterOnDragOver)
             this.unregisterOnDragOver();
         if (this.unregisterOnDragLeave)
             this.unregisterOnDragLeave();
+        if (this.unregisterOnDragEnterGlobal)
+            this.unregisterOnDragEnterGlobal();
         if (this.unregisterOnDragOverGlobal)
             this.unregisterOnDragOverGlobal();
         if (this.unregisterOnDragLeaveGlobal)
@@ -269,7 +273,7 @@ var UploadArea = /** @class */ (function () {
             validateExtension: false,
             multiple: true,
             allowEmptyFile: false,
-            useCapture: false
+            useCapture: false,
         };
     };
     UploadArea.prototype.selectFiles = function (fileList) {
@@ -367,18 +371,24 @@ var UploadArea = /** @class */ (function () {
         var useCapture = this.options.useCapture;
         addEventHandler(this.targetElement, "click", onClick, useCapture);
         this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, "click", onClick); };
-        var onDrag = (function (e) { return _this.onDrag(e); });
-        addEventHandler(this.targetElement, "dragover", onDrag, useCapture);
-        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, "dragover", onDrag); };
+        var onDragEnter = (function (e) { return _this.onDragEnter(e); });
+        addEventHandler(this.targetElement, "dragenter", onDragEnter, useCapture);
+        this.unregisterOnDragEnter = function () { return removeEventHandler(_this.targetElement, "dragenter", onDragEnter); };
+        var onDragOver = (function (e) { return _this.onDragOver(e); });
+        addEventHandler(this.targetElement, "dragover", onDragOver, useCapture);
+        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, "dragover", onDragOver); };
         var onDragLeave = function () { return _this.onDragLeave(); };
         addEventHandler(this.targetElement, "dragleave", onDragLeave, useCapture);
-        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, "dragleave", onDragLeave); };
-        var onDragGlobal = function () { return _this.onDragGlobal(); };
-        addEventHandler(document.body, "dragover", onDragGlobal, useCapture);
-        this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, "dragover", onDragGlobal); };
+        this.unregisterOnDragLeave = function () { return removeEventHandler(_this.targetElement, "dragleave", onDragLeave); };
+        var onDragEnterGlobal = function () { return _this.onDragEnterGlobal(); };
+        addEventHandler(document.body, "dragenter", onDragEnterGlobal, useCapture);
+        this.unregisterOnDragEnterGlobal = function () { return removeEventHandler(document.body, "dragenter", onDragEnterGlobal); };
+        var onDragOverGlobal = function () { return _this.onDragOverGlobal(); };
+        addEventHandler(document.body, "dragover", onDragOverGlobal, useCapture);
+        this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, "dragover", onDragOverGlobal); };
         var onDragLeaveGlobal = function () { return _this.onDragLeaveGlobal(); };
         addEventHandler(document.body, "dragleave", onDragLeaveGlobal, useCapture);
-        this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, "dragleave", onDragLeaveGlobal); };
+        this.unregisterOnDragLeaveGlobal = function () { return removeEventHandler(document.body, "dragleave", onDragLeaveGlobal); };
         var onDrop = (function (e) { return _this.onDrop(e); });
         addEventHandler(this.targetElement, "drop", onDrop, useCapture);
         this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, "drop", onDrop); };
@@ -386,10 +396,16 @@ var UploadArea = /** @class */ (function () {
     UploadArea.prototype.onChange = function (e) {
         this.selectFiles(e.target.files);
     };
-    UploadArea.prototype.onDrag = function (e) {
+    UploadArea.prototype.onDragEnter = function (e) {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
         this.options.onDragEnter && this.options.onDragEnter();
+        this.stopEventPropagation(e);
+    };
+    UploadArea.prototype.onDragOver = function (e) {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
+        this.options.onDragOver && this.options.onDragOver();
         this.addDragOverStyle(this.options.dragOverStyle);
         var effect = undefined;
         if (e.dataTransfer) {
@@ -409,16 +425,21 @@ var UploadArea = /** @class */ (function () {
         this.options.onDragLeave && this.options.onDragLeave();
         this.removeDragOverStyle(this.options.dragOverStyle);
     };
-    UploadArea.prototype.onDragGlobal = function () {
+    UploadArea.prototype.onDragEnterGlobal = function () {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
-        this.options.onDragGlobalEnter && this.options.onDragGlobalEnter();
+        this.options.onDragEnterGlobal && this.options.onDragEnterGlobal();
+    };
+    UploadArea.prototype.onDragOverGlobal = function () {
+        if (!getValueOrResult(this.options.allowDragDrop))
+            return;
+        this.options.onDragOverGlobal && this.options.onDragOverGlobal();
         this.addDragOverStyle(this.options.dragOverGlobalStyle);
     };
     UploadArea.prototype.onDragLeaveGlobal = function () {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
-        this.options.onDragGlobalLeave && this.options.onDragGlobalLeave();
+        this.options.onDragLeaveGlobal && this.options.onDragLeaveGlobal();
         this.removeDragOverStyle(this.options.dragOverGlobalStyle);
     };
     UploadArea.prototype.removeDragOverStyle = function (style) {

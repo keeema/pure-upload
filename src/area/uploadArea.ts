@@ -7,8 +7,10 @@ class UploadArea {
     private fileList?: IUploadFile[] | null;
     private unregisterOnClick?: () => void;
     private unregisterOnDrop?: () => void;
+    private unregisterOnDragEnter?: () => void;
     private unregisterOnDragOver?: () => void;
     private unregisterOnDragLeave?: () => void;
+    private unregisterOnDragEnterGlobal?: () => void;
     private unregisterOnDragOverGlobal?: () => void;
     private unregisterOnDragLeaveGlobal?: () => void;
     private unregisterOnChange?: () => void;
@@ -33,7 +35,7 @@ class UploadArea {
     }
 
     clear(files?: IUploadFile[]) {
-        this.fileList = this.fileList && files ? this.fileList.filter(file => files.indexOf(file) < 0) : null;
+        this.fileList = this.fileList && files ? this.fileList.filter((file) => files.indexOf(file) < 0) : null;
     }
 
     destroy(): void {
@@ -43,9 +45,13 @@ class UploadArea {
 
         if (this.unregisterOnChange) this.unregisterOnChange();
 
+        if (this.unregisterOnDragEnter) this.unregisterOnDragEnter();
+
         if (this.unregisterOnDragOver) this.unregisterOnDragOver();
 
         if (this.unregisterOnDragLeave) this.unregisterOnDragLeave();
+
+        if (this.unregisterOnDragEnterGlobal) this.unregisterOnDragEnterGlobal();
 
         if (this.unregisterOnDragOverGlobal) this.unregisterOnDragOverGlobal();
 
@@ -68,7 +74,7 @@ class UploadArea {
             validateExtension: false,
             multiple: true,
             allowEmptyFile: false,
-            useCapture: false
+            useCapture: false,
         };
     }
 
@@ -94,7 +100,7 @@ class UploadArea {
     }
 
     private putFilesToQueue(files?: IUploadFile[]): void {
-        files = this.fileList && files ? this.fileList.filter(file => files && files.indexOf(file) >= 0) : this.fileList || undefined;
+        files = this.fileList && files ? this.fileList.filter((file) => files && files.indexOf(file) >= 0) : this.fileList || undefined;
 
         if (!files) return;
 
@@ -140,10 +146,10 @@ class UploadArea {
         if (this.isFileTypeInvalid(file)) {
             file.uploadStatus = UploadStatus.failed;
             file.responseText = this.options.localizer.fileTypeInvalid(this.options.accept);
-            file.errorCode = ErrorCode.UnsupportedFileFormat
+            file.errorCode = ErrorCode.UnsupportedFileFormat;
             return false;
         }
-        file.errorCode = ErrorCode.NoError
+        file.errorCode = ErrorCode.NoError;
         return true;
     }
 
@@ -175,21 +181,29 @@ class UploadArea {
         addEventHandler(this.targetElement, "click", onClick, useCapture);
         this.unregisterOnClick = () => removeEventHandler(this.targetElement, "click", onClick);
 
-        const onDrag = ((e: DragEvent) => this.onDrag(e)) as EventListenerOrEventListenerObject;
-        addEventHandler(this.targetElement, "dragover", onDrag, useCapture);
-        this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, "dragover", onDrag);
+        const onDragEnter = ((e: DragEvent) => this.onDragEnter(e)) as EventListenerOrEventListenerObject;
+        addEventHandler(this.targetElement, "dragenter", onDragEnter, useCapture);
+        this.unregisterOnDragEnter = () => removeEventHandler(this.targetElement, "dragenter", onDragEnter);
+
+        const onDragOver = ((e: DragEvent) => this.onDragOver(e)) as EventListenerOrEventListenerObject;
+        addEventHandler(this.targetElement, "dragover", onDragOver, useCapture);
+        this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, "dragover", onDragOver);
 
         const onDragLeave = () => this.onDragLeave();
         addEventHandler(this.targetElement, "dragleave", onDragLeave, useCapture);
-        this.unregisterOnDragOver = () => removeEventHandler(this.targetElement, "dragleave", onDragLeave);
+        this.unregisterOnDragLeave = () => removeEventHandler(this.targetElement, "dragleave", onDragLeave);
 
-        const onDragGlobal = () => this.onDragGlobal();
-        addEventHandler(document.body, "dragover", onDragGlobal, useCapture);
-        this.unregisterOnDragOverGlobal = () => removeEventHandler(document.body, "dragover", onDragGlobal);
+        const onDragEnterGlobal = () => this.onDragEnterGlobal();
+        addEventHandler(document.body, "dragenter", onDragEnterGlobal, useCapture);
+        this.unregisterOnDragEnterGlobal = () => removeEventHandler(document.body, "dragenter", onDragEnterGlobal);
+
+        const onDragOverGlobal = () => this.onDragOverGlobal();
+        addEventHandler(document.body, "dragover", onDragOverGlobal, useCapture);
+        this.unregisterOnDragOverGlobal = () => removeEventHandler(document.body, "dragover", onDragOverGlobal);
 
         const onDragLeaveGlobal = () => this.onDragLeaveGlobal();
         addEventHandler(document.body, "dragleave", onDragLeaveGlobal, useCapture);
-        this.unregisterOnDragOverGlobal = () => removeEventHandler(document.body, "dragleave", onDragLeaveGlobal);
+        this.unregisterOnDragLeaveGlobal = () => removeEventHandler(document.body, "dragleave", onDragLeaveGlobal);
 
         const onDrop = ((e: DragEvent) => this.onDrop(e)) as EventListenerOrEventListenerObject;
         addEventHandler(this.targetElement, "drop", onDrop, useCapture);
@@ -200,10 +214,17 @@ class UploadArea {
         this.selectFiles(<FileList>(<HTMLInputElement>e.target).files);
     }
 
-    private onDrag(e: DragEvent): void {
+    private onDragEnter(e: DragEvent): void {
         if (!getValueOrResult(this.options.allowDragDrop)) return;
 
         this.options.onDragEnter && this.options.onDragEnter();
+        this.stopEventPropagation(e);
+    }
+
+    private onDragOver(e: DragEvent): void {
+        if (!getValueOrResult(this.options.allowDragDrop)) return;
+
+        this.options.onDragOver && this.options.onDragOver();
         this.addDragOverStyle(this.options.dragOverStyle);
         let effect: string | undefined = undefined;
         if (e.dataTransfer) {
@@ -224,17 +245,23 @@ class UploadArea {
         this.removeDragOverStyle(this.options.dragOverStyle);
     }
 
-    private onDragGlobal(): void {
+    private onDragEnterGlobal(): void {
         if (!getValueOrResult(this.options.allowDragDrop)) return;
 
-        this.options.onDragGlobalEnter && this.options.onDragGlobalEnter();
+        this.options.onDragEnterGlobal && this.options.onDragEnterGlobal();
+    }
+
+    private onDragOverGlobal(): void {
+        if (!getValueOrResult(this.options.allowDragDrop)) return;
+
+        this.options.onDragOverGlobal && this.options.onDragOverGlobal();
         this.addDragOverStyle(this.options.dragOverGlobalStyle);
     }
 
     private onDragLeaveGlobal(): void {
         if (!getValueOrResult(this.options.allowDragDrop)) return;
 
-        this.options.onDragGlobalLeave && this.options.onDragGlobalLeave();
+        this.options.onDragLeaveGlobal && this.options.onDragLeaveGlobal();
         this.removeDragOverStyle(this.options.dragOverGlobalStyle);
     }
 
@@ -267,7 +294,7 @@ class UploadArea {
             let items = e.dataTransfer.items;
             if (items && items.length && items[0].webkitGetAsEntry !== null) {
                 const itemsToProcess = this.options.multiple ? items : [items[0]];
-                ItemProcessor.processItems(itemsToProcess, files => this.selectFiles(files));
+                ItemProcessor.processItems(itemsToProcess, (files) => this.selectFiles(files));
             } else {
                 this.selectFiles(files);
             }

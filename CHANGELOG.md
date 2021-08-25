@@ -1,3 +1,7 @@
+## 6.2.0
+
+Added onDragEnter callback functions
+
 # CHANGELOG
 
 ## 6.1.0
