@@ -23,4 +23,6 @@ interface IUploadAreaOptions extends IUploadOptions {
     onDragEnterGlobal?: () => void;
     onDragOverGlobal?: () => void;
     onDragLeaveGlobal?: () => void;
+    onDrop?: () => void;
+    onDropGlobal?: () => void;
 }

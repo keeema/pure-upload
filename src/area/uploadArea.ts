@@ -7,6 +7,7 @@ class UploadArea {
     private fileList?: IUploadFile[] | null;
     private unregisterOnClick?: () => void;
     private unregisterOnDrop?: () => void;
+    private unregisterOnDropGlobal?: () => void;
     private unregisterOnDragEnter?: () => void;
     private unregisterOnDragOver?: () => void;
     private unregisterOnDragLeave?: () => void;
@@ -42,6 +43,8 @@ class UploadArea {
         if (this.unregisterOnClick) this.unregisterOnClick();
 
         if (this.unregisterOnDrop) this.unregisterOnDrop();
+
+        if (this.unregisterOnDropGlobal) this.unregisterOnDropGlobal();
 
         if (this.unregisterOnChange) this.unregisterOnChange();
 
@@ -208,6 +211,10 @@ class UploadArea {
         const onDrop = ((e: DragEvent) => this.onDrop(e)) as EventListenerOrEventListenerObject;
         addEventHandler(this.targetElement, "drop", onDrop, useCapture);
         this.unregisterOnDrop = () => removeEventHandler(this.targetElement, "drop", onDrop);
+
+        const onDropGlobal = ((e: DragEvent) => this.onDropGlobal(e)) as EventListenerOrEventListenerObject;
+        addEventHandler(document.body, "drop", onDropGlobal, useCapture);
+        this.unregisterOnDropGlobal = () => removeEventHandler(document.body, "drop", onDropGlobal);
     }
 
     private onChange(e: Event): void {
@@ -279,7 +286,7 @@ class UploadArea {
     private onDrop(e: DragEvent): void {
         if (!getValueOrResult(this.options.allowDragDrop)) return;
 
-        this.stopEventPropagation(e);
+        this.options.onDrop && this.options.onDrop();
         if (!e.dataTransfer) {
             return;
         }
@@ -298,6 +305,12 @@ class UploadArea {
                 this.selectFiles(files);
             }
         }
+    }
+
+    private onDropGlobal(e: DragEvent): void {
+        this.stopEventPropagation(e);
+
+        this.options.onDropGlobal && this.options.onDropGlobal();
     }
 
     private isIeVersion(v: number): boolean {

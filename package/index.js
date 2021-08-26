@@ -239,6 +239,8 @@ var UploadArea = /** @class */ (function () {
             this.unregisterOnClick();
         if (this.unregisterOnDrop)
             this.unregisterOnDrop();
+        if (this.unregisterOnDropGlobal)
+            this.unregisterOnDropGlobal();
         if (this.unregisterOnChange)
             this.unregisterOnChange();
         if (this.unregisterOnDragEnter)
@@ -392,6 +394,9 @@ var UploadArea = /** @class */ (function () {
         var onDrop = (function (e) { return _this.onDrop(e); });
         addEventHandler(this.targetElement, "drop", onDrop, useCapture);
         this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, "drop", onDrop); };
+        var onDropGlobal = (function (e) { return _this.onDropGlobal(e); });
+        addEventHandler(document.body, "drop", onDropGlobal, useCapture);
+        this.unregisterOnDropGlobal = function () { return removeEventHandler(document.body, "drop", onDropGlobal); };
     };
     UploadArea.prototype.onChange = function (e) {
         this.selectFiles(e.target.files);
@@ -455,7 +460,7 @@ var UploadArea = /** @class */ (function () {
         var _this = this;
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
-        this.stopEventPropagation(e);
+        this.options.onDrop && this.options.onDrop();
         if (!e.dataTransfer) {
             return;
         }
@@ -473,6 +478,10 @@ var UploadArea = /** @class */ (function () {
                 this.selectFiles(files);
             }
         }
+    };
+    UploadArea.prototype.onDropGlobal = function (e) {
+        this.stopEventPropagation(e);
+        this.options.onDropGlobal && this.options.onDropGlobal();
     };
     UploadArea.prototype.isIeVersion = function (v) {
         return RegExp("msie" + (!isNaN(v) ? "\\s" + v.toString() : ""), "i").test(navigator.userAgent);
