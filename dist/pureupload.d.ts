@@ -22,6 +22,7 @@ declare module pu {
         accept: string;
         multiple: boolean;
         validateExtension: boolean;
+        validateMissingExtension: boolean;
         useCapture: boolean;
         localizer: ILocalizer;
     }
@@ -38,6 +39,7 @@ declare module pu {
     export interface ILocalizer {
         fileSizeInvalid: (maxFileSize: number) => string;
         fileTypeInvalid: (accept: string) => string;
+        fileTypeMissing: () => string;
         invalidResponseFromServer: () => string;
     }
     export interface IOffsetInfo {
@@ -68,6 +70,7 @@ declare module pu {
         accept?: string;
         multiple?: boolean;
         validateExtension?: boolean;
+        validateMissingExtension?: boolean;
         manualStart?: boolean;
         allowEmptyFile?: boolean;
         dragOverStyle?: string;
@@ -182,6 +185,7 @@ declare module pu {
         private isIeVersion;
         private onClick;
         private isFileSizeValid;
+        private fileTypeMissing;
         private isFileTypeInvalid;
         private stopEventPropagation;
     }

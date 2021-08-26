@@ -175,15 +175,16 @@ interface IFileExt extends File {
 }
 
 export interface IFullUploadAreaOptions extends IUploadAreaOptions {
-  maxFileSize: number;
-  allowDragDrop: boolean | (() => boolean);
-  clickable: boolean | (() => boolean);
-  accept: string;
-  multiple: boolean;
-  validateExtension: boolean;
-  useCapture: boolean;
+    maxFileSize: number;
+    allowDragDrop: boolean | (() => boolean);
+    clickable: boolean | (() => boolean);
+    accept: string;
+    multiple: boolean;
+    validateExtension: boolean;
+    validateMissingExtension: boolean;
+    useCapture: boolean;
 
-  localizer: ILocalizer;
+    localizer: ILocalizer;
 }
 
 export interface IFullUploadOptions extends IUploadOptions {
@@ -194,22 +195,19 @@ export interface IFullUploadOptions extends IUploadOptions {
 }
 
 export interface ILocalizer {
-  fileSizeInvalid: (maxFileSize: number) => string;
-  fileTypeInvalid: (accept: string) => string;
-  invalidResponseFromServer: () => string;
+    fileSizeInvalid: (maxFileSize: number) => string;
+    fileTypeInvalid: (accept: string) => string;
+    fileTypeMissing: () => string;
+    invalidResponseFromServer: () => string;
 }
 
 function getDefaultLocalizer(): ILocalizer {
   return {
-    fileSizeInvalid: maxFileSize =>
-      "The selected file exceeds the allowed size of " +
-      maxFileSize +
-      " or its size is 0 MB. Please choose another file.",
-    fileTypeInvalid: accept =>
-      "File format is not allowed. Only " +
-      (accept ? accept : "") +
-      " files are allowed.",
-    invalidResponseFromServer: () => "Invalid response from server"
+      fileSizeInvalid: (maxFileSize) =>
+          "The selected file exceeds the allowed size of " + maxFileSize + " or its size is 0 MB. Please choose another file.",
+      fileTypeInvalid: (accept) => "File format is not allowed. Only " + (accept ? accept : "") + " files are allowed.",
+      fileTypeMissing: () => "File without format is not allowed.",
+      invalidResponseFromServer: () => "Invalid response from server",
   };
 }
 
@@ -302,6 +300,7 @@ export interface IUploadAreaOptions extends IUploadOptions {
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;
+    validateMissingExtension?: boolean;
     manualStart?: boolean;
     allowEmptyFile?: boolean;
     dragOverStyle?: string;
@@ -480,6 +479,7 @@ export class UploadArea {
             clickable: true,
             accept: "*.*",
             validateExtension: false,
+            validateMissingExtension: false,
             multiple: true,
             allowEmptyFile: false,
             useCapture: false,
@@ -549,6 +549,12 @@ export class UploadArea {
             file.uploadStatus = UploadStatus.failed;
             file.responseText = this.options.localizer.fileSizeInvalid(this.options.maxFileSize);
             file.errorCode = ErrorCode.FileSizeExceeded;
+            return false;
+        }
+        if (this.fileTypeMissing(file)) {
+            file.uploadStatus = UploadStatus.failed;
+            file.responseText = this.options.localizer.fileTypeMissing();
+            file.errorCode = ErrorCode.UnsupportedFileFormat;
             return false;
         }
         if (this.isFileTypeInvalid(file)) {
@@ -742,11 +748,16 @@ export class UploadArea {
         return true;
     }
 
+    private fileTypeMissing(file: File): boolean {
+        return this.options.validateMissingExtension && file.name.indexOf(".") === -1;
+    }
+
     private isFileTypeInvalid(file: File): boolean {
         if (
             file.name &&
             this.options.accept &&
-            (this.options.accept.trim() !== "*" || this.options.accept.trim() !== "*.*") &&
+            this.options.accept.trim() !== "*" &&
+            this.options.accept.trim() !== "*.*" &&
             this.options.validateExtension &&
             this.options.accept.indexOf("/") === -1
         ) {

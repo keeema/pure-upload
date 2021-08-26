@@ -5,6 +5,7 @@ interface IUploadAreaOptions extends IUploadOptions {
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;
+    validateMissingExtension?: boolean;
     manualStart?: boolean;
     allowEmptyFile?: boolean;
     dragOverStyle?: string;

@@ -22,6 +22,7 @@ export interface IFullUploadAreaOptions extends IUploadAreaOptions {
     accept: string;
     multiple: boolean;
     validateExtension: boolean;
+    validateMissingExtension: boolean;
     useCapture: boolean;
     localizer: ILocalizer;
 }
@@ -38,6 +39,7 @@ export interface IFullUploadOptions extends IUploadOptions {
 export interface ILocalizer {
     fileSizeInvalid: (maxFileSize: number) => string;
     fileTypeInvalid: (accept: string) => string;
+    fileTypeMissing: () => string;
     invalidResponseFromServer: () => string;
 }
 export interface IOffsetInfo {
@@ -68,6 +70,7 @@ export interface IUploadAreaOptions extends IUploadOptions {
     accept?: string;
     multiple?: boolean;
     validateExtension?: boolean;
+    validateMissingExtension?: boolean;
     manualStart?: boolean;
     allowEmptyFile?: boolean;
     dragOverStyle?: string;
@@ -182,6 +185,7 @@ export class UploadArea {
     private isIeVersion;
     private onClick;
     private isFileSizeValid;
+    private fileTypeMissing;
     private isFileTypeInvalid;
     private stopEventPropagation;
 }

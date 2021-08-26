@@ -1,4 +1,8 @@
 # CHANGELOG
+## 7.1.0
+
+Fixed allowed files types for "*" and "*.*".
+Added validateMissingExtension check
 
 ## 7.0.0
 
