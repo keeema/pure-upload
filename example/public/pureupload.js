@@ -109,16 +109,11 @@ var pu;
     function getDefaultLocalizer() {
         return {
             fileSizeInvalid: function (maxFileSize) {
-                return "The selected file exceeds the allowed size of " +
-                    maxFileSize +
-                    " or its size is 0 MB. Please choose another file.";
+                return "The selected file exceeds the allowed size of " + maxFileSize + " or its size is 0 MB. Please choose another file.";
             },
-            fileTypeInvalid: function (accept) {
-                return "File format is not allowed. Only " +
-                    (accept ? accept : "") +
-                    " files are allowed.";
-            },
-            invalidResponseFromServer: function () { return "Invalid response from server"; }
+            fileTypeInvalid: function (accept) { return "File format is not allowed. Only " + (accept ? accept : "") + " files are allowed."; },
+            fileTypeMissing: function () { return "File without format is not allowed."; },
+            invalidResponseFromServer: function () { return "Invalid response from server"; },
         };
     }
     var ItemProcessor = /** @class */ (function () {
@@ -273,6 +268,7 @@ var pu;
                 clickable: true,
                 accept: "*.*",
                 validateExtension: false,
+                validateMissingExtension: false,
                 multiple: true,
                 allowEmptyFile: false,
                 useCapture: false,
@@ -337,6 +333,12 @@ var pu;
                 file.uploadStatus = UploadStatus.failed;
                 file.responseText = this.options.localizer.fileSizeInvalid(this.options.maxFileSize);
                 file.errorCode = ErrorCode.FileSizeExceeded;
+                return false;
+            }
+            if (this.fileTypeMissing(file)) {
+                file.uploadStatus = UploadStatus.failed;
+                file.responseText = this.options.localizer.fileTypeMissing();
+                file.errorCode = ErrorCode.UnsupportedFileFormat;
                 return false;
             }
             if (this.isFileTypeInvalid(file)) {
@@ -507,10 +509,14 @@ var pu;
                 return false;
             return true;
         };
+        UploadArea.prototype.fileTypeMissing = function (file) {
+            return this.options.validateMissingExtension && file.name.indexOf(".") === -1;
+        };
         UploadArea.prototype.isFileTypeInvalid = function (file) {
             if (file.name &&
                 this.options.accept &&
-                (this.options.accept.trim() !== "*" || this.options.accept.trim() !== "*.*") &&
+                this.options.accept.trim() !== "*" &&
+                this.options.accept.trim() !== "*.*" &&
                 this.options.validateExtension &&
                 this.options.accept.indexOf("/") === -1) {
                 var acceptedExtensions = this.options.accept.split(",");

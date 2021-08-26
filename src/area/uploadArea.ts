@@ -75,6 +75,7 @@ class UploadArea {
             clickable: true,
             accept: "*.*",
             validateExtension: false,
+            validateMissingExtension: false,
             multiple: true,
             allowEmptyFile: false,
             useCapture: false,
@@ -144,6 +145,12 @@ class UploadArea {
             file.uploadStatus = UploadStatus.failed;
             file.responseText = this.options.localizer.fileSizeInvalid(this.options.maxFileSize);
             file.errorCode = ErrorCode.FileSizeExceeded;
+            return false;
+        }
+        if (this.fileTypeMissing(file)) {
+            file.uploadStatus = UploadStatus.failed;
+            file.responseText = this.options.localizer.fileTypeMissing();
+            file.errorCode = ErrorCode.UnsupportedFileFormat;
             return false;
         }
         if (this.isFileTypeInvalid(file)) {
@@ -337,11 +344,16 @@ class UploadArea {
         return true;
     }
 
+    private fileTypeMissing(file: File): boolean {
+        return this.options.validateMissingExtension && file.name.indexOf(".") === -1;
+    }
+
     private isFileTypeInvalid(file: File): boolean {
         if (
             file.name &&
             this.options.accept &&
-            (this.options.accept.trim() !== "*" || this.options.accept.trim() !== "*.*") &&
+            this.options.accept.trim() !== "*" &&
+            this.options.accept.trim() !== "*.*" &&
             this.options.validateExtension &&
             this.options.accept.indexOf("/") === -1
         ) {
