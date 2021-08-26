@@ -79,9 +79,13 @@ export interface IUploadAreaOptions extends IUploadOptions {
     onFileError?: (file: IUploadFile) => void;
     onFileCanceled?: (file: IUploadFile) => void;
     onDragEnter?: () => void;
+    onDragOver?: () => void;
     onDragLeave?: () => void;
-    onDragGlobalEnter?: () => void;
-    onDragGlobalLeave?: () => void;
+    onDragEnterGlobal?: () => void;
+    onDragOverGlobal?: () => void;
+    onDragLeaveGlobal?: () => void;
+    onDrop?: () => void;
+    onDropGlobal?: () => void;
 }
 export interface IUploadCallbacks {
     onProgressCallback?: (file: IUploadFile) => void;
@@ -145,8 +149,11 @@ export class UploadArea {
     private fileList?;
     private unregisterOnClick?;
     private unregisterOnDrop?;
+    private unregisterOnDropGlobal?;
+    private unregisterOnDragEnter?;
     private unregisterOnDragOver?;
     private unregisterOnDragLeave?;
+    private unregisterOnDragEnterGlobal?;
     private unregisterOnDragOverGlobal?;
     private unregisterOnDragLeaveGlobal?;
     private unregisterOnChange?;
@@ -162,13 +169,16 @@ export class UploadArea {
     private setupFileApiElements;
     private registerEvents;
     private onChange;
-    private onDrag;
+    private onDragEnter;
+    private onDragOver;
     private onDragLeave;
-    private onDragGlobal;
+    private onDragEnterGlobal;
+    private onDragOverGlobal;
     private onDragLeaveGlobal;
     private removeDragOverStyle;
     private addDragOverStyle;
     private onDrop;
+    private onDropGlobal;
     private isIeVersion;
     private onClick;
     private isFileSizeValid;

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 7.0.0
+
+Added onDragEnter and odDropGlobal callback functions
+
 ## 6.1.0
 
 Added onDrag callback functions
