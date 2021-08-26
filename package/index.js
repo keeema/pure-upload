@@ -371,7 +371,7 @@ var UploadArea = /** @class */ (function () {
         var useCapture = this.options.useCapture;
         addEventHandler(this.targetElement, "click", onClick, useCapture);
         this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, "click", onClick); };
-        var onDragEnter = (function (e) { return _this.onDragEnter(e); });
+        var onDragEnter = function () { return _this.onDragEnter(); };
         addEventHandler(this.targetElement, "dragenter", onDragEnter, useCapture);
         this.unregisterOnDragEnter = function () { return removeEventHandler(_this.targetElement, "dragenter", onDragEnter); };
         var onDragOver = (function (e) { return _this.onDragOver(e); });
@@ -396,11 +396,10 @@ var UploadArea = /** @class */ (function () {
     UploadArea.prototype.onChange = function (e) {
         this.selectFiles(e.target.files);
     };
-    UploadArea.prototype.onDragEnter = function (e) {
+    UploadArea.prototype.onDragEnter = function () {
         if (!getValueOrResult(this.options.allowDragDrop))
             return;
         this.options.onDragEnter && this.options.onDragEnter();
-        this.stopEventPropagation(e);
     };
     UploadArea.prototype.onDragOver = function (e) {
         if (!getValueOrResult(this.options.allowDragDrop))

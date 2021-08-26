@@ -584,7 +584,7 @@ export class UploadArea {
         addEventHandler(this.targetElement, "click", onClick, useCapture);
         this.unregisterOnClick = () => removeEventHandler(this.targetElement, "click", onClick);
 
-        const onDragEnter = ((e: DragEvent) => this.onDragEnter(e)) as EventListenerOrEventListenerObject;
+        const onDragEnter = () => this.onDragEnter();
         addEventHandler(this.targetElement, "dragenter", onDragEnter, useCapture);
         this.unregisterOnDragEnter = () => removeEventHandler(this.targetElement, "dragenter", onDragEnter);
 
@@ -617,11 +617,10 @@ export class UploadArea {
         this.selectFiles(<FileList>(<HTMLInputElement>e.target).files);
     }
 
-    private onDragEnter(e: DragEvent): void {
+    private onDragEnter(): void {
         if (!getValueOrResult(this.options.allowDragDrop)) return;
 
         this.options.onDragEnter && this.options.onDragEnter();
-        this.stopEventPropagation(e);
     }
 
     private onDragOver(e: DragEvent): void {
