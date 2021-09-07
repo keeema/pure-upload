@@ -5,14 +5,14 @@ var gulp = require("gulp"),
     rename = require("gulp-rename"),
     ts = require("gulp-typescript"),
     flatten = require("gulp-flatten"),
-    watch = require("gulp-watch"),
     karma = require("karma"),
-    foreach = require("gulp-foreach"),
+    tap = require("gulp-tap"),
     insert = require("gulp-insert"),
     merge = require("merge2"),
     replace = require("gulp-replace"),
     runSequence = require("gulp4-run-sequence");
 
+var watch = gulp.watch;
 var dist = "./dist/";
 var build = "./build/";
 var specs = "./specs/";
@@ -63,8 +63,9 @@ gulp.task(
         return gulp
             .src("build/*.ts")
             .pipe(
-                foreach(function (stream, file) {
-                    return stream.pipe(insert.prepend("export "));
+                tap(function (file) {
+                    file.contents = Buffer.concat([Buffer.from("export "), file.contents]);
+                    return file;
                 })
             )
             .pipe(gulp.dest(build));
@@ -95,10 +96,18 @@ gulp.task(
         return gulp
             .src("build/pureupload.ts")
             .pipe(
-                foreach(function (stream, file) {
-                    return stream.pipe(insert.prepend("module pu {")).pipe(insert.append("}"));
+                tap(function (file) {
+                    file.contents = Buffer.concat([Buffer.from("module pu {"), file.contents]);
+                    return file;
                 })
             )
+            .pipe(
+                tap(function (file) {
+                    file.contents = Buffer.concat([file.contents, Buffer.from("}")]);
+                    return file;
+                })
+            )
+
             .pipe(gulp.dest(build));
     })
 );
@@ -219,8 +228,9 @@ gulp.task(
         return gulp
             .src("package/*.ts")
             .pipe(
-                foreach(function (stream, file) {
-                    return stream.pipe(insert.prepend("export "));
+                tap(function (file) {
+                    file.contents = Buffer.concat([Buffer.from("export "), file.contents]);
+                    return file;
                 })
             )
             .pipe(gulp.dest(pkg));

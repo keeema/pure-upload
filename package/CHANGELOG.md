@@ -1,7 +1,12 @@
 # CHANGELOG
+
+## 7.1.1
+
+Fix audit findings in dependencies
+
 ## 7.1.0
 
-Fixed allowed files types for "*" and "*.*".
+Fixed allowed files types for "_" and "_.\*".
 Added validateMissingExtension check
 
 ## 7.0.0
