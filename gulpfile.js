@@ -20,17 +20,21 @@ var pkg = "./package/";
 var examplePublic = "./example/public/";
 
 var tsProject = ts.createProject("./src/tsconfig.json");
+var specTsProject = ts.createProject("./src/tsconfig.json");
+var examplePageTsProject = ts.createProject("./src/tsconfig.json");
+var exampleServerTsProject = ts.createProject("./src/tsconfig.json");
+var packageTsProject = ts.createProject("./src/tsconfig.json");
 
-var tsProjectExample = ts.createProject({
-    target: "es5",
-    module: "commonjs",
-    strict: true,
-    noUnusedLocals: true,
-    noUnusedParameters: true,
-    noImplicitReturns: true,
-    noFallthroughCasesInSwitch: true,
-    skipLibCheck: true,
-});
+// var tsProjectExample = ts.createProject({
+//     target: "es5",
+//     module: "commonjs",
+//     strict: true,
+//     noUnusedLocals: true,
+//     noUnusedParameters: true,
+//     noImplicitReturns: true,
+//     noFallthroughCasesInSwitch: true,
+//     skipLibCheck: true,
+// });
 
 gulp.task("cleanBuild", function () {
     return gulp
@@ -176,7 +180,7 @@ gulp.task(
 gulp.task(
     "compileSpecsTs",
     gulp.series("removeCompileSourcesSpecs", function () {
-        var tsResult = gulp.src(["./specs/*.ts"]).pipe(tsProject());
+        var tsResult = gulp.src(["./specs/*.ts"]).pipe(specTsProject());
 
         return tsResult.js.pipe(gulp.dest(specs));
     })
@@ -258,7 +262,7 @@ gulp.task(
 gulp.task(
     "compilePkgTs",
     gulp.series("removeBundledParts", function () {
-        var tsResult = gulp.src("./package/*.ts").pipe(tsProject());
+        var tsResult = gulp.src("./package/*.ts").pipe(packageTsProject());
 
         return merge([tsResult.dts.pipe(gulp.dest(pkg)), tsResult.js.pipe(gulp.dest(pkg))]);
     })
@@ -338,7 +342,7 @@ gulp.task(
 gulp.task(
     "compileExampleTs",
     gulp.series("copyDistLib", function () {
-        var tsResult = gulp.src(["./dist/**/*.d.ts", "./example/src/**/*.ts"]).pipe(flatten()).pipe(tsProjectExample());
+        var tsResult = gulp.src(["./dist/**/*.d.ts", "./example/src/**/*.ts"]).pipe(flatten()).pipe(examplePageTsProject());
 
         return tsResult.js.pipe(gulp.dest(examplePublic));
     })
@@ -347,7 +351,7 @@ gulp.task(
 gulp.task(
     "compileExampleBackendTs",
     gulp.series("compileExampleTs", function () {
-        var tsResult = gulp.src(["./example.ts", "./decl/**/*.d.ts"]).pipe(tsProjectExample());
+        var tsResult = gulp.src(["./example.ts", "./decl/**/*.d.ts"]).pipe(exampleServerTsProject());
 
         return tsResult.js.pipe(gulp.dest("./"));
     })

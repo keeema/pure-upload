@@ -7,11 +7,22 @@
         "lib": ["es5", "dom", "es2015.core", "es2015.promise", "es2015.iterable", "es2015.collection"],
         "module": "commonjs",
         "preserveConstEnums": false,
-        "reactNamespace": "React",
-        "removeComments": false,
-        "sourceMap": true,
         "target": "es5",
-        "types": []
+        "types": [],
+        "noEmitHelpers": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "noUncheckedIndexedAccess": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "reactNamespace": "b",
+        "removeComments": false,
+        "skipLibCheck": false,
+        "skipDefaultLibCheck": true,
+        "sourceMap": true,
+        "strict": true,
+        "strictPropertyInitialization": true
     },
     "include": ["**/*"]
 }

@@ -1,12 +1,6 @@
 // See: https://wicg.github.io/entries-api
 
-type ErrorCallback = (err: DOMException) => void;
-
-type FileCallback = (file: File) => void;
-
 type FilesCallback = (file: File[]) => void;
-
-type FileSystemEntriesCallback = (entries: FileSystemEntry[]) => void;
 
 interface FileSystemEntry {
     readonly isDirectory: boolean;

@@ -138,6 +138,8 @@ var ItemProcessor = /** @class */ (function () {
     };
     ItemProcessor.prototype.processEntry = function (entry, path, callback) {
         if (path === void 0) { path = ""; }
+        if (!entry)
+            return;
         if (this.isFileSystemDirectoryEntry(entry))
             this.processDirectoryEntry(entry, path, callback);
         else if (this.isFileSystemFileEntry(entry))

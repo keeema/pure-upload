@@ -13,8 +13,7 @@ export function getUploadCore(options: IUploadOptions, callbacks: IUploadCallbac
 export function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
 export function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
 export function newGuid(): string;
-export type ErrorCallback = (err: DOMException) => void;
-type FilesCallback = (file: File[]) => void;
+export type FilesCallback = (file: File[]) => void;
 export interface IFullUploadAreaOptions extends IUploadAreaOptions {
     maxFileSize: number;
     allowDragDrop: boolean | (() => boolean);
@@ -248,5 +247,4 @@ export enum UploadStatus {
     canceled = 4,
     removed = 5
 }
-export {};
 }

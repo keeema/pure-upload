@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## 7.1.1
+## 8.0.0
 
 Fix audit findings in dependencies
+Update TS@4.4.2
 
 ## 7.1.0
 

@@ -142,13 +142,7 @@ export function newGuid(): string {
 
 export // See: https://wicg.github.io/entries-api
 
-type ErrorCallback = (err: DOMException) => void;
-
-type FileCallback = (file: File) => void;
-
 type FilesCallback = (file: File[]) => void;
-
-type FileSystemEntriesCallback = (entries: FileSystemEntry[]) => void;
 
 interface FileSystemEntry {
     readonly isDirectory: boolean;
@@ -229,15 +223,16 @@ export class ItemProcessor {
 
     processItems(items: DataTransferItem[] | DataTransferItemList, callback?: () => void): void {
         callback = this.callbackAfter(items.length, callback);
-        this.toValidItems(items).forEach(item => this.processEntry(item.webkitGetAsEntry(), "", callback));
+        this.toValidItems(items).forEach((item) => this.processEntry(item.webkitGetAsEntry(), "", callback));
     }
 
     private processEntries(entries: FileSystemEntry[], path: string = "", callback?: () => void): void {
         callback = this.callbackAfter(entries.length, callback);
-        entries.forEach(entry => this.processEntry(entry, path, callback));
+        entries.forEach((entry) => this.processEntry(entry, path, callback));
     }
 
-    private processEntry(entry: FileSystemEntry, path: string = "", callback?: () => void): void {
+    private processEntry(entry: FileSystemEntry | null, path: string = "", callback?: () => void): void {
+        if (!entry) return;
         if (this.isFileSystemDirectoryEntry(entry)) this.processDirectoryEntry(entry, path, callback);
         else if (this.isFileSystemFileEntry(entry)) this.processFileEntry(entry, path, callback);
         else if (callback !== undefined) callback(); // this.errors.push(new Error('...'))?
@@ -247,13 +242,13 @@ export class ItemProcessor {
         entry
             .createReader()
             .readEntries(
-                entries => this.processEntries(entries, path + "/" + entry.name, callback),
+                (entries) => this.processEntries(entries, path + "/" + entry.name, callback),
                 this.pushAndCallback(this.errors, callback)
             );
     }
 
     private processFileEntry(entry: FileSystemFileEntry, path: string = "", callback?: () => void): void {
-        entry.file(file => this.processFile(file, path, callback), this.pushAndCallback(this.errors, callback));
+        entry.file((file) => this.processFile(file, path, callback), this.pushAndCallback(this.errors, callback));
     }
 
     private processFile(file: File, path: string = "", callback?: () => void): void {
