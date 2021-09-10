@@ -218,9 +218,20 @@ gulp.task(
     "copyTsToPkg",
     gulp.series("cleanPkg", function () {
         return gulp
-            .src(["./src/**/*.ts", "!./src/**/*.d.ts", "!./src/**/*.spec.ts", "./package.json", "./README.md", "./CHANGELOG.md"], {
-                allowEmpty: true,
-            })
+            .src(
+                [
+                    "./src/**/*.ts",
+                    "!./src/**/*.d.ts",
+                    "!./src/**/*.spec.ts",
+                    "./package.json",
+                    "./package-lock.json",
+                    "./README.md",
+                    "./CHANGELOG.md",
+                ],
+                {
+                    allowEmpty: true,
+                }
+            )
             .pipe(flatten())
             .pipe(gulp.dest(pkg));
     })

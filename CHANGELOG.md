@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 8.1.0
+
+Change dependencies
+
 ## 8.0.0
 
 Fix audit findings in dependencies

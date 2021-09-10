@@ -1,6 +1,6 @@
 {
     "name": "pure-upload",
-    "version": "8.0.0",
+    "version": "8.1.0",
     "description": "The pure upload library without dependencies",
     "author": {
         "name": "t.rut"
@@ -66,6 +66,9 @@
         "glob-parent": "^6.0.1"
     },
     "scripts": {
-        "preinstall": "npx npm-force-resolutions"
+        "force-resolutions": "npx npm-force-resolutions",
+        "build": "npm run force-resolutions & npx gulp",
+        "example-watch": "force-resolutions & npx gulp dwe",
+        "debug-watch": "force-resolutions & npx gulp dwe"
     }
 }

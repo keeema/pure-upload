@@ -1,40 +1,50 @@
 # Pure-upload
-[![npm version](https://badge.fury.io/js/pure-upload.svg)](http://badge.fury.io/js/pure-upload)  [![Bower version](https://badge.fury.io/bo/pure-upload.svg)](http://badge.fury.io/bo/pure-upload)
+
+[![npm version](https://badge.fury.io/js/pure-upload.svg)](http://badge.fury.io/js/pure-upload) [![Bower version](https://badge.fury.io/bo/pure-upload.svg)](http://badge.fury.io/bo/pure-upload)
 
 The pure JS (TS) upload library with no dependencies compatible with Google Chrome, Firefox, IE10+, Edge and modern mobile browsers.
 
 ## Installation
-1. Dowload as a ZIP file directly from [GitHub](https://github.com/keeema/pure-upload/archive/master.zip) pages and include to your project.
+
+1. Download as a ZIP file directly from [GitHub](https://github.com/keeema/pure-upload/archive/master.zip) pages and include to your project.
 2. Install with npm by `npm install pure-upload --save` or `yarn add pure-upload`.
 3. Install with bower by `bower install pure-upload`.
 
 ## Example
+
 See a simple [example](http://keeema.github.io/pure-upload).
 
 ## Api
 
 ### Using NPM package:
+
 Import pure-upload with standard import syntax:
 
 ```typescript
-import * as pu from 'pure-upload';
+import * as pu from "pure-upload";
 ```
 
 ### Uploader
+
 Uploader manages upload queue and registers upload areas.
 
 Initialization:
+
 ```typescript
-let uploader = pu.getUploader(uploadQueueOptions, uploadQueueCallbacks)
+let uploader = pu.getUploader(uploadQueueOptions, uploadQueueCallbacks);
 ```
+
 ### Upload queue options
+
 ```typescript
 maxParallelUploads?: number;
 parallelBatchOffset?: number;
 autoStart?: boolean;
 autoRemove?: boolean;
 ```
+
 ### Upload queue callbacks
+
 ```typescript
 onProgressCallback?: (file: IUploadFile) => void;
 onCancelledCallback?: (file: IUploadFile) => void;
@@ -50,18 +60,23 @@ onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
 ```
 
 ### Upload area
+
 Upload area defines element registred in Uploader.
 
 Registration:
+
 ```typescript
 let uploadArea = uploader.registerArea(element, uploadAreaOptions);
 ```
 
 Unregistration:
+
 ```typescript
 uploader.unregisterArea(uploadArea);
 ```
+
 ### Upload area options
+
 ```typescript
 url: string;
 method: string;
@@ -87,19 +102,26 @@ onFilesSelected?: (file: IUploadFile[]) => void;
 onFileError?: (file: IUploadFile) => void;
 onFileCanceled?: (file: IUploadFile) => void;
 ```
+
 ### Upload area - manual starting
+
 ```typescript
 start(autoClear?: boolean, files?: IUploadFile[]): void;
 clear(files?: IUploadFile[]): void;
 ```
+
 ### Localizer
+
 ```typescript
 fileSizeInvalid: (maxFileSize: number) => string;
 fileTypeInvalid: (accept: string) => string;
 invalidResponseFromServer: () => string;
 ```
+
 ### Upload file
-Standard *File* object extended with additional informations and methods to manage a file in queue.
+
+Standard _File_ object extended with additional informations and methods to manage a file in queue.
+
 ```typescript
 guid: string;
 uploadStatus?: UploadStatus;
@@ -114,9 +136,35 @@ start: () => void;
 ```
 
 ### Upload status
+
 File statuses accesible by `pu.uploadStatus`.
 
-Library used by [Quadient](https://quadient.cz/.
+## How to develop
 
+### Debug and watch
+
+```bash
+npm debug-watch
+```
+
+### Build and watch example
+
+```bash
+npm run example-watch
+```
+
+### Run example solution
+
+```bash
+node example
+```
+
+### Build package
+
+```bash
+npm run build
+```
+
+Library used by [Quadient](https://quadient.cz/.
 
 MIT, Copyright &copy; 2015 Tomáš Růt
