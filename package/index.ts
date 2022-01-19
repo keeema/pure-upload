@@ -508,9 +508,7 @@ export class UploadArea {
         if (!files) return;
 
         files.forEach((file: IUploadFile) => {
-            if (file.guid === undefined) {
-              file.guid = newGuid();
-            }
+            file.guid = newGuid();
             delete file.uploadStatus;
             file.url = this.uploadCore.getUrl(file);
             file.onError =

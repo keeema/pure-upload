@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 8.1.1
+
+Remove overwriting external guid
+
 ## 8.1.0
 
 Change dependencies
