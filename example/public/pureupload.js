@@ -300,7 +300,9 @@ var pu;
             if (!files)
                 return;
             files.forEach(function (file) {
-                file.guid = newGuid();
+                if (file.guid === undefined) {
+                    file.guid = newGuid();
+                }
                 delete file.uploadStatus;
                 file.url = _this.uploadCore.getUrl(file);
                 file.onError =
