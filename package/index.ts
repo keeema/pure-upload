@@ -717,9 +717,10 @@ export class UploadArea {
     }
 
     private onDropGlobal(e: DragEvent): void {
-        this.stopEventPropagation(e);
-
-        this.options.onDropGlobal && this.options.onDropGlobal();
+        if (this.options.onDropGlobal) {
+            this.stopEventPropagation(e);
+            this.options.onDropGlobal();
+        }
     }
 
     private isIeVersion(v: number): boolean {

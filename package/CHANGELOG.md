@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 8.1.3
+
+Deny stop event propagation if drop global action is not defined
+
 ## 8.1.1 - 8.1.2
 
 Remove overwriting external guid
