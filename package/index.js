@@ -486,8 +486,10 @@ var UploadArea = /** @class */ (function () {
         }
     };
     UploadArea.prototype.onDropGlobal = function (e) {
-        this.stopEventPropagation(e);
-        this.options.onDropGlobal && this.options.onDropGlobal();
+        if (this.options.onDropGlobal) {
+            this.stopEventPropagation(e);
+            this.options.onDropGlobal();
+        }
     };
     UploadArea.prototype.isIeVersion = function (v) {
         return RegExp("msie" + (!isNaN(v) ? "\\s" + v.toString() : ""), "i").test(navigator.userAgent);
