@@ -315,6 +315,10 @@ class UploadArea {
                 this.selectFiles(files);
             }
         }
+
+        if (!this.options.onDropGlobal) {
+            this.stopEventPropagation(e);
+        }
     }
 
     private onDropGlobal(e: DragEvent): void {
