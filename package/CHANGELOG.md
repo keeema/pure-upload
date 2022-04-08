@@ -1,5 +1,10 @@
 # CHANGELOG
 
+
+## 8.1.4
+
+Added stop event propagation on drop if drop global action is not defined
+
 ## 8.1.3
 
 Deny stop event propagation if drop global action is not defined

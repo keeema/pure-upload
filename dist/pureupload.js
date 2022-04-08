@@ -484,6 +484,9 @@ var pu;
                     this.selectFiles(files);
                 }
             }
+            if (!this.options.onDropGlobal) {
+                this.stopEventPropagation(e);
+            }
         };
         UploadArea.prototype.onDropGlobal = function (e) {
             if (this.options.onDropGlobal) {
