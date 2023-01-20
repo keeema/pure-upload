@@ -192,9 +192,9 @@ var ItemProcessor = /** @class */ (function () {
     return ItemProcessor;
 }());
 exports.ItemProcessor = ItemProcessor;
-function removeEventHandler(el, event, handler) {
+function removeEventHandler(el, event, handler, options) {
     if (el.removeEventListener) {
-        el.removeEventListener(event, handler);
+        el.removeEventListener(event, handler, options);
     }
     else {
         var elem = el;
@@ -364,7 +364,7 @@ var UploadArea = /** @class */ (function () {
         addEventHandler(this._fileInput, "change", onChange, this.options.useCapture);
         this.unregisterOnChange = function () {
             if (_this._fileInput)
-                removeEventHandler(_this._fileInput, "change", onchange);
+                removeEventHandler(_this._fileInput, "change", onchange, { capture: _this.options.useCapture });
         };
         if (this.options.multiple) {
             this._fileInput.setAttribute("multiple", "");
@@ -375,34 +375,34 @@ var UploadArea = /** @class */ (function () {
     };
     UploadArea.prototype.registerEvents = function () {
         var _this = this;
+        var capture = this.options.useCapture;
         var onClick = function () { return _this.onClick(); };
-        var useCapture = this.options.useCapture;
-        addEventHandler(this.targetElement, "click", onClick, useCapture);
-        this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, "click", onClick); };
+        addEventHandler(this.targetElement, "click", onClick, capture);
+        this.unregisterOnClick = function () { return removeEventHandler(_this.targetElement, "click", onClick, { capture: capture }); };
         var onDragEnter = function () { return _this.onDragEnter(); };
-        addEventHandler(this.targetElement, "dragenter", onDragEnter, useCapture);
-        this.unregisterOnDragEnter = function () { return removeEventHandler(_this.targetElement, "dragenter", onDragEnter); };
+        addEventHandler(this.targetElement, "dragenter", onDragEnter, capture);
+        this.unregisterOnDragEnter = function () { return removeEventHandler(_this.targetElement, "dragenter", onDragEnter, { capture: capture }); };
         var onDragOver = (function (e) { return _this.onDragOver(e); });
-        addEventHandler(this.targetElement, "dragover", onDragOver, useCapture);
-        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, "dragover", onDragOver); };
+        addEventHandler(this.targetElement, "dragover", onDragOver, capture);
+        this.unregisterOnDragOver = function () { return removeEventHandler(_this.targetElement, "dragover", onDragOver, { capture: capture }); };
         var onDragLeave = function () { return _this.onDragLeave(); };
-        addEventHandler(this.targetElement, "dragleave", onDragLeave, useCapture);
-        this.unregisterOnDragLeave = function () { return removeEventHandler(_this.targetElement, "dragleave", onDragLeave); };
+        addEventHandler(this.targetElement, "dragleave", onDragLeave, capture);
+        this.unregisterOnDragLeave = function () { return removeEventHandler(_this.targetElement, "dragleave", onDragLeave, { capture: capture }); };
         var onDragEnterGlobal = function () { return _this.onDragEnterGlobal(); };
-        addEventHandler(document.body, "dragenter", onDragEnterGlobal, useCapture);
-        this.unregisterOnDragEnterGlobal = function () { return removeEventHandler(document.body, "dragenter", onDragEnterGlobal); };
+        addEventHandler(document.body, "dragenter", onDragEnterGlobal, capture);
+        this.unregisterOnDragEnterGlobal = function () { return removeEventHandler(document.body, "dragenter", onDragEnterGlobal, { capture: capture }); };
         var onDragOverGlobal = function () { return _this.onDragOverGlobal(); };
-        addEventHandler(document.body, "dragover", onDragOverGlobal, useCapture);
-        this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, "dragover", onDragOverGlobal); };
+        addEventHandler(document.body, "dragover", onDragOverGlobal, capture);
+        this.unregisterOnDragOverGlobal = function () { return removeEventHandler(document.body, "dragover", onDragOverGlobal, { capture: capture }); };
         var onDragLeaveGlobal = function () { return _this.onDragLeaveGlobal(); };
-        addEventHandler(document.body, "dragleave", onDragLeaveGlobal, useCapture);
-        this.unregisterOnDragLeaveGlobal = function () { return removeEventHandler(document.body, "dragleave", onDragLeaveGlobal); };
+        addEventHandler(document.body, "dragleave", onDragLeaveGlobal, capture);
+        this.unregisterOnDragLeaveGlobal = function () { return removeEventHandler(document.body, "dragleave", onDragLeaveGlobal, { capture: capture }); };
         var onDrop = (function (e) { return _this.onDrop(e); });
-        addEventHandler(this.targetElement, "drop", onDrop, useCapture);
-        this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, "drop", onDrop); };
+        addEventHandler(this.targetElement, "drop", onDrop, capture);
+        this.unregisterOnDrop = function () { return removeEventHandler(_this.targetElement, "drop", onDrop, { capture: capture }); };
         var onDropGlobal = (function (e) { return _this.onDropGlobal(e); });
-        addEventHandler(document.body, "drop", onDropGlobal, useCapture);
-        this.unregisterOnDropGlobal = function () { return removeEventHandler(document.body, "drop", onDropGlobal); };
+        addEventHandler(document.body, "drop", onDropGlobal, capture);
+        this.unregisterOnDropGlobal = function () { return removeEventHandler(document.body, "drop", onDropGlobal, { capture: capture }); };
     };
     UploadArea.prototype.onChange = function (e) {
         this.selectFiles(e.target.files);

@@ -1,10 +1,11 @@
 function removeEventHandler(
   el: HTMLInputElement | Element,
   event: string,
-  handler: EventListenerOrEventListenerObject
+  handler: EventListenerOrEventListenerObject,
+  options?: boolean | EventListenerOptions,
 ) {
   if (el.removeEventListener) {
-    el.removeEventListener(event, handler);
+    el.removeEventListener(event, handler, options);
   } else {
     let elem = <IElementWithDetachEvent>el;
     if (elem.detachEvent) {

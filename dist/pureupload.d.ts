@@ -141,7 +141,7 @@ declare module pu {
         autoStart?: boolean;
         autoRemove?: boolean;
     }
-    function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: EventListenerOrEventListenerObject): void;
+    function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     class UploadArea {
         targetElement: HTMLElement;
         uploader: Uploader;
