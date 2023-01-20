@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 8.1.5
+
+Added options (capture) to removeEventListener so the matching events are added and removed
 
 ## 8.1.4
 
