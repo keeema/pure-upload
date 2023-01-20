@@ -141,7 +141,7 @@ export interface IUploadQueueOptions {
     autoStart?: boolean;
     autoRemove?: boolean;
 }
-export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: EventListenerOrEventListenerObject): void;
+export function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 export class UploadArea {
     targetElement: HTMLElement;
     uploader: Uploader;
