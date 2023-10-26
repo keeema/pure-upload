@@ -1,6 +1,6 @@
 # Pure-upload
 
-[![npm version](https://badge.fury.io/js/pure-upload.svg)](http://badge.fury.io/js/pure-upload) [![Bower version](https://badge.fury.io/bo/pure-upload.svg)](http://badge.fury.io/bo/pure-upload)
+[![npm version](https://badge.fury.io/js/pure-upload.svg)](https://www.npmjs.com/package/pure-upload) [![Bower version](https://badge.fury.io/bo/pure-upload.svg)](http://badge.fury.io/bo/pure-upload)
 
 The pure JS (TS) upload library with no dependencies compatible with Google Chrome, Firefox, IE10+, Edge and modern mobile browsers.
 
@@ -12,7 +12,7 @@ The pure JS (TS) upload library with no dependencies compatible with Google Chro
 
 ## Example
 
-See a simple [example](http://keeema.github.io/pure-upload).
+See a simple [example](https://keeema.github.io/pure-upload).
 
 ## Api
 
@@ -61,7 +61,7 @@ onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
 
 ### Upload area
 
-Upload area defines element registred in Uploader.
+Upload area defines element registered in Uploader.
 
 Registration:
 
@@ -120,7 +120,7 @@ invalidResponseFromServer: () => string;
 
 ### Upload file
 
-Standard _File_ object extended with additional informations and methods to manage a file in queue.
+Standard _File_ object extended with additional information and methods to manage a file in queue.
 
 ```typescript
 guid: string;
@@ -137,7 +137,7 @@ start: () => void;
 
 ### Upload status
 
-File statuses accesible by `pu.uploadStatus`.
+File statuses accessible by `pu.uploadStatus`.
 
 ## How to develop
 

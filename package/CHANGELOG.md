@@ -77,7 +77,7 @@ Added onFilesSelected for UploadArea.
 
 ## 5.0.5
 
-Updated build tools, changed minfied version.
+Updated build tools, changed minified version.
 
 ## 5.0.4
 
@@ -133,7 +133,7 @@ Localizations are now accessible through new options property with specific erro
 
 ## Cleaning
 
-Removed compatibility parts for obsolette browser without FileAPI.
+Removed compatibility parts for obsolete browser without FileAPI.
 
 ## 2.2.3
 
@@ -146,7 +146,7 @@ Few options of UploadArea changed to be acceptable as a function.
 
 ## Fix
 
-Automatic clearing of manual upload file list after puting to queue is done on parameter.
+Automatic clearing of manual upload file list after putting to queue is done on parameter.
 
 ## 2.2.0
 

@@ -61,7 +61,7 @@ onFilesAddedErrorCallback?: (files: IUploadFile[]) => void;
 
 ### Upload area
 
-Upload area defines element registred in Uploader.
+Upload area defines element registered in Uploader.
 
 Registration:
 
@@ -137,7 +137,7 @@ start: () => void;
 
 ### Upload status
 
-File statuses accesible by `pu.uploadStatus`.
+File statuses accessible by `pu.uploadStatus`.
 
 ## How to develop
 
@@ -165,6 +165,6 @@ node example
 npm run build
 ```
 
-Library used by [Quadient](https://quadient.cz/.
+Library used by [Quadient](https://quadient.cz/).
 
 MIT, Copyright &copy; 2015 Tomáš Růt
