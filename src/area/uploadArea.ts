@@ -306,11 +306,11 @@ class UploadArea {
 
         let files: FileList | File[] = e.dataTransfer.files;
         if (files.length) {
-            if (!this.options.multiple) files = [files[0]];
+            if (!this.options.multiple) files = [files[0]!];
 
             let items = e.dataTransfer.items;
-            if (items && items.length && items[0].webkitGetAsEntry !== null) {
-                const itemsToProcess = this.options.multiple ? items : [items[0]];
+            if (items && items.length && items[0]!.webkitGetAsEntry !== null) {
+                const itemsToProcess = this.options.multiple ? items : [items[0]!];
                 ItemProcessor.processItems(itemsToProcess, (files) => this.selectFiles(files));
             } else {
                 this.selectFiles(files);
@@ -371,7 +371,7 @@ class UploadArea {
             if (fileExtension.indexOf(".") === -1) return true;
             let isFileExtensionExisted = true;
             for (let i = 0; i < acceptedExtensions.length; i++) {
-                if (acceptedExtensions[i].toUpperCase().trim() === fileExtension.toUpperCase()) {
+                if (acceptedExtensions[i]!.toUpperCase().trim() === fileExtension.toUpperCase()) {
                     isFileExtensionExisted = false;
                 }
             }

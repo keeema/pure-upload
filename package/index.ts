@@ -40,7 +40,7 @@ export function castFiles(
   if (typeof fileList === "object") {
     files = Object.keys(fileList)
       .filter(key => key !== "length")
-      .map(key => (<IFileOrObjectWithIndexer>fileList)[key]);
+      .map(key => (<IFileOrObjectWithIndexer>fileList)[key]!);
   } else {
     files = <IUploadFile[]>fileList;
   }
@@ -271,8 +271,8 @@ export class ItemProcessor {
         const validItems = [];
 
         for (let i = 0; i < items.length; ++i) {
-            if (items[i].webkitGetAsEntry !== undefined && items[i].webkitGetAsEntry !== null) {
-                validItems.push(items[i]);
+            if (items[i]!.webkitGetAsEntry !== undefined && items[i]!.webkitGetAsEntry !== null) {
+                validItems.push(items[i]!);
             }
         }
 
@@ -706,11 +706,11 @@ export class UploadArea {
 
         let files: FileList | File[] = e.dataTransfer.files;
         if (files.length) {
-            if (!this.options.multiple) files = [files[0]];
+            if (!this.options.multiple) files = [files[0]!];
 
             let items = e.dataTransfer.items;
-            if (items && items.length && items[0].webkitGetAsEntry !== null) {
-                const itemsToProcess = this.options.multiple ? items : [items[0]];
+            if (items && items.length && items[0]!.webkitGetAsEntry !== null) {
+                const itemsToProcess = this.options.multiple ? items : [items[0]!];
                 ItemProcessor.processItems(itemsToProcess, (files) => this.selectFiles(files));
             } else {
                 this.selectFiles(files);
@@ -771,7 +771,7 @@ export class UploadArea {
             if (fileExtension.indexOf(".") === -1) return true;
             let isFileExtensionExisted = true;
             for (let i = 0; i < acceptedExtensions.length; i++) {
-                if (acceptedExtensions[i].toUpperCase().trim() === fileExtension.toUpperCase()) {
+                if (acceptedExtensions[i]!.toUpperCase().trim() === fileExtension.toUpperCase()) {
                     isFileExtensionExisted = false;
                 }
             }
@@ -1046,7 +1046,7 @@ export class Uploader {
     unregisterArea(area: UploadArea): void {
         const areaIndex = this.uploadAreas.indexOf(area);
         if (areaIndex >= 0) {
-            this.uploadAreas[areaIndex].destroy();
+            this.uploadAreas[areaIndex]!.destroy();
             this.uploadAreas.splice(areaIndex, 1);
         }
     }

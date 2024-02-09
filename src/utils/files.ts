@@ -7,7 +7,7 @@ function castFiles(
   if (typeof fileList === "object") {
     files = Object.keys(fileList)
       .filter(key => key !== "length")
-      .map(key => (<IFileOrObjectWithIndexer>fileList)[key]);
+      .map(key => (<IFileOrObjectWithIndexer>fileList)[key]!);
   } else {
     files = <IUploadFile[]>fileList;
   }

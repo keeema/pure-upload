@@ -59,8 +59,8 @@ class ItemProcessor {
         const validItems = [];
 
         for (let i = 0; i < items.length; ++i) {
-            if (items[i].webkitGetAsEntry !== undefined && items[i].webkitGetAsEntry !== null) {
-                validItems.push(items[i]);
+            if (items[i]!.webkitGetAsEntry !== undefined && items[i]!.webkitGetAsEntry !== null) {
+                validItems.push(items[i]!);
             }
         }
 
