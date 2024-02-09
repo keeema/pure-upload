@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UploadStatus = exports.UploadQueue = exports.Uploader = exports.UploadCore = exports.UploadArea = exports.removeEventHandler = exports.ItemProcessor = exports.newGuid = exports.getValueOrResult = exports.getUploader = exports.getUploadCore = exports.decorateSimpleFunction = exports.castFiles = exports.isFileApi = exports.ErrorCode = exports.addEventHandler = void 0;
+exports.Uploader = exports.UploadStatus = exports.UploadQueue = exports.UploadCore = exports.UploadArea = exports.removeEventHandler = exports.ItemProcessor = exports.newGuid = exports.getValueOrResult = exports.getUploader = exports.getUploadCore = exports.decorateSimpleFunction = exports.castFiles = exports.isFileApi = exports.ErrorCode = exports.addEventHandler = void 0;
 function addEventHandler(el, event, handler, useCapture) {
     if (el.addEventListener) {
         el.addEventListener(event, handler, useCapture);
@@ -767,36 +767,6 @@ var UploadCore = /** @class */ (function () {
     return UploadCore;
 }());
 exports.UploadCore = UploadCore;
-var Uploader = /** @class */ (function () {
-    function Uploader(options, callbacks) {
-        if (options === void 0) { options = {}; }
-        if (callbacks === void 0) { callbacks = {}; }
-        this.options = options;
-        this.uploadAreas = [];
-        this.queue = new UploadQueue(options, callbacks);
-    }
-    Uploader.prototype.registerArea = function (element, options) {
-        var uploadArea = new UploadArea(element, options, this);
-        this.uploadAreas.push(uploadArea);
-        return uploadArea;
-    };
-    Uploader.prototype.unregisterArea = function (area) {
-        var areaIndex = this.uploadAreas.indexOf(area);
-        if (areaIndex >= 0) {
-            this.uploadAreas[areaIndex].destroy();
-            this.uploadAreas.splice(areaIndex, 1);
-        }
-    };
-    Object.defineProperty(Uploader.prototype, "firstUploadArea", {
-        get: function () {
-            return this.uploadAreas[0];
-        },
-        enumerable: false,
-        configurable: true
-    });
-    return Uploader;
-}());
-exports.Uploader = Uploader;
 var UploadQueue = /** @class */ (function () {
     function UploadQueue(options, callbacks) {
         this.offset = { fileCount: 0, running: false };
@@ -974,3 +944,33 @@ var UploadStatus;
     UploadStatus[UploadStatus["canceled"] = 4] = "canceled";
     UploadStatus[UploadStatus["removed"] = 5] = "removed";
 })(UploadStatus = exports.UploadStatus || (exports.UploadStatus = {}));
+var Uploader = /** @class */ (function () {
+    function Uploader(options, callbacks) {
+        if (options === void 0) { options = {}; }
+        if (callbacks === void 0) { callbacks = {}; }
+        this.options = options;
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options, callbacks);
+    }
+    Uploader.prototype.registerArea = function (element, options) {
+        var uploadArea = new UploadArea(element, options, this);
+        this.uploadAreas.push(uploadArea);
+        return uploadArea;
+    };
+    Uploader.prototype.unregisterArea = function (area) {
+        var areaIndex = this.uploadAreas.indexOf(area);
+        if (areaIndex >= 0) {
+            this.uploadAreas[areaIndex].destroy();
+            this.uploadAreas.splice(areaIndex, 1);
+        }
+    };
+    Object.defineProperty(Uploader.prototype, "firstUploadArea", {
+        get: function () {
+            return this.uploadAreas[0];
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Uploader;
+}());
+exports.Uploader = Uploader;

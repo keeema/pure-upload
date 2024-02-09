@@ -1,4 +1,5 @@
 declare module pu {
+    type FilesCallback = (file: File[]) => void;
     function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject, useCapture: boolean): void;
     enum ErrorCode {
         NoError = 0,
@@ -13,7 +14,6 @@ declare module pu {
     function getUploader(options: IUploadQueueOptions, callbacks: IUploadQueueCallbacks): Uploader;
     function getValueOrResult<T>(valueOrGetter?: T | (() => T)): T | undefined;
     function newGuid(): string;
-    type FilesCallback = (file: File[]) => void;
     interface IFullUploadAreaOptions extends IUploadAreaOptions {
         maxFileSize: number;
         allowDragDrop: boolean | (() => boolean);
@@ -44,23 +44,6 @@ declare module pu {
     interface IOffsetInfo {
         running: boolean;
         fileCount: number;
-    }
-    class ItemProcessor {
-        errors: Error[];
-        files: File[];
-        private constructor();
-        static processItems(items: DataTransferItem[] | DataTransferItemList, callback?: FilesCallback): void;
-        processItems(items: DataTransferItem[] | DataTransferItemList, callback?: () => void): void;
-        private processEntries;
-        private processEntry;
-        private processDirectoryEntry;
-        private processFileEntry;
-        private processFile;
-        private callbackAfter;
-        private pushAndCallback;
-        private toValidItems;
-        private isFileSystemFileEntry;
-        private isFileSystemDirectoryEntry;
     }
     interface IUploadAreaOptions extends IUploadOptions {
         maxFileSize?: number;
@@ -141,6 +124,23 @@ declare module pu {
         autoStart?: boolean;
         autoRemove?: boolean;
     }
+    class ItemProcessor {
+        errors: Error[];
+        files: File[];
+        private constructor();
+        static processItems(items: DataTransferItem[] | DataTransferItemList, callback?: FilesCallback): void;
+        processItems(items: DataTransferItem[] | DataTransferItemList, callback?: () => void): void;
+        private processEntries;
+        private processEntry;
+        private processDirectoryEntry;
+        private processFileEntry;
+        private processFile;
+        private callbackAfter;
+        private pushAndCallback;
+        private toValidItems;
+        private isFileSystemFileEntry;
+        private isFileSystemDirectoryEntry;
+    }
     function removeEventHandler(el: HTMLInputElement | Element, event: string, handler: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     class UploadArea {
         targetElement: HTMLElement;
@@ -211,15 +211,6 @@ declare module pu {
         private getDefaultOptions;
         private setFullCallbacks;
     }
-    class Uploader {
-        uploadAreas: UploadArea[];
-        queue: UploadQueue;
-        options: IUploadQueueOptions;
-        constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
-        registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
-        unregisterArea(area: UploadArea): void;
-        get firstUploadArea(): UploadArea | undefined;
-    }
     class UploadQueue {
         offset: IOffsetInfo;
         options: IUploadQueueOptions;
@@ -246,5 +237,14 @@ declare module pu {
         failed = 3,
         canceled = 4,
         removed = 5
+    }
+    class Uploader {
+        uploadAreas: UploadArea[];
+        queue: UploadQueue;
+        options: IUploadQueueOptions;
+        constructor(options?: IUploadQueueOptions, callbacks?: IUploadQueueCallbacks);
+        registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea;
+        unregisterArea(area: UploadArea): void;
+        get firstUploadArea(): UploadArea | undefined;
     }
 }

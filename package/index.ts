@@ -1,3 +1,31 @@
+export // See: https://wicg.github.io/entries-api
+
+type FilesCallback = (file: File[]) => void;
+
+interface FileSystemEntry {
+    readonly isDirectory: boolean;
+    readonly isFile: boolean;
+    readonly name: string;
+}
+
+interface FileSystemDirectoryEntry extends FileSystemEntry {
+    createReader(): FileSystemDirectoryReader;
+}
+
+interface FileSystemDirectoryReader {
+    readEntries(successCallback: FileSystemEntriesCallback, errorCallback?: ErrorCallback): void;
+}
+
+interface FileSystemFileEntry extends FileSystemEntry {
+    getAsFile(): File | null;
+    file(successCallback: FileCallback, errorCallback?: ErrorCallback): void;
+}
+
+interface IFileExt extends File {
+    fullPath: string;
+    kind: string;
+}
+
 export function addEventHandler(
   el: Element | HTMLElement,
   event: string,
@@ -140,34 +168,6 @@ export function newGuid(): string {
   return uuid;
 }
 
-export // See: https://wicg.github.io/entries-api
-
-type FilesCallback = (file: File[]) => void;
-
-interface FileSystemEntry {
-    readonly isDirectory: boolean;
-    readonly isFile: boolean;
-    readonly name: string;
-}
-
-interface FileSystemDirectoryEntry extends FileSystemEntry {
-    createReader(): FileSystemDirectoryReader;
-}
-
-interface FileSystemDirectoryReader {
-    readEntries(successCallback: FileSystemEntriesCallback, errorCallback?: ErrorCallback): void;
-}
-
-interface FileSystemFileEntry extends FileSystemEntry {
-    getAsFile(): File | null;
-    file(successCallback: FileCallback, errorCallback?: ErrorCallback): void;
-}
-
-interface IFileExt extends File {
-    fullPath: string;
-    kind: string;
-}
-
 export interface IFullUploadAreaOptions extends IUploadAreaOptions {
     maxFileSize: number;
     allowDragDrop: boolean | (() => boolean);
@@ -208,84 +208,6 @@ function getDefaultLocalizer(): ILocalizer {
 export interface IOffsetInfo {
   running: boolean;
   fileCount: number;
-}
-
-export class ItemProcessor {
-    errors: Error[] = [];
-    files: File[] = [];
-
-    private constructor() {}
-
-    static processItems(items: DataTransferItem[] | DataTransferItemList, callback?: FilesCallback): void {
-        const processor = new ItemProcessor();
-        processor.processItems(items, () => callback && callback(processor.files));
-    }
-
-    processItems(items: DataTransferItem[] | DataTransferItemList, callback?: () => void): void {
-        callback = this.callbackAfter(items.length, callback);
-        this.toValidItems(items).forEach((item) => this.processEntry(item.webkitGetAsEntry(), "", callback));
-    }
-
-    private processEntries(entries: FileSystemEntry[], path: string = "", callback?: () => void): void {
-        callback = this.callbackAfter(entries.length, callback);
-        entries.forEach((entry) => this.processEntry(entry, path, callback));
-    }
-
-    private processEntry(entry: FileSystemEntry | null, path: string = "", callback?: () => void): void {
-        if (!entry) return;
-        if (this.isFileSystemDirectoryEntry(entry)) this.processDirectoryEntry(entry, path, callback);
-        else if (this.isFileSystemFileEntry(entry)) this.processFileEntry(entry, path, callback);
-        else if (callback !== undefined) callback(); // this.errors.push(new Error('...'))?
-    }
-
-    private processDirectoryEntry(entry: FileSystemDirectoryEntry, path: string = "", callback?: () => void): void {
-        entry
-            .createReader()
-            .readEntries(
-                (entries) => this.processEntries(entries, path + "/" + entry.name, callback),
-                this.pushAndCallback(this.errors, callback)
-            );
-    }
-
-    private processFileEntry(entry: FileSystemFileEntry, path: string = "", callback?: () => void): void {
-        entry.file((file) => this.processFile(file, path, callback), this.pushAndCallback(this.errors, callback));
-    }
-
-    private processFile(file: File, path: string = "", callback?: () => void): void {
-        (file as IFileExt).fullPath = path + "/" + file.name;
-        this.pushAndCallback(this.files, callback)(file);
-    }
-
-    private callbackAfter(i: number, callback?: () => void) {
-        return () => (--i === 0 && callback !== undefined ? callback() : i);
-    }
-
-    private pushAndCallback<T>(array: T[], callback?: () => void) {
-        return (item: T) => {
-            array.push(item);
-            if (callback !== undefined) callback();
-        };
-    }
-
-    private toValidItems(items: DataTransferItem[] | DataTransferItemList): DataTransferItem[] {
-        const validItems = [];
-
-        for (let i = 0; i < items.length; ++i) {
-            if (items[i]!.webkitGetAsEntry !== undefined && items[i]!.webkitGetAsEntry !== null) {
-                validItems.push(items[i]!);
-            }
-        }
-
-        return validItems;
-    }
-
-    private isFileSystemFileEntry(entry: FileSystemEntry | FileSystemFileEntry): entry is FileSystemFileEntry {
-        return entry.isFile;
-    }
-
-    private isFileSystemDirectoryEntry(entry: FileSystemEntry | FileSystemDirectoryEntry): entry is FileSystemDirectoryEntry {
-        return entry.isDirectory;
-    }
 }
 
 export interface IUploadAreaOptions extends IUploadOptions {
@@ -373,6 +295,84 @@ export interface IUploadQueueOptions {
   parallelBatchOffset?: number;
   autoStart?: boolean;
   autoRemove?: boolean;
+}
+
+export class ItemProcessor {
+    errors: Error[] = [];
+    files: File[] = [];
+
+    private constructor() {}
+
+    static processItems(items: DataTransferItem[] | DataTransferItemList, callback?: FilesCallback): void {
+        const processor = new ItemProcessor();
+        processor.processItems(items, () => callback && callback(processor.files));
+    }
+
+    processItems(items: DataTransferItem[] | DataTransferItemList, callback?: () => void): void {
+        callback = this.callbackAfter(items.length, callback);
+        this.toValidItems(items).forEach((item) => this.processEntry(item.webkitGetAsEntry(), "", callback));
+    }
+
+    private processEntries(entries: FileSystemEntry[], path: string = "", callback?: () => void): void {
+        callback = this.callbackAfter(entries.length, callback);
+        entries.forEach((entry) => this.processEntry(entry, path, callback));
+    }
+
+    private processEntry(entry: FileSystemEntry | null, path: string = "", callback?: () => void): void {
+        if (!entry) return;
+        if (this.isFileSystemDirectoryEntry(entry)) this.processDirectoryEntry(entry, path, callback);
+        else if (this.isFileSystemFileEntry(entry)) this.processFileEntry(entry, path, callback);
+        else if (callback !== undefined) callback(); // this.errors.push(new Error('...'))?
+    }
+
+    private processDirectoryEntry(entry: FileSystemDirectoryEntry, path: string = "", callback?: () => void): void {
+        entry
+            .createReader()
+            .readEntries(
+                (entries) => this.processEntries(entries, path + "/" + entry.name, callback),
+                this.pushAndCallback(this.errors, callback)
+            );
+    }
+
+    private processFileEntry(entry: FileSystemFileEntry, path: string = "", callback?: () => void): void {
+        entry.file((file) => this.processFile(file, path, callback), this.pushAndCallback(this.errors, callback));
+    }
+
+    private processFile(file: File, path: string = "", callback?: () => void): void {
+        (file as IFileExt).fullPath = path + "/" + file.name;
+        this.pushAndCallback(this.files, callback)(file);
+    }
+
+    private callbackAfter(i: number, callback?: () => void) {
+        return () => (--i === 0 && callback !== undefined ? callback() : i);
+    }
+
+    private pushAndCallback<T>(array: T[], callback?: () => void) {
+        return (item: T) => {
+            array.push(item);
+            if (callback !== undefined) callback();
+        };
+    }
+
+    private toValidItems(items: DataTransferItem[] | DataTransferItemList): DataTransferItem[] {
+        const validItems = [];
+
+        for (let i = 0; i < items.length; ++i) {
+            if (items[i]!.webkitGetAsEntry !== undefined && items[i]!.webkitGetAsEntry !== null) {
+                validItems.push(items[i]!);
+            }
+        }
+
+        return validItems;
+    }
+
+    private isFileSystemFileEntry(entry: FileSystemEntry | FileSystemFileEntry): entry is FileSystemFileEntry {
+        return entry.isFile;
+    }
+
+    private isFileSystemDirectoryEntry(entry: FileSystemEntry | FileSystemDirectoryEntry): entry is FileSystemDirectoryEntry {
+        return entry.isDirectory;
+    }
 }
 
 export function removeEventHandler(
@@ -1026,36 +1026,6 @@ export class UploadCore {
   }
 }
 
-export class Uploader {
-    uploadAreas: UploadArea[];
-    queue: UploadQueue;
-    options: IUploadQueueOptions;
-
-    constructor(options: IUploadQueueOptions = {}, callbacks: IUploadQueueCallbacks = {}) {
-        this.options = options;
-        this.uploadAreas = [];
-        this.queue = new UploadQueue(options, callbacks);
-    }
-
-    registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea {
-        const uploadArea = new UploadArea(element, options, this);
-        this.uploadAreas.push(uploadArea);
-        return uploadArea;
-    }
-
-    unregisterArea(area: UploadArea): void {
-        const areaIndex = this.uploadAreas.indexOf(area);
-        if (areaIndex >= 0) {
-            this.uploadAreas[areaIndex]!.destroy();
-            this.uploadAreas.splice(areaIndex, 1);
-        }
-    }
-
-    get firstUploadArea(): UploadArea | undefined {
-        return this.uploadAreas[0];
-    }
-}
-
 export class UploadQueue {
   offset: IOffsetInfo = { fileCount: 0, running: false };
   options: IUploadQueueOptions;
@@ -1284,3 +1254,33 @@ export enum UploadStatus {
   removed
 }
 
+
+export class Uploader {
+    uploadAreas: UploadArea[];
+    queue: UploadQueue;
+    options: IUploadQueueOptions;
+
+    constructor(options: IUploadQueueOptions = {}, callbacks: IUploadQueueCallbacks = {}) {
+        this.options = options;
+        this.uploadAreas = [];
+        this.queue = new UploadQueue(options, callbacks);
+    }
+
+    registerArea(element: HTMLElement, options: IUploadAreaOptions): UploadArea {
+        const uploadArea = new UploadArea(element, options, this);
+        this.uploadAreas.push(uploadArea);
+        return uploadArea;
+    }
+
+    unregisterArea(area: UploadArea): void {
+        const areaIndex = this.uploadAreas.indexOf(area);
+        if (areaIndex >= 0) {
+            this.uploadAreas[areaIndex]!.destroy();
+            this.uploadAreas.splice(areaIndex, 1);
+        }
+    }
+
+    get firstUploadArea(): UploadArea | undefined {
+        return this.uploadAreas[0];
+    }
+}

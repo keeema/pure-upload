@@ -141,6 +141,8 @@ File statuses accessible by `pu.uploadStatus`.
 
 ## How to develop
 
+Current gulp build tool requires node v16 or v17.
+
 ### Debug and watch
 
 ```bash
