@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 8.3.0
+
+Updated TypeScript to 5.3.3.
+
+## 8.2.0
+
+Fixed build for noUncheckedIndexedAccess.
+
 ## 8.1.5
 
 Added options (capture) to removeEventListener so the matching events are added and removed

@@ -1,6 +1,6 @@
 {
     "name": "pure-upload",
-    "version": "8.2.0",
+    "version": "8.3.0",
     "description": "The pure upload library without dependencies",
     "author": {
         "name": "t.rut"
@@ -59,7 +59,7 @@
         "multer": "^1.4.2",
         "npm-force-resolutions": "0.0.10",
         "prettier": "^2.0.5",
-        "typescript": "^4.4.2"
+        "typescript": "^5.3.3"
     },
     "dependencies": {},
     "resolutions": {
