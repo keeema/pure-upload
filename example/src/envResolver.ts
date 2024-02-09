@@ -54,7 +54,7 @@ class FormDataMock {
   }
   delete() {}
   get(key: string) {
-    return this.data[key].data;
+    return this.data[key]!.data;
   }
   getAll() {
     return [];
@@ -94,7 +94,7 @@ class XhrMock {
   }
 
   send(formData: FormDataMock): void {
-    this.file = (<FormDataMock>formData).data["file"].data;
+    this.file = (<FormDataMock>formData).data["file"]!.data;
     this.performStep();
   }
 

@@ -10,20 +10,20 @@ describe("uploadQueue", () => {
 
         it("sets the 'queued' state for newly added files", () => {
             uploadQueue.addFiles([<IUploadFile>{}, <IUploadFile>{}]);
-            expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.queued);
-            expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.queued);
+            expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.queued);
+            expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.queued);
         });
 
         it("sets the 'queued' state only for non-failed files", () => {
             uploadQueue.addFiles([<IUploadFile>{}, <IUploadFile>{ uploadStatus: UploadStatus.failed }]);
-            expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.queued);
-            expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.failed);
+            expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.queued);
+            expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.failed);
         });
 
         it("assigns the remove function to the newly added files", () => {
             let file = <IUploadFile>{};
             uploadQueue.addFiles([file]);
-            expect(uploadQueue.queuedFiles[0].remove).toBeDefined();
+            expect(uploadQueue.queuedFiles[0]!.remove).toBeDefined();
         });
 
         it("cancels uploading file on remove", () => {
@@ -173,9 +173,9 @@ describe("uploadQueue", () => {
                 uploadQueue["filesChanged"]();
 
                 expect(uploadQueue.queuedFiles.length).toEqual(3);
-                expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.failed);
+                expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[2]!.uploadStatus).toEqual(UploadStatus.failed);
             });
         });
 
@@ -254,14 +254,14 @@ describe("uploadQueue", () => {
                 files.forEach((file) => uploadQueue.queuedFiles.push(file));
                 uploadQueue["filesChanged"]();
 
-                expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
-                expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+                expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[2]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[3]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[4]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[5]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[6]!.uploadStatus).toEqual(UploadStatus.failed);
+                expect(uploadQueue.queuedFiles[7]!.uploadStatus).toEqual(UploadStatus.canceled);
             });
 
             it("starts only limited count of files when set limit and autoStart is turned on", () => {
@@ -269,79 +269,79 @@ describe("uploadQueue", () => {
                 files.forEach((file) => uploadQueue.queuedFiles.push(file));
                 uploadQueue["filesChanged"]();
 
-                expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
-                expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+                expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[2]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[3]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[4]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[5]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[6]!.uploadStatus).toEqual(UploadStatus.failed);
+                expect(uploadQueue.queuedFiles[7]!.uploadStatus).toEqual(UploadStatus.canceled);
 
-                uploadQueue.queuedFiles[4].uploadStatus = UploadStatus.uploaded;
+                uploadQueue.queuedFiles[4]!.uploadStatus = UploadStatus.uploaded;
                 uploadQueue["filesChanged"]();
 
-                expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
-                expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+                expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[2]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[3]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[4]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[5]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[6]!.uploadStatus).toEqual(UploadStatus.failed);
+                expect(uploadQueue.queuedFiles[7]!.uploadStatus).toEqual(UploadStatus.canceled);
 
-                uploadQueue.queuedFiles[0].uploadStatus = UploadStatus.uploaded;
-                uploadQueue.queuedFiles[3].uploadStatus = UploadStatus.uploaded;
+                uploadQueue.queuedFiles[0]!.uploadStatus = UploadStatus.uploaded;
+                uploadQueue.queuedFiles[3]!.uploadStatus = UploadStatus.uploaded;
                 uploadQueue["filesChanged"]();
 
-                expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
-                expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+                expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[2]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[3]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[4]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[5]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[6]!.uploadStatus).toEqual(UploadStatus.failed);
+                expect(uploadQueue.queuedFiles[7]!.uploadStatus).toEqual(UploadStatus.canceled);
             });
 
             it("starts limited count of files with offset when set limit and parallelBatchOffset and autoStart is turned on", (done: Function) => {
                 uploadQueue = new UploadQueue({ autoStart: true, maxParallelUploads: 2, parallelBatchOffset: 1000 }, {});
                 files.forEach((file) => uploadQueue.queuedFiles.push(file));
-                uploadQueue.queuedFiles[3].uploadStatus = UploadStatus.queued;
-                uploadQueue.queuedFiles[4].uploadStatus = UploadStatus.queued;
+                uploadQueue.queuedFiles[3]!.uploadStatus = UploadStatus.queued;
+                uploadQueue.queuedFiles[4]!.uploadStatus = UploadStatus.queued;
                 uploadQueue["filesChanged"]();
 
-                expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
-                expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+                expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[2]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[3]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[4]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[5]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[6]!.uploadStatus).toEqual(UploadStatus.failed);
+                expect(uploadQueue.queuedFiles[7]!.uploadStatus).toEqual(UploadStatus.canceled);
 
-                uploadQueue.queuedFiles[0].uploadStatus = UploadStatus.uploaded;
+                uploadQueue.queuedFiles[0]!.uploadStatus = UploadStatus.uploaded;
                 uploadQueue["filesChanged"]();
 
                 // only the uploaded file changed because of offset
-                expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.uploading);
-                expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.queued);
-                expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
-                expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
-                expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+                expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.uploading);
+                expect(uploadQueue.queuedFiles[2]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[3]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[4]!.uploadStatus).toEqual(UploadStatus.queued);
+                expect(uploadQueue.queuedFiles[5]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                expect(uploadQueue.queuedFiles[6]!.uploadStatus).toEqual(UploadStatus.failed);
+                expect(uploadQueue.queuedFiles[7]!.uploadStatus).toEqual(UploadStatus.canceled);
 
                 setTimeout(() => {
-                    expect(uploadQueue.queuedFiles[0].uploadStatus).toEqual(UploadStatus.uploaded);
-                    expect(uploadQueue.queuedFiles[1].uploadStatus).toEqual(UploadStatus.uploading);
-                    expect(uploadQueue.queuedFiles[2].uploadStatus).toEqual(UploadStatus.uploading);
-                    expect(uploadQueue.queuedFiles[3].uploadStatus).toEqual(UploadStatus.queued);
-                    expect(uploadQueue.queuedFiles[4].uploadStatus).toEqual(UploadStatus.queued);
-                    expect(uploadQueue.queuedFiles[5].uploadStatus).toEqual(UploadStatus.uploaded);
-                    expect(uploadQueue.queuedFiles[6].uploadStatus).toEqual(UploadStatus.failed);
-                    expect(uploadQueue.queuedFiles[7].uploadStatus).toEqual(UploadStatus.canceled);
+                    expect(uploadQueue.queuedFiles[0]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                    expect(uploadQueue.queuedFiles[1]!.uploadStatus).toEqual(UploadStatus.uploading);
+                    expect(uploadQueue.queuedFiles[2]!.uploadStatus).toEqual(UploadStatus.uploading);
+                    expect(uploadQueue.queuedFiles[3]!.uploadStatus).toEqual(UploadStatus.queued);
+                    expect(uploadQueue.queuedFiles[4]!.uploadStatus).toEqual(UploadStatus.queued);
+                    expect(uploadQueue.queuedFiles[5]!.uploadStatus).toEqual(UploadStatus.uploaded);
+                    expect(uploadQueue.queuedFiles[6]!.uploadStatus).toEqual(UploadStatus.failed);
+                    expect(uploadQueue.queuedFiles[7]!.uploadStatus).toEqual(UploadStatus.canceled);
 
                     done();
                 }, 1000);
