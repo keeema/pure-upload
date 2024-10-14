@@ -183,7 +183,7 @@ class UploadCore {
       xhr.statusText ||
       (xhr.status
         ? xhr.status.toString()
-        : "" || this.options.localizer.invalidResponseFromServer());
+        : this.options.localizer.invalidResponseFromServer());
   }
 
   private getDefaultOptions(): IFullUploadOptions {
