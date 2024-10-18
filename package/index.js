@@ -1,6 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Uploader = exports.UploadStatus = exports.UploadQueue = exports.UploadCore = exports.UploadArea = exports.removeEventHandler = exports.ItemProcessor = exports.newGuid = exports.getValueOrResult = exports.getUploader = exports.getUploadCore = exports.decorateSimpleFunction = exports.castFiles = exports.isFileApi = exports.ErrorCode = exports.addEventHandler = void 0;
+exports.Uploader = exports.UploadStatus = exports.UploadQueue = exports.UploadCore = exports.UploadArea = exports.ItemProcessor = exports.isFileApi = exports.ErrorCode = void 0;
+exports.addEventHandler = addEventHandler;
+exports.castFiles = castFiles;
+exports.decorateSimpleFunction = decorateSimpleFunction;
+exports.getUploadCore = getUploadCore;
+exports.getUploader = getUploader;
+exports.getValueOrResult = getValueOrResult;
+exports.newGuid = newGuid;
+exports.removeEventHandler = removeEventHandler;
 function addEventHandler(el, event, handler, useCapture) {
     if (el.addEventListener) {
         el.addEventListener(event, handler, useCapture);
@@ -15,14 +23,13 @@ function addEventHandler(el, event, handler, useCapture) {
         }
     }
 }
-exports.addEventHandler = addEventHandler;
 var ErrorCode;
 (function (ErrorCode) {
     ErrorCode[ErrorCode["NoError"] = 0] = "NoError";
     ErrorCode[ErrorCode["FileSizeExceeded"] = 1] = "FileSizeExceeded";
     ErrorCode[ErrorCode["UnsupportedFileFormat"] = 2] = "UnsupportedFileFormat";
     ErrorCode[ErrorCode["XhrResponseError"] = 3] = "XhrResponseError";
-})(ErrorCode = exports.ErrorCode || (exports.ErrorCode = {}));
+})(ErrorCode || (exports.ErrorCode = ErrorCode = {}));
 exports.isFileApi = !!(window.File && window.FormData);
 function castFiles(fileList, status) {
     var files;
@@ -49,7 +56,6 @@ function castFiles(fileList, status) {
     });
     return files;
 }
-exports.castFiles = castFiles;
 function decorateSimpleFunction(origFn, newFn, newFirst) {
     if (newFirst === void 0) { newFirst = false; }
     if (!origFn)
@@ -64,7 +70,6 @@ function decorateSimpleFunction(origFn, newFn, newFirst) {
             newFn();
         };
 }
-exports.decorateSimpleFunction = decorateSimpleFunction;
 function applyDefaults(target, source) {
     var to = Object(target);
     for (var nextKey in source) {
@@ -78,17 +83,14 @@ function applyDefaults(target, source) {
 function getUploadCore(options, callbacks) {
     return new UploadCore(options, callbacks);
 }
-exports.getUploadCore = getUploadCore;
 function getUploader(options, callbacks) {
     return new Uploader(options, callbacks);
 }
-exports.getUploader = getUploader;
 function getValueOrResult(valueOrGetter) {
     if (isGetter(valueOrGetter))
         return valueOrGetter();
     return valueOrGetter;
 }
-exports.getValueOrResult = getValueOrResult;
 function isGetter(valueOrGetter) {
     return typeof valueOrGetter === "function";
 }
@@ -105,7 +107,6 @@ function newGuid() {
     });
     return uuid;
 }
-exports.newGuid = newGuid;
 function getDefaultLocalizer() {
     return {
         fileSizeInvalid: function (maxFileSize) {
@@ -206,7 +207,6 @@ function removeEventHandler(el, event, handler, options) {
         }
     }
 }
-exports.removeEventHandler = removeEventHandler;
 var UploadArea = /** @class */ (function () {
     function UploadArea(targetElement, options, uploader) {
         this.targetElement = targetElement;
@@ -717,7 +717,7 @@ var UploadCore = /** @class */ (function () {
                 xhr.statusText ||
                 (xhr.status
                     ? xhr.status.toString()
-                    : "" || this.options.localizer.invalidResponseFromServer());
+                    : this.options.localizer.invalidResponseFromServer());
     };
     UploadCore.prototype.getDefaultOptions = function () {
         return {
@@ -943,7 +943,7 @@ var UploadStatus;
     UploadStatus[UploadStatus["failed"] = 3] = "failed";
     UploadStatus[UploadStatus["canceled"] = 4] = "canceled";
     UploadStatus[UploadStatus["removed"] = 5] = "removed";
-})(UploadStatus = exports.UploadStatus || (exports.UploadStatus = {}));
+})(UploadStatus || (exports.UploadStatus = UploadStatus = {}));
 var Uploader = /** @class */ (function () {
     function Uploader(options, callbacks) {
         if (options === void 0) { options = {}; }

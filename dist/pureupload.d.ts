@@ -1,4 +1,4 @@
-declare module pu {
+declare namespace pu {
     type FilesCallback = (file: File[]) => void;
     function addEventHandler(el: Element | HTMLElement, event: string, handler: EventListenerOrEventListenerObject, useCapture: boolean): void;
     enum ErrorCode {

@@ -22,10 +22,7 @@ function mockXhr() {
     FormData = FormDataMock;
 }
 function resolveEnvironment() {
-    if (window.location.href
-        .toString()
-        .toLowerCase()
-        .indexOf("file://") >= 0) {
+    if (window.location.href.toString().toLowerCase().indexOf("file://") >= 0) {
         mockXhr();
         return;
     }
@@ -40,9 +37,16 @@ var FormDataMock = /** @class */ (function () {
     function FormDataMock() {
         this.data = {};
     }
-    FormDataMock.prototype.append = function (key, data, additional) {
-        this.data[key] = { data: data, additional: additional };
+    FormDataMock.prototype.append = function (name, value, filename) {
+        if (value instanceof Blob) {
+            this.data[name] = { data: value, additional: filename };
+        }
+        else {
+            this.data[name] = { data: new Blob([value]), additional: undefined };
+        }
     };
+    //   this.data[key] = { data, additional };
+    // }
     FormDataMock.prototype.delete = function () { };
     FormDataMock.prototype.get = function (key) {
         return this.data[key].data;
@@ -53,7 +57,9 @@ var FormDataMock = /** @class */ (function () {
     FormDataMock.prototype.has = function (key) {
         return this.data[key] !== undefined;
     };
-    FormDataMock.prototype.set = function (_key, _value) { };
+    FormDataMock.prototype.set = function (name, value, filename) {
+        this.append(name, value, filename);
+    };
     FormDataMock.prototype.forEach = function (_callbackfn) {
         return;
     };
@@ -94,7 +100,7 @@ var XhrMock = /** @class */ (function () {
                 var e = {
                     lengthComputable: true,
                     loaded: _this.loaded,
-                    total: _this.file ? _this.file.size : 0
+                    total: _this.file ? _this.file.size : 0,
                 };
                 _this.upload.onprogress(e);
                 _this.performStep();
@@ -103,8 +109,7 @@ var XhrMock = /** @class */ (function () {
     };
     XhrMock.prototype.addStep = function () {
         var newValue = this.loaded + this.step;
-        this.loaded =
-            this.file && newValue > this.file.size ? this.file.size : newValue;
+        this.loaded = this.file && newValue > this.file.size ? this.file.size : newValue;
         return this.loaded;
     };
     return XhrMock;

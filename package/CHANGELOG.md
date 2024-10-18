@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 8.4.0
+
+Updated TypeScript to 5.6.3.
+
 ## 8.3.0
 
 Updated TypeScript to 5.3.3.

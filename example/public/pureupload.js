@@ -717,7 +717,7 @@ var pu;
                     xhr.statusText ||
                     (xhr.status
                         ? xhr.status.toString()
-                        : "" || this.options.localizer.invalidResponseFromServer());
+                        : this.options.localizer.invalidResponseFromServer());
         };
         UploadCore.prototype.getDefaultOptions = function () {
             return {
